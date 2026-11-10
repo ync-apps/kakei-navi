@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>まとめ割ナビ</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="スマホ・光回線・電気・ガス・カードをまとめて見直し、1年〜4年以上の実質負担が一番安い組み合わせと乗り換えのやることリストを無料で計算します。">
+<meta property="og:title" content="まとめ割ナビ｜固定費をまとめて見直すと、いくら浮く？">
+<meta property="og:description" content="家族のスマホ・光回線・電気・ガス・カードを全部まとめて、実質負担が一番安い組み合わせを無料で計算。データは毎週月曜0時に更新。">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@500;700;900&family=Noto+Sans+JP:wght@400;500;700&family=Outfit:wght@500;600;700&display=swap">
+<style>
+html, body { margin: 0; }
+
+/* Layout: 明細書のように「今のまま」と「まとめた後」を並べて比べる。左に主張、右に明細カード。下は手順→計算式→信頼→FAQ */
+:root {
+  --paper: #f4f7f5;        /* 地：わずかに緑寄りの白 */
+  --sheet: #ffffff;        /* 明細の紙 */
+  --ink: #12211c;          /* 文字：深い緑の墨 */
+  --muted: #5b6b64;
+  --rule: #dbe3de;
+  --brand: #12704f;        /* まとめ割の緑 */
+  --brand-ink: #ffffff;
+  --brand-soft: #e2f1ea;
+  --mark: #f2b632;         /* 浮いたお金のマーカー（1か所だけ強く） */
+  --c-mobile: #3a6fd8;
+  --c-hikari: #17a3a0;
+  --c-elec: #e39a1e;
+  --c-gas: #e0664f;
+  --font-display: "Zen Kaku Gothic New", "Hiragino Sans", "Noto Sans JP", sans-serif;
+  --font-body: "Noto Sans JP", "Hiragino Sans", "Yu Gothic UI", sans-serif;
+  --font-num: "Outfit", "Noto Sans JP", system-ui, sans-serif;
+  --deep: #12211c;          /* 計算式の帯 */
+  --on-deep: #f4f7f5;
+  --radius: 16px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0d1512; --sheet: #15201c; --ink: #e7efeb; --muted: #9aaca4; --rule: #26342e;
+    --brand: #3fbf8c; --brand-ink: #06120d; --brand-soft: #173329; --mark: #f5c451;
+    --c-mobile: #6d97ee; --c-hikari: #3cc3bf; --c-elec: #f0b44a; --c-gas: #f08a75;
+    --deep: #08100d; --on-deep: #e7efeb; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #0d1512; --sheet: #15201c; --ink: #e7efeb; --muted: #9aaca4; --rule: #26342e;
+  --brand: #3fbf8c; --brand-ink: #06120d; --brand-soft: #173329; --mark: #f5c451;
+  --c-mobile: #6d97ee; --c-hikari: #3cc3bf; --c-elec: #f0b44a; --c-gas: #f08a75;
+  --deep: #08100d; --on-deep: #e7efeb; color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--paper); color: var(--ink);
+  font-family: var(--font-body); font-size: 15px; line-height: 1.75;
+  -webkit-text-size-adjust: 100%;
+}
+.band { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.wrap { max-width: 1080px; margin: 0 auto; }
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; line-height: 1.35; margin: 0; }
+p { margin: 0; }
+a { color: inherit; }
+.num { font-family: var(--font-num); font-variant-numeric: tabular-nums; }
+:focus-visible { outline: 3px solid var(--mark); outline-offset: 2px; border-radius: 6px; }
+
+/* ---------- ヘッダー ---------- */
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--paper); }
+.head { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: color-mix(in srgb, var(--paper) 88%, transparent); backdrop-filter: blur(10px); border-bottom: 1px solid var(--rule); }
+.head .wrap { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-block: 12px; }
+.logo { display: flex; align-items: center; gap: 10px; font-family: var(--font-display); font-weight: 900; font-size: 1.15rem; text-decoration: none; letter-spacing: .02em; }
+.logo-mark { width: 30px; height: 30px; border-radius: 9px; background: var(--brand); display: grid; place-items: center; }
+.logo-mark span { display: block; width: 16px; height: 4px; border-radius: 2px; background: var(--brand-ink); box-shadow: 0 -6px 0 var(--brand-ink), 0 6px 0 var(--mark); }
+.nav { display: flex; align-items: center; gap: 22px; font-size: .9rem; }
+.nav a { text-decoration: none; color: var(--muted); }
+.nav a:hover { color: var(--ink); }
+.nav a.btn, .nav a.btn:hover { color: var(--brand-ink); }
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 12px 22px; border-radius: 999px; border: 0; cursor: pointer;
+  background: var(--brand); color: var(--brand-ink); font: 700 1rem/1.2 var(--font-body); text-decoration: none;
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+.btn:hover { transform: translateY(-1px); box-shadow: 0 8px 20px color-mix(in srgb, var(--brand) 30%, transparent); }
+.btn.small { padding: 9px 16px; font-size: .88rem; }
+.btn .arrow { font-family: var(--font-num); }
+@media (max-width: 720px) { .nav a:not(.btn) { display: none; } }
+
+/* ---------- ヒーロー ---------- */
+.hero .wrap { display: grid; grid-template-columns: 1.05fr .95fr; gap: 48px; align-items: center; padding-block: 64px 56px; }
+.eyebrow { font-size: .8rem; letter-spacing: .12em; color: var(--brand); font-weight: 700; }
+.hero h1 { font-size: clamp(2rem, 4.6vw, 3.25rem); font-weight: 900; letter-spacing: .01em; margin-top: 14px; }
+.hero h1 .hl { background: linear-gradient(transparent 62%, color-mix(in srgb, var(--mark) 55%, transparent) 62%); }
+.lead { margin-top: 18px; color: var(--muted); font-size: 1.02rem; max-width: 34em; }
+.hero-cta { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 20px; margin-top: 28px; }
+.hero-cta .note { font-size: .85rem; color: var(--muted); }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 26px; }
+.chip { font-size: .8rem; padding: 4px 12px; border-radius: 999px; background: var(--sheet); border: 1px solid var(--rule); color: var(--muted); }
+.chip b { color: var(--ink); font-family: var(--font-num); font-weight: 600; }
+
+/* 明細カード */
+.bill { background: var(--sheet); border-radius: 20px; padding: 24px; border: 1px solid var(--rule); box-shadow: 0 30px 60px -30px color-mix(in srgb, var(--ink) 35%, transparent); min-width: 0; }
+.bill-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; padding-bottom: 14px; border-bottom: 1px dashed var(--rule); }
+.bill-title { font-family: var(--font-display); font-weight: 700; }
+.bill-meta { font-size: .75rem; color: var(--muted); }
+.row { display: grid; gap: 8px; padding-block: 16px 4px; }
+.row-top { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.row-label { font-size: .85rem; color: var(--muted); }
+.row-total { font-size: 1.6rem; font-weight: 600; letter-spacing: -.01em; }
+.row-total small { font-size: .8rem; color: var(--muted); font-weight: 500; margin-left: 2px; }
+.after .row-total { color: var(--brand); }
+.stack { display: flex; height: 18px; border-radius: 6px; overflow: hidden; background: var(--rule); }
+.stack i { display: block; height: 100%; }
+.stack i + i { box-shadow: -2px 0 0 var(--sheet); }
+.m { background: var(--c-mobile); } .h { background: var(--c-hikari); } .e { background: var(--c-elec); } .g { background: var(--c-gas); }
+.legend { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 14px; font-size: .75rem; }
+.legend div { display: grid; gap: 1px; }
+.legend span { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); }
+.legend span::before { content: ""; width: 8px; height: 8px; border-radius: 2px; background: currentColor; }
+.legend .lm::before { background: var(--c-mobile); } .legend .lh::before { background: var(--c-hikari); }
+.legend .le::before { background: var(--c-elec); } .legend .lg::before { background: var(--c-gas); }
+.legend b { font-family: var(--font-num); font-weight: 600; font-size: .85rem; }
+.legend s { color: var(--muted); font-family: var(--font-num); text-decoration-thickness: 1px; }
+.saving { margin-top: 18px; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 16px; border-radius: 12px; background: var(--brand-soft); }
+.saving p { font-size: .85rem; }
+.saving .big { font-size: 1.7rem; font-weight: 700; white-space: nowrap; }
+.saving .big .marker { background: linear-gradient(transparent 60%, color-mix(in srgb, var(--mark) 70%, transparent) 60%); padding: 0 2px; }
+.example { margin-top: 10px; font-size: .72rem; color: var(--muted); }
+
+@media (max-width: 860px) {
+  .hero .wrap { grid-template-columns: 1fr; gap: 36px; padding-block: 40px 40px; }
+}
+@media (max-width: 420px) {
+  .legend { grid-template-columns: repeat(2, 1fr); row-gap: 10px; }
+  .saving { flex-direction: column; align-items: flex-start; }
+}
+
+/* ---------- 比較の広さ ---------- */
+.reach { border-block: 1px solid var(--rule); background: var(--sheet); }
+@media (max-width: 760px) { .reach .wrap { padding-block: 4px; } }
+
+/* ---------- セクション共通 ---------- */
+.sec .wrap { padding-block: 72px; }
+.sec-head { display: grid; gap: 10px; max-width: 40em; margin-bottom: 36px; }
+.sec h2 { font-size: clamp(1.5rem, 3vw, 2.1rem); font-weight: 900; }
+.sec-head p { color: var(--muted); }
+
+/* 使い方（本当に順番がある手順なので番号を付ける） */
+.steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; counter-reset: step; }
+.step { position: relative; padding: 24px; border-radius: var(--radius); background: var(--sheet); border: 1px solid var(--rule); display: grid; gap: 10px; align-content: start; min-width: 0; }
+.step-no { font-family: var(--font-num); font-weight: 700; font-size: .85rem; color: var(--brand); letter-spacing: .08em; }
+.step h3 { font-size: 1.15rem; }
+.step p { font-size: .9rem; color: var(--muted); }
+.step .sample { margin-top: 6px; font-size: .8rem; background: var(--paper); border-radius: 10px; padding: 10px 12px; display: grid; gap: 4px; }
+.sample-row { display: flex; justify-content: space-between; gap: 8px; }
+.sample-row span { color: var(--muted); }
+.sample-row b { font-family: var(--font-num); font-weight: 600; }
+.todo { display: grid; gap: 6px; }
+.todo li { list-style: none; display: flex; gap: 8px; align-items: flex-start; }
+.todo li::before { content: ""; flex: none; width: 14px; height: 14px; margin-top: 4px; border-radius: 4px; border: 1.5px solid var(--brand); }
+.todo { padding: 0; margin: 0; }
+.duemo-pill { justify-self: start; font-size: .75rem; font-weight: 700; padding: 3px 10px; border-radius: 999px; background: var(--brand); color: var(--brand-ink); }
+@media (max-width: 860px) { .steps { grid-template-columns: 1fr; } }
+
+/* 計算式 */
+.formula-sec { background: var(--deep); color: var(--on-deep); }
+.formula-sec .sec-head p { color: color-mix(in srgb, var(--on-deep) 70%, transparent); }
+.formula { display: flex; flex-wrap: wrap; align-items: stretch; gap: 10px; }
+.term { display: grid; gap: 4px; padding: 14px 16px; border-radius: 12px; background: color-mix(in srgb, var(--on-deep) 8%, transparent); border: 1px solid color-mix(in srgb, var(--on-deep) 14%, transparent); min-width: 0; }
+.term b { font-family: var(--font-display); font-size: 1rem; }
+.term span { font-size: .78rem; color: color-mix(in srgb, var(--on-deep) 65%, transparent); }
+.op { display: grid; place-items: center; font-family: var(--font-num); font-size: 1.6rem; font-weight: 600; color: var(--mark); padding-inline: 2px; }
+.term.result { background: var(--mark); color: #1b1606; border-color: transparent; }
+.term.result span { color: #4a3d12; }
+.formula-notes { margin-top: 28px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; font-size: .88rem; }
+.formula-notes div { display: grid; gap: 4px; }
+.formula-notes b { font-family: var(--font-display); }
+.formula-notes p { color: color-mix(in srgb, var(--on-deep) 70%, transparent); }
+@media (max-width: 760px) { .formula-notes { grid-template-columns: 1fr; } }
+
+/* 信頼 */
+.trust { display: grid; grid-template-columns: 1.1fr .9fr; gap: 40px; align-items: start; }
+.trust-list { display: grid; gap: 18px; }
+.trust-item { display: grid; grid-template-columns: 36px 1fr; gap: 14px; }
+.trust-icon { width: 36px; height: 36px; border-radius: 10px; background: var(--brand-soft); display: grid; place-items: center; color: var(--brand); font-family: var(--font-num); font-weight: 700; }
+.trust-item h3 { font-size: 1rem; }
+.trust-item p { font-size: .9rem; color: var(--muted); }
+.source-card { background: var(--sheet); border: 1px solid var(--rule); border-radius: var(--radius); padding: 18px 20px; display: grid; gap: 4px; min-width: 0; }
+.source-card .cap { font-size: .75rem; color: var(--muted); letter-spacing: .06em; }
+.src-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding-block: 10px; border-bottom: 1px solid var(--rule); font-size: .88rem; }
+.src-row:last-child { border-bottom: 0; }
+.src-row .name { min-width: 0; }
+.src-row .name small { display: block; color: var(--muted); font-size: .75rem; }
+.badge { flex: none; font-size: .72rem; font-weight: 700; padding: 2px 8px; border-radius: 999px; }
+.badge.ok { background: var(--brand-soft); color: var(--brand); }
+.badge.mid { background: color-mix(in srgb, var(--c-mobile) 14%, transparent); color: var(--c-mobile); }
+.badge.low { background: color-mix(in srgb, var(--mark) 22%, transparent); color: color-mix(in srgb, var(--mark) 40%, var(--ink)); }
+@media (max-width: 860px) { .trust { grid-template-columns: 1fr; } }
+
+/* FAQ */
+.faq { display: grid; gap: 10px; max-width: 760px; }
+.faq details { background: var(--sheet); border: 1px solid var(--rule); border-radius: 12px; padding: 4px 18px; }
+.faq summary { cursor: pointer; padding-block: 12px; font-weight: 700; list-style: none; display: flex; justify-content: space-between; gap: 12px; }
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary::after { content: "+"; font-family: var(--font-num); color: var(--brand); font-size: 1.2rem; line-height: 1.2; }
+.faq details[open] summary::after { content: "−"; }
+.faq details p { padding-bottom: 14px; font-size: .9rem; color: var(--muted); }
+
+/* 最後のCTA */
+.final .wrap { padding-block: 24px 72px; }
+.final-box { border-radius: 24px; background: var(--brand); color: var(--brand-ink); padding: clamp(28px, 5vw, 48px); display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 20px; }
+.final-box h2 { font-size: clamp(1.4rem, 3vw, 2rem); font-weight: 900; }
+.final-box p { opacity: .85; margin-top: 6px; }
+.final-box .btn { background: var(--brand-ink); color: var(--brand); }
+
+/* フッター */
+.foot { border-top: 1px solid var(--rule); }
+.foot .wrap { padding-block: 24px 40px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; font-size: .8rem; color: var(--muted); }
+.foot nav { display: flex; gap: 16px; flex-wrap: wrap; }
+
+.preview-note { background: var(--mark); color: #1b1606; font-size: .8rem; text-align: center; padding-block: 6px; }
+
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+/* 期間の切り替え */
+.period { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-top: 14px; padding: 4px; border-radius: 12px; background: var(--paper); }
+.period button { border: 0; border-radius: 9px; padding: 8px 4px; background: transparent; color: var(--muted); font: 700 .85rem/1.2 var(--font-body); cursor: pointer; }
+.period button[aria-selected="true"] { background: var(--sheet); color: var(--ink); box-shadow: 0 1px 3px color-mix(in srgb, var(--ink) 18%, transparent); }
+.row-label .avg { font-size: .7rem; margin-left: 4px; }
+.stack i { transition: width .35s ease; }
+
+/* 比較の広さ（押すと一覧） */
+.reach-grid { display: grid; grid-template-columns: repeat(5, 1fr); grid-auto-flow: row dense; padding-block: 14px; }
+.reach-item { display: grid; gap: 2px; align-content: start; text-align: left; padding: 10px 16px; border: 0; border-left: 1px solid var(--rule); background: transparent; color: var(--ink); font: inherit; cursor: pointer; border-radius: 0; }
+.reach-item:first-child { border-left: 0; }
+.reach-item:not(.static):hover, .reach-item[aria-expanded="true"] { background: var(--brand-soft); }
+.reach-item.static { cursor: default; }
+.reach-item b { font-family: var(--font-num); font-weight: 600; font-size: 1.6rem; line-height: 1.2; }
+.reach-item.static b { font-family: var(--font-display); font-size: 1.35rem; }
+.reach-item b small { font-family: var(--font-body); font-size: .8rem; font-weight: 500; margin-left: 2px; }
+.reach-item span { font-size: .78rem; color: var(--muted); }
+.reach-item em { font-style: normal; font-size: .75rem; color: var(--brand); font-weight: 700; }
+.reach-item.static em { color: var(--muted); font-weight: 500; }
+.reach-panel { grid-column: 1 / -1; margin-block: 6px 10px; padding: 18px 20px; border-radius: var(--radius); background: var(--paper); border: 1px solid var(--rule); display: grid; gap: 12px; }
+.reach-panel h3 { font-size: 1rem; display: flex; justify-content: space-between; gap: 10px; align-items: baseline; }
+.reach-panel h3 button { border: 0; background: transparent; color: var(--muted); font: inherit; font-size: .85rem; cursor: pointer; }
+.co-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; margin: 0; padding: 0; list-style: none; }
+.co-list li { background: var(--sheet); border: 1px solid var(--rule); border-radius: 10px; padding: 10px 12px; display: grid; gap: 2px; min-width: 0; }
+.co-list a { font-weight: 700; text-decoration: none; }
+.co-list a:hover { text-decoration: underline; }
+.co-list small { color: var(--muted); font-size: .75rem; }
+.co-list li { grid-template-columns: 1fr auto; column-gap: 10px; align-items: center; padding: 8px 12px; }
+.co-list li > a, .co-list li > b, .co-list li > small { grid-column: 1; }
+.co-list .badge { grid-column: 2; grid-row: 1 / span 2; justify-self: end; }
+.excluded { font-size: .8rem; color: var(--muted); display: grid; gap: 4px; }
+.excluded b { color: var(--ink); }
+@media (max-width: 760px) {
+  .reach-grid { grid-template-columns: repeat(2, 1fr); }
+  .reach-item { border-left: 0; padding: 10px 8px; border-radius: 10px; }
+  .reach-item.static { grid-column: 1 / -1; }
+}
+</style>
+</head>
+<body>
+<header class="head band">
+  <div class="wrap">
+    <a class="logo" href="#top" aria-label="まとめ割ナビ トップ"><span class="logo-mark"><span></span></span>まとめ割ナビ</a>
+    <nav class="nav" aria-label="ページ内リンク">
+      <a href="#how">使い方</a>
+      <a href="#formula">計算のしかた</a>
+      <a href="#trust">データについて</a>
+      <a href="#faq">よくある質問</a>
+      <a class="btn small" href="keisan.html">無料で計算する</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+  <section class="hero band">
+    <div class="wrap">
+      <div>
+        <p class="eyebrow">スマホ ・ 光回線 ・ 電気 ・ ガス ・ カード</p>
+        <h1>毎月の固定費、<br><span class="hl">まとめて見直すと</span><br>いくら浮く？</h1>
+        <p class="lead">家族のスマホ、自宅のネット、電気、ガスを全部まとめて、1年・2年・3年・4年以上のうち選んだ期間で、実質負担が一番安い組み合わせを計算します。セット割・家族割・キャッシュバックも、受け取りの手間まで込みで比べます。</p>
+        <div class="hero-cta">
+          <a class="btn" href="keisan.html">無料で計算する <span class="arrow">→</span></a>
+          <p class="note">登録不要・約3分。入力内容は端末の外に送りません。</p>
+        </div>
+        <div class="chips">
+          <span class="chip">家族<b>1人ずつ</b>別の会社でも計算</span>
+          <span class="chip">電気は<b>kWh</b>と料金表で計算</span>
+          <span class="chip">やることを<b>DUEMO</b>に登録</span>
+        </div>
+      </div>
+
+      <aside class="bill" aria-label="計算結果の例">
+        <div class="bill-head">
+          <p class="bill-title">ひと月の固定費</p>
+          <p class="bill-meta">例：関東・マンション・家族2人</p>
+        </div>
+        <div class="period" role="tablist" aria-label="比べる期間">
+          <button type="button" role="tab" data-months="12" aria-selected="false">1年</button>
+          <button type="button" role="tab" data-months="24" aria-selected="true">2年</button>
+          <button type="button" role="tab" data-months="36" aria-selected="false">3年</button>
+          <button type="button" role="tab" data-months="48" aria-selected="false">4年以上</button>
+        </div>
+        <div class="row before">
+          <div class="row-top"><span class="row-label">今のまま</span><span class="row-total num"><span id="ex-before">33,400</span><small>円/月</small></span></div>
+          <div class="stack" id="bar-before" role="img" aria-label="今のままの内訳"></div>
+        </div>
+        <div class="row after">
+          <div class="row-top"><span class="row-label">まとめて見直した後<small class="avg">（期間の平均）</small></span><span class="row-total num"><span id="ex-after">18,158</span><small>円/月</small></span></div>
+          <div class="stack" id="bar-after" role="img" aria-label="見直した後の内訳"></div>
+        </div>
+        <div class="legend" id="legend"></div>
+        <div class="saving">
+          <p><span id="ex-period">2年間</span>で浮くお金<br><span style="color:var(--muted);font-size:.75rem">キャッシュバック・手数料込み</span></p>
+          <p class="big num"><span class="marker" id="ex-saving">約365,000</span><span style="font-size:1rem">円</span></p>
+        </div>
+        <p class="example">※ 計算の一例です（このサイトの計算エンジンで、例の家庭を計算した結果）。実際の金額は入力内容と時期で変わります。</p>
+      </aside>
+    </div>
+  </section>
+
+  <section class="reach band" aria-label="比較している範囲">
+    <div class="wrap">
+      <div class="reach-grid">
+        <button type="button" class="reach-item" data-list="mobile" aria-expanded="false" aria-controls="reach-panel"><b class="num" id="cnt-mobile">13<small>社</small></b><span>スマホ（格安SIM含む）</span><em>一覧を見る</em></button>
+        <button type="button" class="reach-item" data-list="hikari" aria-expanded="false" aria-controls="reach-panel"><b class="num" id="cnt-hikari">14<small>社</small></b><span>光回線（地域の回線含む）</span><em>一覧を見る</em></button>
+        <button type="button" class="reach-item" data-list="electric" aria-expanded="false" aria-controls="reach-panel"><b class="num" id="cnt-electric">9<small>社</small></b><span>電気（エリア別の料金表）</span><em>一覧を見る</em></button>
+        <button type="button" class="reach-item" data-list="card" aria-expanded="false" aria-controls="reach-panel"><b class="num" id="cnt-card">6<small>種</small></b><span>カード払いの割引</span><em>一覧を見る</em></button>
+        <div class="reach-item static"><b>毎週月曜</b><span>0時に料金・キャンペーンを更新</span><em id="asof">データ時点 2026年11月10日</em></div>
+        <div class="reach-panel" id="reach-panel" role="region" aria-label="比較している会社の一覧" hidden></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec band" id="how">
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="eyebrow">使い方</p>
+        <h2>入れるのは、明細に書いてある数字だけ</h2>
+        <p>手元にスマホの請求と電気の検針票があれば十分です。わからない項目は空欄でも計算できます。</p>
+      </div>
+      <div class="steps">
+        <article class="step">
+          <p class="step-no">STEP 1</p>
+          <h3>今の契約を入れる</h3>
+          <p>家族のスマホ会社とデータ量、光回線、電気代、ガス代を入力。電気は検針票の使用量とアンペアがあると、より正確になります。</p>
+          <div class="sample" aria-label="入力の例">
+            <div class="sample-row"><span>1人目</span><b>ドコモ・20GB</b></div>
+            <div class="sample-row"><span>電気</span><b class="num">260kWh・30A</b></div>
+            <div class="sample-row"><span>ガス</span><b>都市ガス 5,000円</b></div>
+          </div>
+        </article>
+        <article class="step">
+          <p class="step-no">STEP 2</p>
+          <h3>全部の組み合わせを計算</h3>
+          <p>スマホ × 光回線 × 電気 × ガス × カードを、家族1人ずつ別の会社にする案も含めて計算。選んだ期間（1〜4年以上）の実質負担が安い順に並べます。</p>
+          <div class="sample" aria-label="計算結果の例">
+            <div class="sample-row"><span>1位</span><b class="num" id="ex-rank1">18,158円/月</b></div>
+            <div class="sample-row"><span>2位</span><b class="num" id="ex-rank2">18,600円/月</b></div>
+            <div class="sample-row"><span>比べた組み合わせ</span><b class="num" id="ex-combos">1,400通り</b></div>
+          </div>
+        </article>
+        <article class="step">
+          <p class="step-no">STEP 3</p>
+          <h3>やることリストで乗り換え</h3>
+          <p>申し込みの順番、開通後の申請、17か月後の受け取り手続きまで一覧に。1件ずつタスク管理アプリ DUEMO に登録して、もらい忘れを防げます。</p>
+          <ul class="todo">
+            <li>事業者変更承諾番号を取る</li>
+            <li>おうち割 光セットを申し込む</li>
+            <li>キャッシュバックの受け取り手続き</li>
+          </ul>
+          <span class="duemo-pill">DUEMOへ登録</span>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec band formula-sec" id="formula">
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="eyebrow" style="color:var(--mark)">計算のしかた</p>
+        <h2>月額の安さではなく、使う期間全体の「実質負担」で比べます</h2>
+        <p>月額が安くても、工事費や解約金でかえって高くなることがあります。かかるお金と戻ってくるお金を、全部ひとつの式で足し引きします。</p>
+      </div>
+      <div class="formula" role="img" aria-label="実質負担＝月額×期間＋手数料・工事費・解約金−セット割・家族割・カード割−キャンペーン・ポイント">
+        <div class="term"><b>月額 × 期間</b><span>1年・2年・3年・4年以上</span></div>
+        <div class="op">+</div>
+        <div class="term"><b>手数料・工事費</b><span>今の回線の解約金も</span></div>
+        <div class="op">−</div>
+        <div class="term"><b>セット割・家族割</b><span>カード払いの割引も</span></div>
+        <div class="op">−</div>
+        <div class="term"><b>キャンペーン</b><span>ポイント還元も</span></div>
+        <div class="op">=</div>
+        <div class="term result"><b>実質負担</b><span>安い順に並べる</span></div>
+      </div>
+      <div class="formula-notes">
+        <div><b>電気は料金表で</b><p>「○%安い」の目安ではなく、各社の基本料金と kWh 単価から計算します。</p></div>
+        <div><b>申請が必要な特典は選べる</b><p>17か月後に手続きが必要なキャッシュバックは「全額・半分・入れない」から選べます。</p></div>
+        <div><b>期間で変わる料金も計算</b><p>「2年目まで割引」のような料金は、割引が終わった後の料金で計算します。終わったキャンペーンは自動で外れます。</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec band" id="trust">
+    <div class="wrap trust">
+      <div>
+        <div class="sec-head">
+          <p class="eyebrow">データについて</p>
+          <h2>どの数字にも、出典があります</h2>
+        </div>
+        <div class="trust-list">
+          <div class="trust-item"><span class="trust-icon">✓</span><div><h3>公式サイトで確認</h3><p>料金・割引・キャンペーンは各社の公式ページで確認し、すべての項目に出典リンクを付けています。</p></div></div>
+          <div class="trust-item"><span class="trust-icon">月</span><div><h3>毎週月曜0時に更新</h3><p>毎週月曜の0時に、料金改定と新しいキャンペーンを調べ直してデータを更新しています。</p></div></div>
+          <div class="trust-item"><span class="trust-icon">=</span><div><h3>順位は報酬と無関係</h3><p>並び順は実質負担の安い順だけで決まります。広告の有無や報酬額では変わりません。</p></div></div>
+        </div>
+      </div>
+      <div class="source-card" aria-label="出典表示の例">
+        <p class="cap">データの表示例</p>
+        <div class="src-row"><p class="name">ドコモ光セット割<small>1回線 月1,210円引き</small></p><span class="badge ok">公式で確認</span></div>
+        <div class="src-row"><p class="name">楽天でんき（関東）<small>基本料金0円・38.00円/kWh</small></p><span class="badge ok">公式で確認</span></div>
+        <div class="src-row"><p class="name">ワイモバイル シンプル3 M<small>30GB 月4,378円</small></p><span class="badge mid">記事で確認</span></div>
+        <div class="src-row"><p class="name">代理店キャッシュバック<small>窓口ごとに金額が違う</small></p><span class="badge low">要確認・計算外</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec band" id="faq" style="padding-top:0">
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="eyebrow">よくある質問</p>
+        <h2>よくある質問</h2>
+      </div>
+      <div class="faq">
+        <details><summary>本当に無料ですか？</summary><p>無料です。会員登録もいりません。サイトはアフィリエイト広告で運営していますが、おすすめの順位は広告報酬と関係なく、実質負担の安い順です。</p></details>
+        <details><summary>入力した情報はどこかに送られますか？</summary><p>送りません。計算はお使いの端末のブラウザの中だけで行い、入力内容は次に開いたときのために端末に保存されるだけです。</p></details>
+        <details><summary>プロパンガスやオール電化でも使えますか？</summary><p>使えます。プロパンガスは会社ごとの料金が公表されていないことが多いため、今の金額のまま計算し、スマホ・光回線・電気の見直し分を出します。</p></details>
+        <details><summary>電気やガスを乗り換えると、工事や立ち会いが必要ですか？</summary><p>一般的な家庭の電気・都市ガスの切り替えは、新しい会社に申し込むだけで、今の会社への解約連絡も不要です。必要な手続きは、結果の「やることリスト」に順番に出ます。</p></details>
+        <details><summary>何年分で比べればいいですか？</summary><p>次に見直すまでの期間に合わせて選んでください。1年・2年・3年・4年以上から選べます。キャッシュバックや工事費のように最初だけかかるお金は、期間が長いほど1か月あたりの影響が小さくなります。</p></details>
+        <details><summary>どの地域に対応していますか？</summary><p>全国のスマホと光回線、沖縄を除く全国の電気（エリア別の料金表）に対応しています。地域の光回線（eo光・コミュファ光・ピカラ光・メガ・エッグ・BBIQ）も比べます。</p></details>
+      </div>
+    </div>
+  </section>
+
+  <section class="final band">
+    <div class="wrap">
+      <div class="final-box">
+        <div>
+          <h2>まずは今の固定費を入れてみる</h2>
+          <p>約3分。結果を見てから、乗り換えるかどうか決められます。</p>
+        </div>
+        <a class="btn" href="keisan.html">無料で計算する <span class="arrow">→</span></a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="foot band">
+  <div class="wrap">
+    <p>© まとめ割ナビ　<span id="foot-asof">データは毎週月曜0時に更新</span></p>
+    <nav aria-label="サイト情報"><a href="about.html">運営者・広告について</a><a href="privacy.html">プライバシーポリシー</a></nav>
+  </div>
+</footer>
+
+<script src="data.js"></script>
+<script src="engine.js"></script>
+<script>
+(function () {
+  const D = window.KAKEI_DATA;
+  const E = window.KakeiEngine;
+  if (!D || !E) return; // データが読めなくても静的な内容はそのまま表示
+  const fmt = (n) => Math.round(n).toLocaleString('ja-JP');
+  const $ = (id) => document.getElementById(id);
+  const esc = (t) => String(t).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const jpDate = (ymd) => `${Number(ymd.slice(0, 4))}年${Number(ymd.slice(5, 7))}月${Number(ymd.slice(8, 10))}日`;
+
+  // データ時点
+  $('asof').textContent = `データ時点 ${jpDate(D.asOf)}`;
+  $('foot-asof').textContent = `データ時点 ${jpDate(D.asOf)}・毎週月曜0時に更新`;
+
+  // ---- 例の家庭を、本物の計算エンジンで計算 ----
+  const example = {
+    area: 'tokyo', housing: 'mansion',
+    lines: [{ current: 'docomo', gb: 20 }, { current: 'docomo', gb: 3 }],
+    mobileCurrentMonthly: 15000,
+    hikari: { use: true, current: 'docomo-hikari', currentMonthly: 4400, cancelFee: 0 },
+    electric: { current: 'std', bill: 9000, amp: 30, kWh: '' },
+    gas: { type: 'city', current: 'std', bill: 5000 },
+    cards: {}, options: {},
+  };
+  const before = { line: 15000, hikari: 4400, electric: 9000, gas: 5000 };
+  const beforeTotal = before.line + before.hikari + before.electric + before.gas;
+  const CATS = [['line', 'スマホ', 'm', 'lm'], ['hikari', '光回線', 'h', 'lh'], ['electric', '電気', 'e', 'le'], ['gas', 'ガス', 'g', 'lg']];
+  const cache = {};
+  function calc(months) {
+    if (!cache[months]) cache[months] = E.compare({ ...example, months }, D);
+    return cache[months];
+  }
+  function bar(el, values) {
+    el.innerHTML = CATS.map(([k, , cls]) => `<i class="${cls}" style="width:${(values[k] / beforeTotal * 100).toFixed(1)}%"></i>`).join('');
+  }
+  function show(months) {
+    const r = calc(months);
+    const best = r.top[0];
+    const after = {};
+    for (const [k] of CATS) after[k] = best.subtotal[k] / months;
+    after.line += (best.subtotal.card || 0) / months;
+    const afterTotal = best.total / months;
+    $('ex-before').textContent = fmt(beforeTotal);
+    $('ex-after').textContent = fmt(afterTotal);
+    bar($('bar-before'), before);
+    bar($('bar-after'), after);
+    $('legend').innerHTML = CATS.map(([k, name, , lc]) => `<div><span class="${lc}">${name}</span><b>${fmt(after[k])}</b><s>${fmt(before[k])}</s></div>`).join('');
+    $('ex-period').textContent = months === 48 ? '4年間' : `${months / 12}年間`;
+    $('ex-saving').textContent = '約' + fmt(Math.round((r.current.total - best.total) / 1000) * 1000);
+    $('ex-rank1').textContent = `${fmt(afterTotal)}円/月`;
+    if (r.top[1]) $('ex-rank2').textContent = `${fmt(r.top[1].total / months)}円/月`;
+    $('ex-combos').textContent = `${fmt(r.combinations)}通り`;
+    document.querySelectorAll('.period button').forEach((b) => b.setAttribute('aria-selected', String(Number(b.dataset.months) === months)));
+  }
+  document.querySelectorAll('.period button').forEach((b) => b.addEventListener('click', () => show(Number(b.dataset.months))));
+  show(24);
+
+  // ---- 比較対象の会社数と一覧 ----
+  const areaName = (ids) => ids.map((id) => (D.areas.find((a) => a.id === id) || {}).name).join('・');
+  const conf = (x) => x.confidence === 'high' ? '<span class="badge ok">公式で確認</span>' : x.confidence === 'mid' ? '<span class="badge mid">記事で確認</span>' : '<span class="badge low">要確認</span>';
+  const link = (name, url) => /^https:\/\//.test(url || '') ? `<a href="${esc(url)}" target="_blank" rel="noopener">${esc(name)}</a>` : `<b>${esc(name)}</b>`;
+  const lists = {
+    mobile: { title: 'スマホ', unit: '社', items: D.mobileBrands.map((b) => ({ name: b.name, url: b.source, conf: b, sub: `${b.plans.length}プラン（${b.plans.map((p) => p.capGB === null ? '無制限' : p.capGB + 'GB').join('・')}）` })), notCat: 'スマホ' },
+    hikari: { title: '光回線', unit: '社', items: D.hikari.map((h) => ({ name: h.name, url: h.source, conf: h, sub: `${h.areas ? areaName(h.areas) + 'のみ' : '全国'}${h.housing && h.housing.length === 1 ? '・戸建てのみ' : ''}` })), notCat: '光回線' },
+    electric: { title: '電気', unit: '社', items: D.electric.map((e) => ({ name: e.name, url: e.source || (e.tariffs && e.tariffs.tokyo && e.tariffs.tokyo.source), conf: e, sub: e.areas ? (e.areas.length >= 9 ? '沖縄以外の全国' : areaName(e.areas)) : '各地域の大手電力' })), notCat: '電気' },
+    card: { title: 'カード払いの割引', unit: '種', items: (D.cards || []).map((c) => ({ name: c.name, url: c.source, conf: c, sub: Object.entries(c.perLine).map(([b, v]) => `${(D.mobileBrands.find((x) => x.id === b) || {}).name} 月${fmt(v)}円引き`).join('／') + (c.annualFee ? `・年会費${fmt(c.annualFee)}円` : '・年会費無料') })), notCat: 'カード' },
+  };
+  for (const [k, l] of Object.entries(lists)) $('cnt-' + k).innerHTML = `${l.items.length}<small>${l.unit}</small>`;
+  const panel = $('reach-panel');
+  let open = null;
+  function openList(key, btn) {
+    document.querySelectorAll('.reach-item[data-list]').forEach((b) => b.setAttribute('aria-expanded', 'false'));
+    if (open === key) { panel.hidden = true; open = null; return; }
+    const l = lists[key];
+    panel.innerHTML = `
+      <h3><span>${esc(l.title)}：${l.items.length}${l.unit}を比較</span><button type="button" id="panel-close">閉じる</button></h3>
+      <ul class="co-list">${l.items.map((x) => `<li>${link(x.name, x.url)}<small>${esc(x.sub)}</small>${conf(x.conf)}</li>`).join('')}</ul>`;
+    btn.after(panel); // 押したタイルのすぐ下に出す（空いたマスは後ろのタイルが詰める）
+    panel.hidden = false;
+    btn.setAttribute('aria-expanded', 'true');
+    open = key;
+    $('panel-close').addEventListener('click', () => { panel.hidden = true; btn.setAttribute('aria-expanded', 'false'); open = null; btn.focus(); });
+  }
+  document.querySelectorAll('.reach-item[data-list]').forEach((b) => b.addEventListener('click', () => openList(b.dataset.list, b)));
+})();
+</script>
+</body>
+</html>

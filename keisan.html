@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>まとめ割ナビ</title>
+  <meta name="description" content="スマホ・光回線・電気・ガスの組み合わせから、家計に一番お得なセットを計算します。">
+  <meta property="og:title" content="まとめ割ナビ｜スマホ・光回線・電気・ガスの一番お得な組み合わせ">
+  <meta property="og:description" content="家族のスマホ・光回線・電気・ガス・カードを全部まとめて、実質負担が一番安い組み合わせと、乗り換えのやることリストを無料で計算。">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="top">
+    <div class="wrap">
+      <h1 class="logo"><a href="./" style="color:inherit;text-decoration:none">まとめ割ナビ</a></h1>
+      <p class="tagline">スマホ・光回線・電気・ガスを<strong>まとめて</strong>、家計に一番お得な組み合わせを計算します</p>
+    </div>
+  </header>
+
+  <nav class="tabs wrap" role="tablist">
+    <button class="tab is-active" role="tab" data-tab="sim" aria-selected="true">計算する</button>
+    <button class="tab" role="tab" data-tab="campaigns" aria-selected="false">キャンペーン</button>
+    <button class="tab" role="tab" data-tab="scope" aria-selected="false">比較対象</button>
+  </nav>
+
+  <main class="wrap">
+    <p class="pr-disclosure" id="pr-disclosure" hidden></p>
+    <div class="notice" id="notice"></div>
+
+    <!-- 診断 -->
+    <section id="tab-sim" class="panel">
+      <form id="form" class="form" autocomplete="off">
+        <fieldset class="card">
+          <legend>1. お住まい</legend>
+          <div class="grid2">
+            <label>地域（電力エリア）
+              <select name="area" id="area"></select>
+            </label>
+            <label>住まい
+              <select name="housing">
+                <option value="mansion">マンション・アパート</option>
+                <option value="house">戸建て</option>
+              </select>
+            </label>
+          </div>
+          <label>比べる期間
+            <select name="months">
+              <option value="12">1年（12か月）</option>
+              <option value="24" selected>2年（24か月）</option>
+              <option value="36">3年（36か月）</option>
+              <option value="48">4年以上（48か月で計算）</option>
+            </select>
+          </label>
+        </fieldset>
+
+        <fieldset class="card">
+          <legend>2. スマホ（家族全員分）</legend>
+          <p class="hint">1人ずつ「今の会社」と「1か月に使うデータ量」を入れてください。</p>
+          <div id="lines"></div>
+          <button type="button" class="btn-sub" id="add-line">＋ 1人追加</button>
+          <label>今のスマホ代（家族合計・月）
+            <span class="yen"><input type="number" name="mobileCurrentMonthly" min="0" step="100" inputmode="numeric" placeholder="例 15000"></span>
+          </label>
+        </fieldset>
+
+        <fieldset class="card">
+          <legend>3. 光回線（自宅のネット）</legend>
+          <label class="check"><input type="checkbox" name="hikariUse" checked> 自宅で光回線を使う</label>
+          <div id="hikari-box">
+            <label>今の光回線
+              <select name="hikariCurrent" id="hikariCurrent"></select>
+            </label>
+            <div class="grid2">
+              <label>今の光回線の月額
+                <span class="yen"><input type="number" name="hikariCurrentMonthly" min="0" step="10" inputmode="numeric" placeholder="例 4400"></span>
+              </label>
+              <label>乗り換えるときの解約金など
+                <span class="yen"><input type="number" name="hikariCancelFee" min="0" step="100" inputmode="numeric" placeholder="わからなければ空欄"></span>
+              </label>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset class="card">
+          <legend>4. 電気</legend>
+          <div class="grid2">
+            <label>今の電気の会社
+              <select name="electricCurrent" id="electricCurrent"></select>
+            </label>
+            <label>1か月の電気代（平均）
+              <span class="yen"><input type="number" name="electricBill" min="0" step="100" inputmode="numeric" placeholder="例 9000" required></span>
+            </label>
+            <label>契約アンペア
+              <select name="electricAmp">
+                <option value="10">10A</option><option value="15">15A</option><option value="20">20A</option>
+                <option value="30" selected>30A（わからない場合）</option><option value="40">40A</option><option value="50">50A</option><option value="60">60A</option>
+              </select>
+            </label>
+            <label>1か月の使用量（kWh）
+              <input type="number" name="electricKWh" min="0" step="1" inputmode="numeric" placeholder="空欄なら電気代から推定">
+            </label>
+          </div>
+          <p class="hint">使用量と契約アンペアは検針票・明細に書いてあります。各社の料金表で計算するのに使います（関西・中国・四国はアンペアに関係なく計算）。</p>
+        </fieldset>
+
+        <fieldset class="card">
+          <legend>5. ガス</legend>
+          <label>ガスの種類
+            <select name="gasType" id="gasType">
+              <option value="city">都市ガス</option>
+              <option value="propane">プロパンガス（LPガス）</option>
+              <option value="none">ガスなし（オール電化など）</option>
+            </select>
+          </label>
+          <div class="grid2" id="gas-box">
+            <label id="gasCurrentLabel">今のガスの会社
+              <select name="gasCurrent" id="gasCurrent"></select>
+            </label>
+            <label>1か月のガス代（平均）
+              <span class="yen"><input type="number" name="gasBill" min="0" step="100" inputmode="numeric" placeholder="例 5000"></span>
+            </label>
+          </div>
+          <p class="hint" id="gas-hint" hidden>プロパンガスは会社ごとの料金差が大きく、まだ比較に対応していません（今の金額のまま計算します）。</p>
+        </fieldset>
+
+        <fieldset class="card">
+          <legend>6. クレジットカード（スマホ代の支払い）</legend>
+          <p class="hint">スマホ代を対象のカードで払うと毎月安くなります。「作ってもいい」を選ぶと、年会費と入会特典も含めて得になるときだけ提案します。</p>
+          <div class="grid2" id="card-box"></div>
+        </fieldset>
+
+        <details class="card options">
+          <summary>計算の設定</summary>
+          <label class="check"><input type="checkbox" name="includePoints" checked> ポイント還元もお得分に含める</label>
+          <label>自分で申請しないともらえない特典の扱い
+            <select name="applyPolicy">
+              <option value="full">全額もらえる前提で計算する</option>
+              <option value="half">半分だけ見込む（申請を忘れる・条件を外すかもしれない）</option>
+              <option value="none">計算に入れない</option>
+            </select>
+          </label>
+          <p class="hint">キャッシュバックの中には、開通の数か月〜17か月後に届くメールから自分で手続きしないともらえないもの（NURO光・So-net光など）や、エントリーが必要なもの（楽天モバイルなど）があります。期限を過ぎると0円になるため、ここで扱いを選べます。自動でもらえる特典は常に全額で計算します。</p>
+          <label class="check"><input type="checkbox" name="excludeUnverified" checked> 金額を確認できていない割引・特典（要確認）は計算に入れない</label>
+        </details>
+
+        <button type="submit" class="btn-main">お得な組み合わせを計算する</button>
+      </form>
+
+      <div id="result" class="result" aria-live="polite"></div>
+    </section>
+
+    <!-- キャンペーン一覧 -->
+    <section id="tab-campaigns" class="panel" hidden>
+      <div class="filters" id="camp-filters"></div>
+      <div id="campaign-list"></div>
+      <h2 class="h2">セット割・家族割の一覧</h2>
+      <p class="hint">同じサービスをまとめると毎月安くなる割引です。</p>
+      <div id="discount-list"></div>
+    </section>
+    <!-- 比較対象 -->
+    <section id="tab-scope" class="panel" hidden>
+      <div id="scope"></div>
+    </section>
+  </main>
+
+  <footer class="foot wrap">
+    <p class="foot-links"><a href="about.html">運営者・広告について</a>　<a href="privacy.html">プライバシーポリシー</a></p>
+    <p id="foot-note"></p>
+  </footer>
+
+  <script src="data.js"></script>
+  <script src="engine.js"></script>
+  <script src="affiliate.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
