@@ -251,3 +251,13 @@ test('期間限定の料金は期間が過ぎると通常料金になる（NURO�
   assert.strictEqual(nuroMonthly(24), 2980 * 24);
   assert.strictEqual(nuroMonthly(48), 2980 * 24 + 5720 * 24);
 });
+
+test('楽天ひかりの初期登録費：光コラボからの事業者変更は1,980円、それ以外は880円', () => {
+  const fee = (current) => {
+    const r = E.compare(baseInput({ hikari: { use: true, current, currentMonthly: 4400, cancelFee: 0 } }), data);
+    const x = find(r, (y) => y.combo.hikari === 'rakuten-hikari');
+    return x.items.filter((i) => i.label.startsWith('楽天ひかり 契約事務手数料')).reduce((s, i) => s + i.amount, 0);
+  };
+  assert.strictEqual(fee('docomo-hikari'), 1980);
+  assert.strictEqual(fee('none'), 880);
+});

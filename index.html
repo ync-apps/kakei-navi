@@ -242,6 +242,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .reach-item em { font-style: normal; font-size: .75rem; color: var(--brand); font-weight: 700; }
 .reach-item.static em { color: var(--muted); font-weight: 500; }
 .reach-panel { grid-column: 1 / -1; margin-block: 6px 10px; padding: 18px 20px; border-radius: var(--radius); background: var(--paper); border: 1px solid var(--rule); display: grid; gap: 12px; }
+.reach-panel[hidden] { display: none; }
 .reach-panel h3 { font-size: 1rem; display: flex; justify-content: space-between; gap: 10px; align-items: baseline; }
 .reach-panel h3 button { border: 0; background: transparent; color: var(--muted); font: inherit; font-size: .85rem; cursor: pointer; }
 .co-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; margin: 0; padding: 0; list-style: none; }

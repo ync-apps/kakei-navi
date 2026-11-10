@@ -176,7 +176,9 @@
     const currentSvc = data.hikari.find((x) => x.id === h.current);
     const jigyoushaHenkou = !staying && !!currentSvc && currentSvc.type === 'collab' && svc.type === 'collab';
     if (!staying) {
-      if (svc.setupFee) items.push({ cat: 'hikari', label: `${svc.name} 契約事務手数料`, amount: svc.setupFee, low: lowConf({ confidence: svc.setupConfidence || svc.confidence }), src: svc.source });
+      // 事業者変更（光コラボ→光コラボ）で手数料が違う会社は、その金額（例：楽天ひかり 新規880円・事業者変更1,980円）
+      const setupFee = jigyoushaHenkou && svc.setupFeeHenkou !== undefined ? svc.setupFeeHenkou : svc.setupFee;
+      if (setupFee) items.push({ cat: 'hikari', label: `${svc.name} 契約事務手数料${jigyoushaHenkou && svc.setupFeeHenkou !== undefined ? '（事業者変更）' : ''}`, amount: setupFee, low: lowConf({ confidence: svc.setupConfidence || svc.confidence }), src: svc.setupSource || svc.source });
       if (!jigyoushaHenkou && !svc.constructionFree) {
         items.push({ cat: 'hikari', label: `${svc.name} 工事費`, amount: svc.construction[input.housing], low: lowConf(svc), src: svc.source });
       }

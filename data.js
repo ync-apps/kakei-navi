@@ -73,7 +73,7 @@
       },
       {
         id: 'uq', name: 'UQモバイル', group: 'au', confidence: 'high', source: 'https://www.uqwimax.jp/mobile/plan/tokutoku2/',
-        switchFee: 3850, feeConfidence: 'low',
+        switchFee: 3850, feeConfidence: 'high', feeSource: 'https://www.au.com/support/faq/details/00/0000/000003/pg00000330/', feeCheckedAt: '2026-11-11', // オンラインショップは3,850円（UQスポットは4,950円）
         plans: [
           { id: 'uq-tokutoku-5', name: 'UQ トクトクプラン2（〜5GB）', capGB: 5, price: 2948 },
           { id: 'uq-tokutoku-30', name: 'UQ トクトクプラン2（〜30GB）', capGB: 30, price: 4048 },
@@ -101,7 +101,7 @@
         ],
       },
       {
-        id: 'ymobile', name: 'ワイモバイル', group: 'softbank', switchFee: 3850, feeConfidence: 'low', confidence: 'mid',
+        id: 'ymobile', name: 'ワイモバイル', group: 'softbank', switchFee: 3850, feeConfidence: 'mid', feeCheckedAt: '2026-11-11', /* 公式は自動取得不可。記事2つ以上で3,850円が一致。期間限定で無料になることあり */ confidence: 'mid',
         source: 'https://appllio.com/ymobile-simple3-price-plan',
         note: '公式サイトが自動取得を拒否するため、2026年6月の値上げ後の料金を複数の記事で確認',
         plans: [
@@ -157,7 +157,7 @@
         ],
       },
       {
-        id: 'nihontsushin', name: '日本通信SIM', group: 'nihontsushin', switchFee: 3300, feeConfidence: 'low', confidence: 'high', source: 'https://www.nihontsushin.com/',
+        id: 'nihontsushin', name: '日本通信SIM', group: 'nihontsushin', switchFee: 3300, feeConfidence: 'high', feeSource: 'https://www.nihontsushin.com/entry/contract_notice_NT.html', feeCheckedAt: '2026-11-11', /* 新規・MNPとも初期手数料3,300円。スターターパック購入なら不要 */ confidence: 'high', source: 'https://www.nihontsushin.com/',
         plans: [
           { id: 'nt-1', name: '日本通信 合理的シンプル290プラン 1GB', capGB: 1, price: 290 },
           { id: 'nt-20', name: '日本通信 合理的みんなのプラン 20GB', capGB: 20, price: 1390 },
@@ -165,7 +165,7 @@
         ],
       },
       {
-        id: 'biglobe-mobile', name: 'BIGLOBEモバイル', group: 'biglobe', switchFee: 3300, feeConfidence: 'low', confidence: 'high', source: 'https://join.biglobe.ne.jp/mobile/',
+        id: 'biglobe-mobile', name: 'BIGLOBEモバイル', group: 'biglobe', switchFee: 3733, feeConfidence: 'high', feeSource: 'https://join.biglobe.ne.jp/mobile/plan/', feeCheckedAt: '2026-11-11', /* プラン申込手数料3,300円＋SIMカード準備料（eSIMはプロファイル発行料）433円 */ confidence: 'high', source: 'https://join.biglobe.ne.jp/mobile/',
         plans: [
           { id: 'bm-1', name: 'BIGLOBEモバイル プランS 1GB', capGB: 1, price: 1078 },
           { id: 'bm-3', name: 'BIGLOBEモバイル プランR 3GB', capGB: 3, price: 1320 },
@@ -233,7 +233,7 @@
       {
         id: 'au-hikari', name: 'auひかり', type: 'own', confidence: 'high', source: 'https://www.au.com/internet/auhikari_1g/',
         excludeAreas: { house: ['kansai', 'chubu', 'okinawa'], mansion: ['okinawa'] }, housing: ['house'],
-        price: { house: 5390, mansion: 0 }, setupFee: 3300, setupConfidence: 'low', construction: { house: 41250, mansion: 33000 }, constructionFree: true,
+        price: { house: 5390, mansion: 0 }, setupFee: 4950, setupConfidence: 'high', setupSource: 'https://www.au.com/internet/auhikari_1g/charge/zuttogigatoku/', /* 新規登録料。2026年8月1日から3,300円→4,950円 */ construction: { house: 41250, mansion: 33000 }, constructionFree: true,
         note: 'ホーム1G ずっとギガ得プラン 3年目以降の5,390円（1年目5,610円・2年目5,500円は下の差額で計算）。工事費は初期費用相当額割引で実質0円。マンションの料金は確認できず',
       },
       {
@@ -243,7 +243,7 @@
       },
       {
         id: 'rakuten-hikari', name: '楽天ひかり', type: 'collab', confidence: 'high', source: 'https://network.mobile.rakuten.co.jp/hikari/',
-        price: { house: 5280, mansion: 4180 }, setupFee: 1980, setupConfidence: 'low', construction: { house: 22000, mansion: 22000 }, constructionFree: true,
+        price: { house: 5280, mansion: 4180 }, setupFee: 880, setupFeeHenkou: 1980, setupConfidence: 'high', setupSource: 'https://network.mobile.rakuten.co.jp/hikari/fee/pricelist/', /* 初期登録費：フレッツ光を使っていない人880円、転用・事業者変更1,980円 */ construction: { house: 22000, mansion: 22000 }, constructionFree: true,
         note: '工事費はポイント進呈で実質0円',
       },
       {
@@ -269,7 +269,7 @@
       },
       {
         id: 'eo-hikari', name: 'eo光', type: 'own', areas: ['kansai'], housing: ['house'], confidence: 'mid', source: 'https://ieagent.jp/hikari/eohikari-price/',
-        price: { house: 5448, mansion: 0 }, setupFee: 3300, setupConfidence: 'low', construction: { house: 29700, mansion: 29700 }, constructionFree: true,
+        price: { house: 5448, mansion: 0 }, setupFee: 3300, setupConfidence: 'high', setupSource: 'https://simple.eonet.jp/share/pdf/notice.pdf', construction: { house: 29700, mansion: 29700 }, constructionFree: true,
         note: '1ギガ（即割）2年目以降の料金。1年目の割引は下のセット割・継続割引で計算。公式の料金表は読み取れず記事で確認',
       },
       {
@@ -289,7 +289,7 @@
       },
       {
         id: 'bbiq', name: 'BBIQ', type: 'own', areas: ['kyushu'], housing: ['house'], confidence: 'high', source: 'https://www.bbiq.jp/',
-        price: { house: 5500, mansion: 0 }, setupFee: 3300, setupConfidence: 'low', construction: { house: 0, mansion: 0 }, constructionFree: true,
+        price: { house: 5500, mansion: 0 }, setupFee: 880, setupConfidence: 'high', setupSource: 'https://www.bbiq.jp/hikari/internet/price/', construction: { house: 0, mansion: 0 }, constructionFree: true,
         note: '1ギガ ホーム。2〜12か月目は2,970円（Web・電話申込、2027年1月28日まで）。工事費実質無料',
       },
     ],
