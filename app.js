@@ -257,6 +257,40 @@
     setTimeout(() => t.remove(), 3500);
   }
 
+  // ---------- お店で見せる比較図 ----------
+  let cardUrl = null;
+  function showCard(r, input, res) {
+    const canvas = window.KakeiShareCard.make(r, input, res, D);
+    canvas.toBlob((blob) => {
+      if (!blob) { toast('図を作れませんでした'); return; }
+      if (cardUrl) URL.revokeObjectURL(cardUrl);
+      cardUrl = URL.createObjectURL(blob);
+      const name = `matomewari-hikaku-${todayYmd()}.png`;
+      const file = typeof File === 'function' ? new File([blob], name, { type: 'image/png' }) : null;
+      const canShare = !!(file && navigator.canShare && navigator.canShare({ files: [file] }));
+      let dlg = document.getElementById('card-dialog');
+      if (!dlg) {
+        dlg = document.createElement('div');
+        dlg.id = 'card-dialog'; dlg.className = 'card-dialog'; dlg.setAttribute('role', 'dialog'); dlg.setAttribute('aria-modal', 'true'); dlg.setAttribute('aria-label', 'お店で見せる比較図');
+        document.body.appendChild(dlg);
+        dlg.addEventListener('click', (e) => { if (e.target === dlg || e.target.closest('[data-close]')) dlg.hidden = true; });
+      }
+      dlg.innerHTML = `
+        <div class="card-sheet">
+          <div class="card-bar"><strong>お店で見せる比較図</strong><button type="button" class="card-close" data-close>閉じる</button></div>
+          <p class="meta">お店で見せて、提案された内容と比べるときに使えます。iPhoneは画像を長押しして「"写真"に保存」でも保存できます。</p>
+          <div class="card-actions">
+            ${canShare ? '<button type="button" class="btn" data-share>画像を保存・共有</button>' : ''}
+            <a class="btn${canShare ? ' btn-ghost' : ''}" href="${cardUrl}" download="${name}">画像をダウンロード</a>
+          </div>
+          <img class="card-img" src="${cardUrl}" alt="今のままとこの組み合わせの実質負担、月あたりの比較、割引・特典、お店で確かめることをまとめた図">
+        </div>`;
+      dlg.hidden = false;
+      const sh = dlg.querySelector('[data-share]');
+      if (sh) sh.addEventListener('click', () => navigator.share({ files: [file], title: 'まとめ割ナビ 比較メモ' }).catch(() => {}));
+    }, 'image/png');
+  }
+
   function renderResult(input) {
     const res = E.compare(input, D);
     const box = $('#result');
@@ -297,6 +331,7 @@
         </div>
         <ul class="services">${serviceRows(r, input)}</ul>
         <p class="meta">乗り換えの手続き：${r.switches}件${r.hasLowConfidence ? '　<span class="tag low">要確認の金額を含む</span>' : ''}</p>
+        <button type="button" class="btn-sub btn-card" data-card="${i}">お店で見せる比較図を作る</button>
         <details class="breakdown"><summary>内訳を見る（スマホ・光回線・電気・ガス別）</summary>${breakdown(r, m)}</details>
         ${todoBlock(r, input, i)}
       </article>`;
@@ -332,6 +367,7 @@
       const ok = await copyText(lastTodos[Number(b.dataset.copy)]);
       toast(ok ? 'コピーしました' : 'コピーできませんでした。リストを長押しして選択してください');
     }));
+    box.querySelectorAll('[data-card]').forEach((b) => b.addEventListener('click', () => showCard(res.top[Number(b.dataset.card)], input, res)));
     box.querySelectorAll('[data-goto]').forEach((a) => a.addEventListener('click', (e) => { e.preventDefault(); showTab(a.dataset.goto); }));
     box.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
