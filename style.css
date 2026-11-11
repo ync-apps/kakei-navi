@@ -232,3 +232,5 @@ details.breakdown summary { cursor: pointer; font-size: .85rem; color: var(--acc
 .card-actions .btn { display: inline-block; padding: 10px 16px; border: 1px solid var(--accent); border-radius: 999px; background: var(--accent); color: #fff; font: inherit; font-weight: 700; text-decoration: none; cursor: pointer; }
 .card-actions .btn-ghost { background: transparent; color: var(--accent); }
 .card-img { display: block; width: 100%; height: auto; border: 1px solid var(--line); border-radius: 10px; }
+a.btn-copyall { display: inline-block; text-decoration: none; border-style: solid; font-weight: 700; }
+a.btn-copyall.done { background: var(--accent-soft); }

@@ -629,14 +629,21 @@
     return lines.join('\n');
   }
 
-  // DUEMO に貼り付けやすい文字列
-  function todosText(todos, title) {
+  // DUEMO に貼り付けやすい文字列。1行に1つの手続きと、その期限・もらえる特典を書く
+  // （DUEMO の「まとめて登録」が、・で始まる行ごとに期限と金額を読み取って、1件ずつタスクにする）
+  function todosText(todos, title, today) {
     const lines = [title];
     for (const p of PHASES) {
       const ts = todos.filter((t) => t.phase === p.id);
       if (!ts.length) continue;
       lines.push('', `【${p.name}】`);
-      for (const t of ts) lines.push(`・${t.text}${t.months && !t.text.includes('か月') ? `（開通から${t.months}か月後）` : ''}`);
+      for (const t of ts) {
+        const info = [];
+        if (t.amount) info.push(`もらえる特典：${t.amount.toLocaleString('ja-JP')}${t.kind === 'points' ? 'ポイント' : '円'}`);
+        if (today) info.push(`${t.deadline ? '期限' : '目安'}：${jpDate(dueOf(t, today))}まで`);
+        else if (t.months && !t.text.includes('か月')) info.push(`開通から${t.months}か月後`);
+        lines.push(`・${t.text}${info.length ? `（${info.join('・')}）` : ''}`);
+      }
     }
     return lines.join('\n');
   }

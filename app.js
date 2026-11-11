@@ -192,7 +192,7 @@
   const shownTodos = [];
   function todoBlock(r, input, idx) {
     const todos = E.buildTodos(r, input, D);
-    lastTodos[idx] = E.todosText(todos, `まとめ割ナビ：乗り換えの手続き（${r.lines.map((l) => l.brand.name).filter((v, i, a) => a.indexOf(v) === i).join('・')}${r.hikari.svc ? '／' + r.hikari.svc.name : ''}）`);
+    lastTodos[idx] = E.todosText(todos, `まとめ割ナビ：乗り換えの手続き（${r.lines.map((l) => l.brand.name).filter((v, i, a) => a.indexOf(v) === i).join('・')}${r.hikari.svc ? '／' + r.hikari.svc.name : ''}）`, todayYmd());
     shownTodos[idx] = todos;
     if (!todos.length) return '';
     const today = todayYmd();
@@ -216,16 +216,16 @@
       <details class="breakdown todo" ${idx === 0 ? 'open' : ''}>
         <summary>やることリスト（${todos.length}件）</summary>
         <div class="duemo">
-          <p><strong>DUEMOに1件ずつ登録して、やり忘れを防ごう</strong></p>
+          <p><strong>DUEMOに登録して、やり忘れを防ごう</strong></p>
           <ol class="howto">
-            <li>登録したい項目の「DUEMOへ」を押す（内容がコピーされ、DUEMOが開きます）</li>
-            <li>DUEMOで「登録する」→「写真やお知らせから読み取る」に貼り付ける</li>
-            <li>タイトル・金額・期限が入るので、確認して登録</li>
+            <li>下の「全部まとめてDUEMOへ」を押す（全部の手続きがコピーされ、DUEMOが開きます）。1つだけなら各項目の「DUEMOへ」</li>
+            <li>DUEMOで「登録する」→「お知らせメールなどの文を貼り付ける」に貼り付けて「読み取って入れる」</li>
+            <li>手続きごとに名前・期限・金額が出るので、確認して登録（まとめての場合は、いらないものの✓を外せます）</li>
           </ol>
           <p class="meta">特に「開通から○か月後」の受け取り手続きは忘れやすく、期限を過ぎるともらえません。</p>
         </div>
         ${groups}
-        <button type="button" class="btn-sub" data-copy="${idx}">全部まとめてコピー（メモ用）</button>
+        <a class="btn-sub btn-copyall" href="${esc(D.duemoUrl)}" target="_blank" rel="noopener" data-copyall="${idx}">全部まとめてDUEMOへ（${todos.length}件）</a>
       </details>`;
   }
 
@@ -361,11 +361,14 @@
       const ok = copySync(text);
       if (ok) { link.textContent = 'コピー済み'; link.classList.add('done'); }
       else copyText(text).then((ok2) => { if (ok2) { link.textContent = 'コピー済み'; link.classList.add('done'); } });
-      toast('コピーしました。DUEMOの「写真やお知らせから読み取る」に貼り付けてください');
+      toast('コピーしました。DUEMOの「お知らせメールなどの文を貼り付ける」に貼り付けてください');
     }));
-    box.querySelectorAll('[data-copy]').forEach((b) => b.addEventListener('click', async () => {
-      const ok = await copyText(lastTodos[Number(b.dataset.copy)]);
-      toast(ok ? 'コピーしました' : 'コピーできませんでした。リストを長押しして選択してください');
+    // 全部まとめて：リンクで DUEMO を別タブで開く。その直前に同期でコピーする
+    box.querySelectorAll('[data-copyall]').forEach((link) => link.addEventListener('click', () => {
+      const text = lastTodos[Number(link.dataset.copyall)];
+      const done = () => { link.textContent = 'コピー済み（DUEMOに貼り付けてください）'; link.classList.add('done'); };
+      if (copySync(text)) done(); else copyText(text).then((ok) => { if (ok) done(); });
+      toast('全部コピーしました。DUEMOの「お知らせメールなどの文を貼り付ける」に貼り付けると、まとめて登録できます');
     }));
     box.querySelectorAll('[data-card]').forEach((b) => b.addEventListener('click', () => showCard(res.top[Number(b.dataset.card)], input, res)));
     box.querySelectorAll('[data-goto]').forEach((a) => a.addEventListener('click', (e) => { e.preventDefault(); showTab(a.dataset.goto); }));

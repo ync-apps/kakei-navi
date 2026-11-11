@@ -204,6 +204,10 @@ test('やることリスト：カード発行・支払い設定・乗り換え�
   for (let i = 1; i < todos.length; i++) assert.ok(order.indexOf(todos[i - 1].phase) <= order.indexOf(todos[i].phase));
   const text = E.todosText(todos, 'まとめ割ナビの乗り換え');
   assert.ok(text.includes('【最初にやること】'));
+  // 今日の日付を渡すと、手続きごとに期限（目安）が入る（DUEMO のまとめて登録で1件ずつになる）
+  const dated = E.todosText(todos, 'まとめ割ナビの乗り換え', '2026-11-12').split('\n').filter((l) => l.startsWith('・'));
+  assert.strictEqual(dated.length, todos.length);
+  assert.ok(dated.every((l) => /（[^（]*(期限|目安)：20\d\d年\d+月\d+日まで）$/.test(l)));
 });
 
 test('やることリスト：NURO光は17か月後の受け取り手続きが入る', () => {
