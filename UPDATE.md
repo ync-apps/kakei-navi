@@ -20,7 +20,7 @@
        ソフトバンクでんき https://www.softbank.jp/energy/price/ （関西は「Powered by 関西電力」）と auでんき https://www.au.com/energy/denki/merit/plan/ の東京・関西の単価が、`electric` の `std` の `tokyo`・`kansai` と同じか見る。2社がそろって変わっていたら、大手電力の料金も変わったとみなして直す（2026-11-10 に一致を確認済み）
      - ワイモバイル・LINEMO：公式サイト・報道発表・提供条件書PDFのどれも自動では読めない。日付の新しい比較記事を2つ以上読み、一致した値だけを使い `confidence: 'mid'` のままにする。食い違うときは変えずに、報告で「人の確認が必要」と書く
      - 月1回、人が公式ページで答え合わせをする（DUEMO に毎月のタスクとして登録）
-3. `data.js` の `asOf` と `notice` の日付を更新
+3. `data.js` の `asOf` と `notice` の日付を更新（`notice` は日付だけ直し、店頭限定・申込窓口独自のキャッシュバックを計算に入れていない旨の文は消さない）
 4. テストを通す
    ```
    node --test test/engine.test.js
