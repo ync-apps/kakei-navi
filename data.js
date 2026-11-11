@@ -248,7 +248,7 @@
       },
       {
         id: 'iij-hikari', name: 'IIJmioひかり', type: 'collab', confidence: 'high', source: 'https://www.iijmio.jp/imh/',
-        price: { house: 5456, mansion: 4356 }, setupFee: 3300, setupConfidence: 'low', construction: { house: 28600, mansion: 28600 }, constructionFree: true,
+        price: { house: 5456, mansion: 4356 }, setupFee: 3300, setupConfidence: 'high', setupSource: 'https://www.iijmio.jp/imh/', /* 公式の料金シミュレーションで新規・転用・事業者変更とも3,300円（2026-11-11確認） */ construction: { house: 28600, mansion: 28600 }, constructionFree: true,
         note: '工事費は21か月利用で実質0円。最低利用24か月',
       },
       {
@@ -673,10 +673,10 @@
       },
       {
         id: 'sonet-cb', name: 'So-net光 新設キャッシュバック', target: 'hikari', provider: 'sonet-hikari', amount: 10000, kind: 'cash',
-        endsAt: '2026-11-15',
-        todo: [{ phase: 'later', months: 17, text: 'So-net光のキャッシュバックの口座手続き（開通17か月目。期限あり）' }],
-        confidence: 'low', receive: 'apply', receiveNote: '開通17か月目に口座の手続きが必要', source: 'https://www.so-net.ne.jp/access/hikari/',
-        conditions: '11月9日〜15日の申込。6か月以内の支払方法登録。11月10日の再確認では公式ページが表示されず確認できなかった',
+        endsAt: '2026-11-15', newOnly: true, checkedAt: '2026-11-11',
+        todo: [{ phase: 'later', months: 17, text: 'So-net光のキャッシュバックの口座手続き（開通17か月後の15日から45日間。過ぎると受け取れない）' }],
+        confidence: 'high', receive: 'apply', receiveNote: '開通17か月後の15日から45日間に、マイページかSo-net会員アプリで受取口座を指定', source: 'https://www.so-net.ne.jp/access/hikari/1g/',
+        conditions: '2026年11月9日〜15日の申込。新設のみ（転用・事業者変更は対象外）。So-net 光 Mと10ギガが対象（S・Lは対象外）。申込から6か月後の末日までに支払方法の登録と開通。受け取りまで解約・退会しないこと',
       },
       {
         id: 'eo-cash', name: 'eo光 現金3,000円プレゼント', target: 'hikari', provider: 'eo-hikari', amount: 3000, kind: 'cash',

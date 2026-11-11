@@ -261,3 +261,13 @@ test('楽天ひかりの初期登録費：光コラボからの事業者変更�
   assert.strictEqual(fee('docomo-hikari'), 1980);
   assert.strictEqual(fee('none'), 880);
 });
+
+test('So-net光の新設キャッシュバックは事業者変更では対象外', () => {
+  const has = (current) => {
+    const r = E.compare(baseInput({ hikari: { use: true, current, currentMonthly: 4400, cancelFee: 0 }, options: { includePoints: true, excludeUnverified: true, applyPolicy: 'full', today: '2026-11-11' } }), data);
+    const x = find(r, (y) => y.combo.hikari === 'sonet-hikari');
+    return !!x && x.items.some((i) => i.label.startsWith('So-net光 新設キャッシュバック'));
+  };
+  assert.strictEqual(has('none'), true);
+  assert.strictEqual(has('docomo-hikari'), false);
+});

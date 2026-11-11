@@ -185,7 +185,7 @@
       if (h.current !== 'none' && Number(h.cancelFee) > 0) {
         items.push({ cat: 'hikari', label: '今の光回線の解約金・工事費の残り（入力値）', amount: Number(h.cancelFee) });
       }
-      for (const c of data.campaigns.filter((c) => c.target === 'hikari' && c.provider === svc.id && meets(c.requires, combo, area))) {
+      for (const c of data.campaigns.filter((c) => c.target === 'hikari' && c.provider === svc.id && meets(c.requires, combo, area) && !(c.newOnly && jigyoushaHenkou))) { // newOnly：新設のみ（事業者変更は対象外）
         // 今の光回線の解約金を負担してくれる特典
         if (c.coversCancelFee && h.current !== 'none' && Number(h.cancelFee) > 0 && usable(c, opts)) {
           const cover = Math.min(Number(h.cancelFee), c.cancelFeeCap || Infinity);
