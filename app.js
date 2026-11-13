@@ -6,6 +6,7 @@
   const affUrl = (signup) => (signup && okUrlStrict((AFF.links || {})[`${signup.cat}:${signup.id}`])) || '';
   function okUrlStrict(u) { return typeof u === 'string' && /^https:\/\//.test(u) ? u : ''; }
   const hasAffiliate = Object.values(AFF.links || {}).some((u) => okUrlStrict(u));
+  const affLinks = Object.fromEntries(Object.entries(AFF.links || {}).filter(([, u]) => okUrlStrict(u)));
   const yen = E.yen;
   const STORE_KEY = 'kakei-navi:input:v3';
   const $ = (sel) => document.querySelector(sel);
@@ -292,7 +293,8 @@
   }
 
   function renderResult(input) {
-    const res = E.compare(input, D);
+    // 広告リンクを貼った会社は、リンク先のページの特典（viaLink）で計算する
+    const res = E.compare({ ...input, options: { ...(input.options || {}), links: affLinks } }, D);
     const box = $('#result');
     if (!res.top.length) {
       box.innerHTML = '<div class="summary"><p>条件に合う組み合わせが見つかりませんでした。データ量などを見直してください。</p></div>';
@@ -394,14 +396,15 @@
     const expired = D.campaigns.filter((c) => c.endsAt && c.endsAt < today);
     const list = D.campaigns
       .filter((c) => !(c.endsAt && c.endsAt < today))
+      .filter((c) => (!c.viaLink || affLinks[c.viaLink]) && !(c.notWithLink && affLinks[c.notWithLink]))
       .filter((c) => campFilter === 'all' || c.target === campFilter)
       .filter((c) => c.amount > 0 || c.amountMonths)
       .sort((a, b) => b.amount - a.amount);
     $('#campaign-list').innerHTML = list.map((c) => `
       <div class="camp-card">
         <div class="row">
-          <div><span class="meta">${esc(catLabel[c.target])}｜${esc(providerName(c))}</span><br><strong>${linkText(c.name, c.source)}</strong></div>
-          <div class="amt">${c.amountMonths ? `月額${c.amountMonths}か月分` : yen(c.amount)}${c.kind === 'points' ? '<span class="meta"> 相当</span>' : ''}</div>
+          <div><span class="meta">${esc(catLabel[c.target])}｜${esc(providerName(c))}</span><br><strong>${linkText(c.name, c.source)}</strong>${c.viaLink ? '<br><span class="meta">PRリンクから申し込んだ場合の特典</span>' : ''}</div>
+          <div class="amt">${c.amountMonths ? (c.monthlyCap ? `月${yen(c.monthlyCap)}まで×${c.amountMonths}か月` : `月額${c.amountMonths}か月分`) : yen(c.amount)}${c.kind === 'points' ? '<span class="meta"> 相当</span>' : ''}</div>
         </div>
         <p class="cond">${c.endsAt ? `<strong>${Number(c.endsAt.slice(5, 7))}月${Number(c.endsAt.slice(8, 10))}日まで。</strong>` : ''}${c.mnpOnly ? '番号そのまま乗り換え（MNP）限定。' : ''}${esc(c.conditions || '')}</p>
         <p class="meta">${c.kind === 'points' ? 'ポイント' : '現金・残高・割引'}｜受け取り方：${esc(E.RECEIVE_LABEL[c.receive] || '不明')}${c.receiveNote ? `（${esc(c.receiveNote)}）` : ''}${confTag(c)}${srcLink(c)}</p>

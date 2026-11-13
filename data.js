@@ -666,10 +666,33 @@
       },
       {
         id: 'nuro-cb', name: 'NURO光 キャッシュバック', target: 'hikari', provider: 'nuro', amount: 15000, kind: 'cash',
-        endsAt: '2026-11-15',
+        endsAt: '2026-11-15', notWithLink: 'hikari:nuro', /* 広告リンク先の特典とは併用できない */
         todo: [{ phase: 'later', months: 17, text: 'NURO光のキャッシュバック受け取り手続き（開通17か月後に届くメールから。期限あり）' }],
         checkedAt: '2026-11-10', confidence: 'high', receive: 'apply', receiveNote: '開通17か月後に届くメールからマイページで口座を指定（手続き期間45日）', source: 'https://www.nuro.jp/',
         conditions: '11月15日まで。2年割の申込・12か月以内の開通・支払方法の登録が条件',
+      },
+      {
+        // 広告（PR）リンク先の特別ページ（nuro.jp/hikari/pr/sp/）からの申込だけの特典。affiliate.js に NURO光のリンクがあるときだけ計算に入る
+        id: 'nuro-pr-cb', name: 'NURO光 現金キャッシュバック（広告ページ限定）', target: 'hikari', provider: 'nuro', amount: 55000, kind: 'cash',
+        viaLink: 'hikari:nuro', checkedAt: '2026-11-13', confidence: 'high', receive: 'apply',
+        receiveNote: '開通11か月後に15,000円・17か月後に25,000円・23か月後に15,000円（クーポン分）の案内メール。それぞれ45日以内にマイページで口座を指定',
+        source: 'https://www.nuro.jp/hikari/pr/sp/',
+        conditions: '2.5ギガプランの場合（10ギガは80,000円）。このページからの申込のみ。申込画面でクーポン「myb」を入力（入れないと40,000円）。申込から12か月後の月末までに開通、開通10か月後の末日までに支払方法とメールアドレスを登録。受け取りまで解約しないこと。ほかの特典・キャンペーンとは併用不可',
+        todo: [
+          { phase: 'apply', text: 'NURO光は「申し込む（PR）」のリンク先のページから申し込み、申込画面でクーポン「myb」を入力する（ほかのページからだと対象外）' },
+          { phase: 'after', text: 'NURO光の支払方法と連絡先メールアドレスを登録する（開通10か月後の末日まで。しないと案内メールが届かない）' },
+          { phase: 'later', months: 11, text: 'NURO光キャッシュバック1回目（15,000円）の受け取り手続き（案内メールから45日以内）' },
+          { phase: 'later', months: 17, text: 'NURO光キャッシュバック2回目（25,000円）の受け取り手続き（案内メールから45日以内）' },
+          { phase: 'later', months: 23, text: 'NURO光キャッシュバック3回目（クーポン分15,000円）の受け取り手続き（案内メールから45日以内）' },
+        ],
+      },
+      {
+        id: 'nuro-norikae', name: 'NURO光 乗り換え特典', target: 'hikari', provider: 'nuro', amount: 0, kind: 'cash',
+        coversCancelFee: true, cancelFeeCap: 60000, checkedAt: '2026-11-13', confidence: 'high', receive: 'apply',
+        receiveNote: '開通5〜7か月目の末日までに届くシートに解約金の証明書を貼って返送 → 45日以内に案内 → 45日以内に口座指定',
+        source: 'https://www.nuro.jp/',
+        conditions: '今の光回線などの解約金・工事費の残り・撤去費用を最大60,000円までキャッシュバック。申請は1回だけ',
+        todo: [{ phase: 'later', months: 5, text: 'NURO光の乗り換え特典：届いたシートに今の光回線の解約金の証明書を貼って返送する' }],
       },
       {
         id: 'sonet-cb', name: 'So-net光 新設キャッシュバック', target: 'hikari', provider: 'sonet-hikari', amount: 10000, kind: 'cash',
@@ -677,6 +700,27 @@
         todo: [{ phase: 'later', months: 17, text: 'So-net光のキャッシュバックの口座手続き（開通17か月後の15日から45日間。過ぎると受け取れない）' }],
         confidence: 'high', receive: 'apply', receiveNote: '開通17か月後の15日から45日間に、マイページかSo-net会員アプリで受取口座を指定', source: 'https://www.so-net.ne.jp/access/hikari/1g/',
         conditions: '2026年11月9日〜15日の申込。新設のみ（転用・事業者変更は対象外）。So-net 光 Mと10ギガが対象（S・Lは対象外）。申込から6か月後の末日までに支払方法の登録と開通。受け取りまで解約・退会しないこと',
+      },
+      {
+        // 広告（PR）リンク先の特別ページ（join.biglobe.ne.jp/ftth/hikari/lp/af/）の特典。affiliate.js に ビッグローブ光のリンクがあるときだけ計算に入る
+        id: 'biglobe-pr-cb', name: 'ビッグローブ光 キャッシュバック（広告ページ・クーポン）', target: 'hikari', provider: 'biglobe-hikari', amount: 65000, kind: 'cash',
+        viaLink: 'hikari:biglobe-hikari', checkedAt: '2026-11-13', confidence: 'high', receive: 'apply',
+        receiveNote: '12か月目に35,000円、24か月目に30,000円（クーポン分）。それぞれ対象月の2日から45日以内にマイページで手続き（CASH POSTで口座へ）',
+        source: 'https://join.biglobe.ne.jp/ftth/hikari/lp/af/limited.html',
+        conditions: '1ギガ3年プランの場合。リンク先のページから、クーポン「BWS」を入力して申し込む。申込から6か月以内に開通。受け取りまで解約・コース変更しないこと（24か月目の分は24か月目まで継続）',
+        todo: [
+          { phase: 'apply', text: 'ビッグローブ光は「申し込む（PR）」のリンク先のページから、クーポン「BWS」を入力して申し込む' },
+          { phase: 'later', months: 11, text: 'ビッグローブ光キャッシュバック（35,000円）の受け取り手続き（12か月目の2日から45日以内）' },
+          { phase: 'later', months: 23, text: 'ビッグローブ光キャッシュバック（クーポン分30,000円）の受け取り手続き（24か月目の2日から45日以内）' },
+        ],
+      },
+      {
+        id: 'biglobe-pr-cancel', name: 'ビッグローブ光 解約金サポート（広告ページ）', target: 'hikari', provider: 'biglobe-hikari', amount: 0, kind: 'cash',
+        viaLink: 'hikari:biglobe-hikari', coversCancelFee: true, cancelFeeCap: 40000, checkedAt: '2026-11-13', confidence: 'high', receive: 'apply',
+        receiveNote: '申込後に届く入会資料の「解約金サポート申込書」で申請',
+        source: 'https://join.biglobe.ne.jp/ftth/hikari/lp/af/limited.html',
+        conditions: '他社の光回線の解約金（契約解除料・工事費の残り・撤去費用）と同じ額を最大40,000円まで還元',
+        todo: [{ phase: 'after', text: 'ビッグローブ光の「解約金サポート申込書」（入会資料に同封）で、前の光回線の解約金を申請する' }],
       },
       {
         id: 'eo-cash', name: 'eo光 現金3,000円プレゼント', target: 'hikari', provider: 'eo-hikari', amount: 3000, kind: 'cash',
@@ -709,6 +753,14 @@
         id: 'sb-denki-first', name: 'ソフトバンクでんき 初月全額0円', target: 'electric', provider: 'softbank-denki', amountMonths: 1, amount: 0, kind: 'cash',
         todo: [{ phase: 'apply', text: 'ソフトバンクでんきは Web から申し込む（初月0円の対象）' }],
         checkedAt: '2026-11-10', confidence: 'high', receive: 'auto', receiveNote: '初回の請求から割引', requires: { area: ['hokkaido', 'tokyo', 'chubu', 'chugoku', 'shikoku'] }, source: 'https://www.softbank.jp/energy/', conditions: '個人・新規・Web申込。北海道・東京・中部・中国・四国電力エリア。1年未満の解約は違約金3,000円',
+      },
+      {
+        // 「ポイントサイト・比較サイト限定」ページ（softbank.jp/energy/special/site-limited/）の特典。affiliate.js にソフトバンクでんきのリンクがあるときだけ計算に入る
+        id: 'sb-denki-site', name: 'ソフトバンクでんき 比較サイト限定 3か月割引', target: 'electric', provider: 'softbank-denki', amountMonths: 3, monthlyCap: 1100, amount: 0, kind: 'cash',
+        viaLink: 'electric:softbank-denki', endsAt: '2027-03-31', checkedAt: '2026-11-13', confidence: 'high', receive: 'auto', receiveNote: 'ほかの特典が終わった翌月から3か月、電気代から割引（電気代が1,100円より少ない月はその額まで）',
+        requires: { area: ['hokkaido', 'tokyo', 'chubu', 'chugoku', 'shikoku'] }, source: 'https://www.softbank.jp/energy/special/site-limited/',
+        conditions: '2026年10月1日〜2027年3月31日。個人・新規。北海道・東京・中部・中国・四国・沖縄電力エリア（関西電力エリアの「Powered by 関西電力」は対象外）。申込で「現在ご利用の電力会社のご契約情報」を「あり」にする。90日以内の開通。1年未満の解約は違約金5,000円',
+        todo: [{ phase: 'apply', text: 'ソフトバンクでんきは「申し込む（PR）」のリンク先のページで提供条件書を確認してから申し込む（「今の電力会社の契約情報」は「あり」を選ぶ）' }],
       },
       {
         id: 'rakuten-denki-pt', name: '楽天でんき 秋の家計応援キャンペーン', target: 'electric', provider: 'rakuten-denki', amount: 5000, kind: 'points',

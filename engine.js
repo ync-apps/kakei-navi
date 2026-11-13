@@ -47,6 +47,11 @@
   // 終了日を過ぎたものと、「確認できていないものは入れない」設定のときの要確認のものを外す
   function usable(d, opts) {
     if (d && d.endsAt && opts.today && d.endsAt < opts.today) return false;
+    // viaLink：広告（PR）リンク先のページから申し込んだときだけの特典。リンクを貼っていなければ使わない
+    // notWithLink：そのリンクを貼ったら使わない特典（リンク先の特典と併用できないもの）
+    const links = (opts && opts.links) || {};
+    if (d && d.viaLink && !links[d.viaLink]) return false;
+    if (d && d.notWithLink && links[d.notWithLink]) return false;
     return !(opts.excludeUnverified && lowConf(d));
   }
   function todayStr() {
@@ -69,6 +74,7 @@
   function campaignLabel(c, opts) {
     let s = c.name;
     if (c.kind === 'points') s += '（ポイント）';
+    if (c.viaLink) s += '（PRリンクから申し込んだ場合）';
     if (c.receive === 'apply' && opts.applyPolicy === 'half') s += '（申請が必要なので半額で見込み）';
     return s;
   }
@@ -284,7 +290,8 @@
     if (!staying) {
       for (const c of data.campaigns.filter((c) => c.target === kind && c.provider === svc.id && meets(c.requires, combo, area))) {
         // amountMonths：「初月無料」のように月額何か月分か
-        const v = campaignValue(c.amountMonths ? { ...c, amount: monthly * c.amountMonths } : c, opts);
+        // monthlyCap：「毎月の電気代を最大1,100円割引」のように1か月の上限があるもの
+        const v = campaignValue(c.amountMonths ? { ...c, amount: (c.monthlyCap ? Math.min(monthly, c.monthlyCap) : monthly) * c.amountMonths } : c, opts);
         if (v > 0) items.push({ cat: kind, label: campaignLabel(c, opts), amount: -v, low: lowConf(c), campaign: c, src: c.source });
       }
     }

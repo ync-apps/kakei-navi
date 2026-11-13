@@ -275,3 +275,40 @@ test('So-net光の新設キャッシュバックは事業者変更では対象�
   assert.strictEqual(has('none'), true);
   assert.strictEqual(has('docomo-hikari'), false);
 });
+
+test('広告ページの特典：リンクを貼った会社だけ、リンク先の特典で計算する', () => {
+  const today = '2026-11-13';
+  const opts = (links) => ({ includePoints: true, excludeUnverified: true, applyPolicy: 'full', today, links });
+  const nuroOf = (links) => {
+    const r = E.compare(baseInput({ housing: 'house', options: opts(links) }), data);
+    return find(r, (y) => y.combo.hikari === 'nuro');
+  };
+  // リンクなし：公式トップの15,000円（11/15まで）だけ
+  const a = nuroOf({});
+  assert.ok(a.items.some((i) => i.label === 'NURO光 キャッシュバック'));
+  assert.ok(!a.items.some((i) => i.label.includes('広告ページ限定')));
+  // リンクあり：広告ページの55,000円になり、公式トップの15,000円とは併用しない
+  const b = nuroOf({ 'hikari:nuro': 'https://example.com/a8' });
+  const pr = b.items.find((i) => i.label.includes('広告ページ限定'));
+  assert.strictEqual(pr.amount, -55000);
+  assert.ok(pr.label.includes('（PRリンクから申し込んだ場合）'));
+  assert.ok(!b.items.some((i) => i.label === 'NURO光 キャッシュバック'));
+
+  // ビッグローブ光：解約金サポートもリンクがあるときだけ
+  const big = (links) => {
+    const r = E.compare(baseInput({ hikari: { use: true, current: 'docomo-hikari', currentMonthly: 4400, cancelFee: 50000 }, options: opts(links) }), data);
+    return find(r, (y) => y.combo.hikari === 'biglobe-hikari');
+  };
+  assert.ok(!big({}).items.some((i) => i.label.includes('広告ページ')));
+  const bl = big({ 'hikari:biglobe-hikari': 'https://example.com/a8' });
+  assert.strictEqual(bl.items.find((i) => i.label.startsWith('ビッグローブ光 キャッシュバック')).amount, -65000);
+  assert.strictEqual(bl.items.find((i) => i.label.includes('解約金サポート')).amount, -40000);
+});
+
+test('ソフトバンクでんき 比較サイト限定：1か月の上限1,100円×3か月', () => {
+  const r = E.compare(baseInput({ options: { includePoints: true, excludeUnverified: true, applyPolicy: 'full', today: '2026-11-13', links: { 'electric:softbank-denki': 'https://example.com/a8' } } }), data);
+  const x = find(r, (y) => y.combo.electric === 'softbank-denki');
+  assert.strictEqual(x.items.find((i) => i.label.startsWith('ソフトバンクでんき 比較サイト限定')).amount, -3300);
+  const r2 = E.compare(baseInput({ options: { includePoints: true, excludeUnverified: true, applyPolicy: 'full', today: '2026-11-13' } }), data);
+  assert.ok(!find(r2, (y) => y.combo.electric === 'softbank-denki').items.some((i) => i.label.startsWith('ソフトバンクでんき 比較サイト限定')));
+});
