@@ -17,7 +17,7 @@
   const DATA = {
     asOf: '2026-11-10',
     // endsAt: キャンペーン・割引の終了日（この日を過ぎると自動で計算から外れる）。checkedAt: 個別に確認し直した日（なければ asOf）
-    notice: '料金・キャンペーンは毎週月曜0時に更新しています（データ時点：2026年11月10日）。各社の公式サイトなどで調べた値です。「要確認」が付いた金額は確認できなかったものです。申し込み前に必ず公式サイトで最新の条件を確認してください。店頭限定のキャンペーンや、代理店・家電量販店などの申込窓口が独自に出すキャッシュバックは、ネットで公開されていないものも多いため計算に入れていません。',
+    notice: '料金・キャンペーンは毎週月曜0時に更新しています（データ時点：2026年11月10日）。各社の公式サイトなどで調べた値です。「要確認」が付いた金額は確認できなかったものです。申し込み前に必ず公式サイトで最新の条件を確認してください。店頭限定のキャンペーンや、代理店・家電量販店などの申込窓口が独自に出すキャッシュバックは、ネットで公開されていないものも多いため計算に入れていません。ただし、このサイトからリンクしている代理店・広告ページのキャンペーンは、そのページから申し込んだ場合の金額として計算に入れ、その旨を表示しています。',
 
     areas: [
       { id: 'hokkaido', name: '北海道' },
@@ -729,19 +729,95 @@
         todo: [{ phase: 'after', text: 'eo光の現金プレゼント・他社違約金補填の手続きを確認する' }],
       },
       {
-        id: 'commufa-cb', name: 'コミュファ光 WEB限定キャッシュバック', target: 'hikari', provider: 'commufa', amount: 3000, kind: 'cash',
+        id: 'commufa-cb', name: 'コミュファ光 WEB限定キャッシュバック', target: 'hikari', provider: 'commufa', amount: 3000, kind: 'cash', notWithLink: 'hikari:commufa', /* コミュファ光指定のWEBページからの申込が条件 */
         todo: [{ phase: 'apply', text: 'コミュファ光は Web で「1年間980円キャンペーン」と同時に申し込む' }],
         checkedAt: '2026-11-10', confidence: 'high', receive: 'apply', receiveNote: '開通翌月末までに届くメールからCASH POSTで受け取り（Myコミュファ ID 登録が必要）', source: 'https://www.commufa.jp/services/information/', conditions: '1年間980円キャンペーンと同時申し込み',
       },
       {
-        id: 'megaegg-cb', name: 'メガ・エッグ 開通後キャッシュバック', target: 'hikari', provider: 'megaegg', amount: 10000, kind: 'cash',
+        id: 'megaegg-cb', name: 'メガ・エッグ 開通後キャッシュバック', target: 'hikari', provider: 'megaegg', amount: 10000, kind: 'cash', notWithLink: 'hikari:megaegg', /* 公式ホームページからの申込が条件。代理店リンクから申し込むと対象外 */
         todo: [{ phase: 'after', text: 'メガ・エッグの特典を申請（他社の解約金の明細を用意）' }],
         coversCancelFee: true, cancelFeeCap: 50000,
         checkedAt: '2026-11-10', confidence: 'high', receive: 'apply', receiveNote: '開通翌月16日ごろの案内メールから30日以内に口座登録', source: 'https://www.megaegg.jp/', conditions: '公式Web特典（光ベーシック）。標準工事費の分割払いを選ぶ。他社の解約金も最大50,000円まで負担（開通後2か月以内に申請）',
       },
       {
-        id: 'docomo-hikari-agent', name: 'ドコモ光 代理店キャッシュバック', target: 'hikari', provider: 'docomo-hikari', amount: 20000, kind: 'cash',
+        id: 'docomo-hikari-agent', name: 'ドコモ光 代理店キャッシュバック', target: 'hikari', provider: 'docomo-hikari', amount: 20000, kind: 'cash', notWithLink: 'hikari:docomo-hikari',
         confidence: 'low', conditions: '公式のキャンペーンは無し（公式で確認）。代理店経由の金額は代理店ごとに違い、確認できていない',
+      },
+      // ---------- 代理店のキャンペーン（A8.netで提携した代理店のページ。affiliate.js にその会社のリンクがあるときだけ計算に入る） ----------
+      // 条件なし（有料オプション不要）でもらえる金額だけを入れる。2026-11-13 に各代理店のキャンペーンページで確認
+      {
+        id: 'sb-hikari-next', name: 'ソフトバンク光 代理店キャッシュバック（新規）', agent: '株式会社NEXT', target: 'hikari', provider: 'softbank-hikari', amount: 35000, kind: 'cash',
+        viaLink: 'hikari:softbank-hikari', newOnly: true, reduceIfGroup: { group: 'sb-ouen', amount: 15000, label: '超おうち応援割' },
+        checkedAt: '2026-11-13', confidence: 'high', receive: 'apply', receiveNote: '申込後に届くSMSのフォームで振込口座を登録（電話でも可）。開通の翌月末に振込',
+        source: 'https://softbank-hikaricollabo.com/campaign/cashback.php',
+        conditions: '1ギガの新規申込。オプション不要。超おうち応援割を使うと15,000円減額。申込から1か月以内に支払方法を確定、申込月を含む6か月後の月末までに開通。8か月以上継続しないと全額返金',
+        todo: [
+          { phase: 'apply', text: 'ソフトバンク光は「申し込む（PR）」の代理店（株式会社NEXT）のページから申し込む（ほかの窓口だとこのキャッシュバックは対象外）' },
+          { phase: 'after', text: 'ソフトバンク光の代理店キャッシュバック：SMSで届くフォームから振込口座を登録する' },
+        ],
+      },
+      {
+        id: 'sb-hikari-next-henkou', name: 'ソフトバンク光 代理店キャッシュバック（転用・事業者変更）', agent: '株式会社NEXT', target: 'hikari', provider: 'softbank-hikari', amount: 20000, kind: 'cash',
+        viaLink: 'hikari:softbank-hikari', henkouOnly: true, reduceIfGroup: { group: 'sb-ouen', amount: 15000, label: '超おうち応援割' },
+        checkedAt: '2026-11-13', confidence: 'high', receive: 'apply', receiveNote: '申込後に届くSMSのフォームで振込口座を登録（電話でも可）。開通の翌月末に振込',
+        source: 'https://softbank-hikaricollabo.com/campaign/cashback.php',
+        conditions: 'フレッツ光からの転用・他社光コラボからの事業者変更。オプション不要。超おうち応援割を使うと15,000円減額。8か月以上継続しないと全額返金',
+        todo: [
+          { phase: 'apply', text: 'ソフトバンク光は「申し込む（PR）」の代理店（株式会社NEXT）のページから申し込む（事業者変更承諾番号を先に取っておく）' },
+          { phase: 'after', text: 'ソフトバンク光の代理店キャッシュバック：SMSで届くフォームから振込口座を登録する' },
+        ],
+      },
+      {
+        id: 'docomo-hikari-itx', name: 'ドコモ光 代理店キャッシュバック（新規）', agent: 'アイ・ティー・エックス株式会社', target: 'hikari', provider: 'docomo-hikari', amount: 40000, kind: 'cash',
+        viaLink: 'hikari:docomo-hikari', newOnly: true,
+        checkedAt: '2026-11-13', confidence: 'high', receive: 'apply', receiveNote: '申込時の電話かSMSのフォーム（14日間有効）で振込口座を伝える。課金開始月の翌月末に振込',
+        source: 'https://docomohikari-collabo.com/campaign/original-cashback/',
+        conditions: '1ギガの新規申込。オプション加入不要。8か月以上継続。同じ住所・名義で過去に申込があると対象外',
+        todo: [
+          { phase: 'apply', text: 'ドコモ光は「申し込む（PR）」の代理店（アイ・ティー・エックス）のページから申し込み、振込口座を伝える（SMSのフォームは14日以内）' },
+        ],
+      },
+      {
+        id: 'docomo-hikari-itx-henkou', name: 'ドコモ光 代理店キャッシュバック（転用・事業者変更）', agent: 'アイ・ティー・エックス株式会社', target: 'hikari', provider: 'docomo-hikari', amount: 25000, kind: 'cash',
+        viaLink: 'hikari:docomo-hikari', henkouOnly: true,
+        checkedAt: '2026-11-13', confidence: 'high', receive: 'apply', receiveNote: '申込時の電話かSMSのフォーム（14日間有効）で振込口座を伝える。課金開始月の翌月末に振込',
+        source: 'https://docomohikari-collabo.com/campaign/original-cashback/',
+        conditions: '1ギガの転用・事業者変更。オプション加入不要。8か月以上継続',
+        todo: [
+          { phase: 'apply', text: 'ドコモ光は「申し込む（PR）」の代理店（アイ・ティー・エックス）のページから申し込み、振込口座を伝える（事業者変更承諾番号を先に取っておく）' },
+        ],
+      },
+      {
+        id: 'commufa-elidea', name: 'コミュファ光 代理店キャッシュバック', agent: 'エルアイデア株式会社', target: 'hikari', provider: 'commufa', amount: 25000, kind: 'cash',
+        viaLink: 'hikari:commufa',
+        checkedAt: '2026-11-13', confidence: 'high', receive: 'apply', receiveNote: '申込後の確認の電話で振込口座（契約者本人名義）を伝える。光ネットの開通確認の翌営業日に振込',
+        source: 'https://commufa-elidea.com/',
+        conditions: '1ギガ以下のメニューは25,000円（それより上は最大30,000円）。全員対象・オプション条件なし。コミュファ光公式サイトの申込フォームからだと対象外',
+        todo: [
+          { phase: 'apply', text: 'コミュファ光は「申し込む（PR）」の代理店（エルアイデア）のページから申し込み、確認の電話で振込口座を伝える' },
+        ],
+      },
+      {
+        id: 'megaegg-next', name: 'メガ・エッグ 代理店キャッシュバック', agent: '株式会社NEXT', target: 'hikari', provider: 'megaegg', amount: 20000, kind: 'cash',
+        viaLink: 'hikari:megaegg', newOnly: true,
+        checkedAt: '2026-11-13', confidence: 'high', receive: 'apply', receiveNote: '申込後に届くフォームで振込口座を登録（電話でも可）。最短で開通月の翌月末に振込',
+        source: 'https://me-hikari.net/campaign/original.php',
+        conditions: '光ベーシック・光10ギガの新規申込。オプション不要。申込から6か月以内に開通。8か月以上継続しないと全額返金。代理店から申し込むと、メガ・エッグ公式Web特典は対象外',
+        todo: [
+          { phase: 'apply', text: 'メガ・エッグは「申し込む（PR）」の代理店（株式会社NEXT）のページから申し込む' },
+          { phase: 'after', text: 'メガ・エッグの代理店キャッシュバック：届いたフォームで振込口座を登録する' },
+        ],
+      },
+      {
+        id: 'pikara-next', name: 'ピカラ光 代理店キャッシュバック', agent: '株式会社NEXT', target: 'hikari', provider: 'pikara', amount: 30000, kind: 'cash',
+        viaLink: 'hikari:pikara', newOnly: true,
+        checkedAt: '2026-11-13', confidence: 'high', receive: 'apply', receiveNote: '申込後に届くフォームで振込口座を登録（電話でも可）。最短で開通月の翌月末に振込',
+        source: 'https://pikarahikari.net/campaign/original_cb.php',
+        conditions: 'ピカラ光ねっとの新規申込。オプション不要。申込から6か月以内に開通。8か月以上継続しないと全額返金。2022年2月18日〜終了日未定',
+        todo: [
+          { phase: 'apply', text: 'ピカラ光は「申し込む（PR）」の代理店（株式会社NEXT）のページから申し込む' },
+          { phase: 'after', text: 'ピカラ光の代理店キャッシュバック：届いたフォームで振込口座を登録する' },
+        ],
       },
       {
         id: 'au-denki-web', name: 'auでんき Web新規申込特典', target: 'electric', provider: 'au-denki', amount: 5000, kind: 'cash',

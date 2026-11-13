@@ -312,3 +312,29 @@ test('ソフトバンクでんき 比較サイト限定：1か月の上限1,100�
   const r2 = E.compare(baseInput({ options: { includePoints: true, excludeUnverified: true, applyPolicy: 'full', today: '2026-11-13' } }), data);
   assert.ok(!find(r2, (y) => y.combo.electric === 'softbank-denki').items.some((i) => i.label.startsWith('ソフトバンクでんき 比較サイト限定')));
 });
+
+test('代理店のキャンペーン：リンクがあるときだけ、代理店名つきで計算する', () => {
+  const opts = (links) => ({ includePoints: true, excludeUnverified: true, applyPolicy: 'full', today: '2026-11-13', links });
+  const L = 'https://example.com/a8';
+  // ソフトバンク光（新規）：35,000円。超おうち応援割を使う組み合わせでは15,000円減って20,000円
+  const r = E.compare(baseInput({ housing: 'house', hikari: { use: true, current: 'none', currentMonthly: 0, cancelFee: 0 }, options: opts({ 'hikari:softbank-hikari': L }) }), data);
+  const sbs = r.results.filter((y) => y.combo.hikari === 'softbank-hikari');
+  const cbOf = (x) => x.items.find((i) => i.label.startsWith('ソフトバンク光 代理店キャッシュバック（新規）'));
+  assert.ok(sbs.length && sbs.every((x) => cbOf(x)));
+  for (const x of sbs) {
+    const ouen = x.items.some((i) => i.label.startsWith('ソフトバンク光 超おうち応援割'));
+    assert.strictEqual(cbOf(x).amount, ouen ? -20000 : -35000);
+    assert.ok(cbOf(x).label.includes('代理店「株式会社NEXT」のページから申し込んだ場合'));
+  }
+  // ドコモ光 → ソフトバンク光は事業者変更なので 20,000円の方
+  const r2 = E.compare(baseInput({ options: opts({ 'hikari:softbank-hikari': L }) }), data);
+  const x2 = find(r2, (y) => y.combo.hikari === 'softbank-hikari');
+  assert.ok(x2.items.some((i) => i.label.startsWith('ソフトバンク光 代理店キャッシュバック（転用・事業者変更）')));
+  assert.ok(!x2.items.some((i) => i.label.startsWith('ソフトバンク光 代理店キャッシュバック（新規）')));
+  // メガ・エッグ：代理店リンクがあると公式Web特典（10,000円）は外れ、代理店の20,000円になる
+  const mg = (links) => find(E.compare(baseInput({ area: 'chugoku', housing: 'house', hikari: { use: true, current: 'none', currentMonthly: 0, cancelFee: 0 }, options: opts(links) }), data), (y) => y.combo.hikari === 'megaegg');
+  assert.ok(mg({}).items.some((i) => i.label.startsWith('メガ・エッグ 開通後キャッシュバック')));
+  const m2 = mg({ 'hikari:megaegg': L });
+  assert.ok(!m2.items.some((i) => i.label.startsWith('メガ・エッグ 開通後キャッシュバック')));
+  assert.strictEqual(m2.items.find((i) => i.label.startsWith('メガ・エッグ 代理店キャッシュバック')).amount, -20000);
+});

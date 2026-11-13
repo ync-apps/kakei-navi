@@ -74,7 +74,8 @@
   function campaignLabel(c, opts) {
     let s = c.name;
     if (c.kind === 'points') s += '（ポイント）';
-    if (c.viaLink) s += '（PRリンクから申し込んだ場合）';
+    if (c.agent) s += `（代理店「${c.agent}」のページから申し込んだ場合）`;
+    else if (c.viaLink) s += '（PRリンクから申し込んだ場合）';
     if (c.receive === 'apply' && opts.applyPolicy === 'half') s += '（申請が必要なので半額で見込み）';
     return s;
   }
@@ -170,7 +171,7 @@
       const m = d.appliedMonths;
       if (!m) continue;
       const label = d.amount === 'full' ? `${d.name}（${m}か月分）` : `${d.name}（月${yen(Math.abs(d.perMonth))}${d.months ? `・${m}か月` : ''}）`;
-      items.push({ cat: 'hikari', label, amount: -d.total, low: lowConf(d), src: d.source });
+      items.push({ cat: 'hikari', label, amount: -d.total, low: lowConf(d), src: d.source, group: d.group });
     }
     // 毎月のポイント還元（例：楽天ひかり＋楽天モバイルで毎月1,000ポイント）
     for (const d of discounts.filter((d) => d.pointAmount)) {
@@ -191,14 +192,17 @@
       if (h.current !== 'none' && Number(h.cancelFee) > 0) {
         items.push({ cat: 'hikari', label: '今の光回線の解約金・工事費の残り（入力値）', amount: Number(h.cancelFee) });
       }
-      for (const c of data.campaigns.filter((c) => c.target === 'hikari' && c.provider === svc.id && meets(c.requires, combo, area) && !(c.newOnly && jigyoushaHenkou))) { // newOnly：新設のみ（事業者変更は対象外）
+      // newOnly：新設のみ（事業者変更は対象外）／henkouOnly：事業者変更のときだけ
+      for (const c of data.campaigns.filter((c) => c.target === 'hikari' && c.provider === svc.id && meets(c.requires, combo, area) && !(c.newOnly && jigyoushaHenkou) && !(c.henkouOnly && !jigyoushaHenkou) && housingOk(c, ctx))) {
         // 今の光回線の解約金を負担してくれる特典
         if (c.coversCancelFee && h.current !== 'none' && Number(h.cancelFee) > 0 && usable(c, opts)) {
           const cover = Math.min(Number(h.cancelFee), c.cancelFeeCap || Infinity);
           items.push({ cat: 'hikari', label: `${c.name}（今の光回線の解約金を負担）`, amount: -cover, low: lowConf(c), campaign: c, src: c.source });
         }
-        const v = campaignValue(c, opts);
-        if (v > 0) items.push({ cat: 'hikari', label: campaignLabel(c, opts), amount: -v, low: lowConf(c), campaign: c, src: c.source });
+        // reduceIfGroup：その割引（例：ソフトバンク光 超おうち応援割）を使うとキャッシュバックが減るもの
+        const cut = c.reduceIfGroup && items.some((it) => it.group === c.reduceIfGroup.group) ? c.reduceIfGroup.amount : 0;
+        const v = campaignValue(cut ? { ...c, amount: Math.max(0, c.amount - cut) } : c, opts);
+        if (v > 0) items.push({ cat: 'hikari', label: campaignLabel(c, opts) + (cut ? `（${c.reduceIfGroup.label}を使うので${yen(cut)}減額）` : ''), amount: -v, low: lowConf(c), campaign: c, src: c.source });
       }
     }
     return { svc, items, switching: !staying, jigyoushaHenkou };
