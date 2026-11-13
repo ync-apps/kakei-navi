@@ -23,7 +23,7 @@
       'mobile:softbank': '', 'mobile:ymobile': '', 'mobile:linemo': '', 'mobile:rakuten': '', 'mobile:iijmio': '',
       'mobile:mineo': '', 'mobile:nihontsushin': '', 'mobile:biglobe-mobile': '',
       // 光回線
-      'hikari:docomo-hikari': '', 'hikari:softbank-hikari': '', 'hikari:au-hikari': '', 'hikari:biglobe-hikari': '',
+      'hikari:docomo-hikari': '', 'hikari:softbank-hikari': '', 'hikari:au-hikari': '', 'hikari:biglobe-hikari': 'https://px.a8.net/svt/ejp?a8mat=4BGK84+2ARAMY+B4+2N9S82',
       'hikari:rakuten-hikari': '', 'hikari:iij-hikari': '', 'hikari:sonet-hikari': '', 'hikari:en-hikari': '', 'hikari:nuro': '',
       'hikari:eo-hikari': '', 'hikari:commufa': '', 'hikari:pikara': '', 'hikari:megaegg': '', 'hikari:bbiq': '',
       // 電気
