@@ -101,9 +101,9 @@
         ],
       },
       {
-        id: 'ymobile', name: 'ワイモバイル', group: 'softbank', switchFee: 3850, feeConfidence: 'mid', feeCheckedAt: '2026-11-11', /* 公式は自動取得不可。記事2つ以上で3,850円が一致。期間限定で無料になることあり */ confidence: 'mid',
-        source: 'https://appllio.com/ymobile-simple3-price-plan',
-        note: '公式サイトが自動取得を拒否するため、2026年6月の値上げ後の料金を複数の記事で確認',
+        id: 'ymobile', name: 'ワイモバイル', group: 'softbank', switchFee: 3850, feeConfidence: 'mid', feeCheckedAt: '2026-11-11', /* 公式は自動取得不可。記事2つ以上で3,850円が一致。期間限定で無料になることあり */ confidence: 'high', checkedAt: '2026-11-15',
+        source: 'https://www.ymobile.jp/plan/',
+        note: '公式サイトは自動取得を拒否するため、ブラウザで公式の料金プランのページを開いて確認（2026-11-15）',
         plans: [
           { id: 'ym-s', name: 'ワイモバイル シンプル3 S 5GB', capGB: 5, price: 3278 },
           { id: 'ym-m', name: 'ワイモバイル シンプル3 M 30GB', capGB: 30, price: 4378 },
@@ -131,9 +131,9 @@
         ],
       },
       {
-        id: 'iijmio', name: 'IIJmio', group: 'iij', switchFee: 3300, feeConfidence: 'mid', confidence: 'mid',
-        source: 'https://selectra.jp/telecom/news/iijmio-giga-plan-half-price-november-2026',
-        note: '公式の料金表は自動取得できず、5GB 950円のみ公式で確認。ほかは記事（2026年9月時点）。初期費用は12月1日申込から3,850円',
+        id: 'iijmio', name: 'IIJmio', group: 'iij', switchFee: 3300, feeConfidence: 'mid', confidence: 'high', checkedAt: '2026-11-15',
+        source: 'https://www.iijmio.jp/gigaplan/',
+        note: '公式のギガプランのページをブラウザで開いて全プランの料金を確認（2026-11-15）。初期費用は12月1日申込から3,850円（記事 https://selectra.jp/telecom/news/iijmio-giga-plan-half-price-november-2026 ・11月6日更新）',
         plans: [
           { id: 'iij-2', name: 'IIJmio ギガプラン 2GB', capGB: 2, price: 850 },
           { id: 'iij-5', name: 'IIJmio ギガプラン 5GB', capGB: 5, price: 950, source: 'https://www.iijmio.jp/gigaplan/' },
@@ -193,7 +193,7 @@
       {
         id: 'uq-family', name: 'UQ 家族セット割', brand: 'uq', byCount: { 2: 550 }, group: 'home',
         todo: [{ phase: 'after', text: 'UQ 家族セット割を申し込む' }],
-        plans: ['uq-tokutoku-5', 'uq-tokutoku-30'], confidence: 'mid', source: 'https://selectra.jp/telecom/mobile/uqmobile-family-discount',
+        plans: ['uq-tokutoku-5', 'uq-tokutoku-30'], confidence: 'mid', checkedAt: '2026-11-15', source: 'https://selectra.jp/telecom/mobile/uqmobile-family-discount',
         note: 'トクトクプラン2のみ。自宅セット割とは重ならない（公式で確認）。金額は記事',
       },
       {
@@ -205,8 +205,8 @@
       {
         id: 'ym-family', name: 'ワイモバイル 家族割引サービス', brand: 'ymobile', byCount: { 2: 1100 }, secondLineOnwards: true, group: 'home',
         todo: [{ phase: 'after', text: 'ワイモバイル 家族割引サービスを申し込む' }],
-        confidence: 'mid', source: 'https://selectra.jp/telecom/mobile/uqmobile-family-discount',
-        note: '2回線目以降。おうち割 光セットとは重ならない。金額は記事',
+        confidence: 'high', checkedAt: '2026-11-15', source: 'https://www.ymobile.jp/plan/',
+        note: 'シンプル3 S/M/L の2回線目以降。おうち割 光セットとは重ならない（公式の料金プランのページで確認）',
       },
       {
         id: 'rakuten-family', name: '最強家族割', brand: 'rakuten', byCount: { 2: 110 },
@@ -268,9 +268,9 @@
         note: '2.5Gプラン。通常料金（2年割の割引額から計算）。最初の24か月は下の「2年割」で戸建て3,980円・マンション2,980円。工事費は36か月利用で実質0円。提供エリアは県により異なる',
       },
       {
-        id: 'eo-hikari', name: 'eo光', type: 'own', areas: ['kansai'], housing: ['house'], confidence: 'mid', source: 'https://ieagent.jp/hikari/eohikari-price/',
-        price: { house: 5448, mansion: 0 }, setupFee: 3300, setupConfidence: 'high', setupSource: 'https://simple.eonet.jp/share/pdf/notice.pdf', construction: { house: 29700, mansion: 29700 }, constructionFree: true,
-        note: '1ギガ（即割）2年目以降の料金。1年目の割引は下のセット割・継続割引で計算。公式の料金表は読み取れず記事で確認',
+        id: 'eo-hikari', name: 'eo光', type: 'own', areas: ['kansai'], housing: ['house'], confidence: 'high', checkedAt: '2026-11-15', source: 'https://eonet.jp/home/charge/pricelist/',
+        price: { house: 5500, mansion: 0 }, setupFee: 3300, setupConfidence: 'high', setupSource: 'https://simple.eonet.jp/share/pdf/notice.pdf', construction: { house: 29700, mansion: 29700 }, constructionFree: true,
+        note: '1ギガ（即割）2年目以降の料金。1年目の割引は下のセット割で計算。公式の料金表（1ギガコースのタブ）をブラウザで確認（2026-11-15）。10ギガは1〜6か月0円・7〜12か月500円・2年目5,500円（比較には入れていない）',
       },
       {
         id: 'commufa', name: 'コミュファ光', type: 'own', areas: ['chubu'], housing: ['house'], confidence: 'high', source: 'https://www.commufa.jp/services/information/',
@@ -431,8 +431,8 @@
         plans: { 'ym-s': 1650, 'ym-m': 1650, 'ym-l': 1650 },
       },
       {
-        id: 'ym-cho-otoku', name: '超!おトク割（ワイモバイル）', target: 'line', group: 'ym-otoku', months: 12, confidence: 'mid',
-        source: 'https://selectra.jp/telecom/news/ymobile-april-2026', note: 'M/L が12か月割引。申し込み不要と記事に記載',
+        id: 'ym-cho-otoku', name: '超!おトク割（ワイモバイル）', target: 'line', group: 'ym-otoku', months: 12, confidence: 'high', checkedAt: '2026-11-15',
+        source: 'https://www.ymobile.jp/plan/', note: 'M/L が12か月 1,100円割引・自動適用（S は対象外）。公式の料金プランのページで確認',
         plans: { 'ym-m': 1100, 'ym-l': 1100 },
       },
       {
@@ -518,8 +518,8 @@
         source: 'https://www.au.com/internet/auhikari_1g/', requires: { hikari: ['au-hikari'] },
       },
       {
-        id: 'eo-sokuwari', name: 'eo光 即割（1年目）', target: 'hikari', amount: 3068, months: 12, confidence: 'mid',
-        source: 'https://ieagent.jp/hikari/eohikari-price/', note: '1年目2,380円。最低利用期間2年',
+        id: 'eo-sokuwari', name: 'eo光 1年目の割引（即割・キャンペーン適用後）', target: 'hikari', amount: 2220, months: 12, confidence: 'high', checkedAt: '2026-11-15',
+        source: 'https://eonet.jp/home/charge/pricelist/', note: '1年目3,280円（公式の料金表。キャンペーン割引適用後）。即割は2年利用が条件',
         requires: { hikari: ['eo-hikari'] },
       },
       {
@@ -595,33 +595,33 @@
         id: 'dcard-gold', family: 'd', tier: 'gold', name: 'dカード GOLD', annualFee: 11000, confidence: 'high',
         source: 'https://www.docomo.ne.jp/charge/dcard_oshiharai/',
         perLine: { docomo: 550 },
-        joinBonus: { amount: 7400, kind: 'points', receive: 'apply', confidence: 'mid', source: 'https://appllio.com/dcard-gold-campaign', note: '入会＆利用特典（最大）。条件の達成が必要' },
+        joinBonus: { amount: 7400, kind: 'points', receive: 'apply', confidence: 'mid', checkedAt: '2026-11-15', source: 'https://appllio.com/dcard-gold-campaign', note: '入会＆利用特典（最大）。条件の達成が必要' },
       },
       {
         id: 'aupay', family: 'au', tier: 'normal', name: 'au PAY カード', annualFee: 0, confidence: 'high',
         source: 'https://www.au.com/mobile/charge/discount-option/aupay-card-wari/',
         perLine: { au: 220, uq: 220 }, plans: ['au-mini-1', 'au-mini-3', 'au-mini-5', 'au-max', 'uq-tokutoku-5', 'uq-tokutoku-30'],
         note: 'au PAY カードお支払い割。UQ はトクトクプラン2（公式の割引後料金から計算）',
-        joinBonus: { amount: 3000, kind: 'points', receive: 'apply', confidence: 'mid', source: 'https://money.it-trend.jp/articles/brand/au-pay-card/19-0010', note: '新規入会＆利用特典（最大）' },
+        joinBonus: { amount: 3000, kind: 'points', receive: 'apply', confidence: 'mid', checkedAt: '2026-11-15', source: 'https://money.it-trend.jp/articles/brand/au-pay-card/19-0010', note: '新規入会＆利用特典（最大）' },
       },
       {
         id: 'aupay-gold', family: 'au', tier: 'gold', name: 'au PAY ゴールドカード', annualFee: 11000, confidence: 'high',
         source: 'https://www.au.com/mobile/charge/discount-option/aupay-card-wari/',
         perLine: { au: 220, uq: 220 }, plans: ['au-mini-1', 'au-mini-3', 'au-mini-5', 'au-max', 'uq-tokutoku-5', 'uq-tokutoku-30'],
         note: 'スマホ代の割引は一般カードと同じ。コミコミプランバリューの14か月目以降の割引継続は計算に入れていない',
-        joinBonus: { amount: 10000, kind: 'points', receive: 'apply', confidence: 'mid', source: 'https://money.it-trend.jp/articles/brand/au-pay-card/19-0010', note: '新規入会＆利用特典（最大）' },
+        joinBonus: { amount: 10000, kind: 'points', receive: 'apply', confidence: 'mid', checkedAt: '2026-11-15', source: 'https://money.it-trend.jp/articles/brand/au-pay-card/19-0010', note: '新規入会＆利用特典（最大）' },
       },
       {
         id: 'paypay', family: 'paypay', tier: 'normal', name: 'PayPayカード', annualFee: 0, confidence: 'high',
         source: 'https://cdn.softbank.jp/mobile/set/common/pdf/legal/spguide/price_plan/paypay-card.pdf',
         perLine: { softbank: 330, ymobile: 330 }, note: 'PayPayカード割（ソフトバンク・ワイモバイル シンプル3）',
-        joinBonus: { amount: 5000, kind: 'points', receive: 'apply', confidence: 'mid', source: 'https://dime.jp/genre/2124706/', note: '特典が載っている申込ページから申し込み、条件を満たすと' },
+        joinBonus: { amount: 5000, kind: 'points', receive: 'apply', confidence: 'low', checkedAt: '2026-11-15', source: 'https://dime.jp/genre/2124706/', note: '要確認：出典の記事はゴールドの特典の記事で、通常のPayPayカードの5,000ポイントは確認できない。公式のキャンペーンページはログインが必要' },
       },
       {
         id: 'paypay-gold', family: 'paypay', tier: 'gold', name: 'PayPayカード ゴールド', annualFee: 11000, confidence: 'high',
         source: 'https://www.ymobile.jp/yservice/howto/discount/',
         perLine: { softbank: 550, ymobile: 770 }, note: 'ソフトバンク550円（提供条件書）、ワイモバイル770円（公式）',
-        joinBonus: { amount: 5000, kind: 'points', receive: 'apply', confidence: 'mid', source: 'https://www.itmedia.co.jp/mobile/spv/2604/28/news113.html', note: '入会特典。年100万円以上使うと別に6,000ポイント（計算に入れていない）' },
+        joinBonus: { amount: 5000, kind: 'points', receive: 'apply', confidence: 'mid', checkedAt: '2026-11-15', source: 'https://dime.jp/genre/2124706/', note: '入会特典。年100万円以上使うと別に6,000ポイント（計算に入れていない）' },
       },
     ],
 
@@ -632,14 +632,14 @@
       {
         id: 'ahamo-mnp', name: 'ahamo 乗り換え特典', target: 'line', provider: 'ahamo', amount: 20000, kind: 'points', mnpOnly: true,
         todo: [{ phase: 'apply', text: 'ahamo のキャンペーンページで対象条件を確認してから申し込む' }],
-        confidence: 'mid', source: 'https://soldi.hikkoshizamurai.jp/articles/sim-campaign/',
+        confidence: 'mid', checkedAt: '2026-11-15', source: 'https://soldi.hikkoshizamurai.jp/articles/sim-campaign/',
         conditions: 'SIMのみの乗り換え。dポイント（期間・用途限定）。ドコモからは対象外。公式ページは自動取得できず記事で確認',
       },
       {
         id: 'uq-mnp', name: 'UQモバイル 乗り換え特典', target: 'line', provider: 'uq', amount: 20000, kind: 'cash', mnpOnly: true,
         todo: [{ phase: 'apply', text: 'UQモバイルは「SIMのみ」でオンライン申込（特典の対象）' }],
-        confidence: 'mid', receive: 'auto', receiveNote: '開通翌月下旬以降にau PAY 残高へ', source: 'https://soldi.hikkoshizamurai.jp/articles/sim-campaign/',
-        conditions: 'SIMのみの乗り換え。金額は「最大」。au・povoからは対象外',
+        confidence: 'mid', checkedAt: '2026-11-15', receive: 'auto', receiveNote: '開通翌月下旬以降にau PAY 残高へ', source: 'https://soldi.hikkoshizamurai.jp/articles/sim-campaign/',
+        conditions: 'SIMのみの乗り換え。増量オプションⅡの加入が条件。金額は「最大」。au・povoからは対象外（記事は2026-11-06更新・終了日未定）',
       },
       {
         id: 'au-ols-mnp', name: 'au Online Shop SIM乗り換え特典', target: 'line', provider: 'au', amount: 20000, kind: 'cash', mnpOnly: true,
@@ -650,8 +650,8 @@
       {
         id: 'ym-mnp', name: 'ワイモバイル 乗り換え特典', target: 'line', provider: 'ymobile', amount: 15000, kind: 'points', mnpOnly: true,
         todo: [{ phase: 'apply', text: 'ワイモバイルは特典が載っているページから SIM のみで申し込む' }],
-        confidence: 'mid', source: 'https://selectra.jp/telecom/mobile/ymobile-campaigns',
-        conditions: 'SIMのみの乗り換え。PayPayポイント。記事により15,000〜21,000円相当と差あり。ソフトバンク・LINEMOからは対象外',
+        confidence: 'mid', checkedAt: '2026-11-15', source: 'https://selectra.jp/telecom/mobile/ymobile-campaigns',
+        conditions: 'M/LプランにSIMのみの乗り換え。データ増量オプション（月550円）の加入が条件。PayPayポイント15,000円相当（ヤフー店は最大21,000円相当）。ソフトバンク・LINEMOからは対象外（記事は2026-11-13更新・終了日未定）',
       },
       {
         id: 'rakuten-mnp', name: '楽天モバイル 乗り換えポイント', target: 'line', provider: 'rakuten', amount: 10000, kind: 'points', mnpOnly: true,

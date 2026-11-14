@@ -181,9 +181,11 @@ test('カード：持っているカードの割引が回線ごとに付く（�
 test('カード：作ってもいい場合は、得なときだけ作る（年会費・入会特典込み）', () => {
   const r = E.compare(baseInput({ cards: { paypay: 'okAny' } }), data);
   const x = find(r, (y) => allSame('ymobile')(y) && y.combo.hikari === 'softbank-hikari');
-  // 2回線×24か月：一般 330×48+5,000 = 20,840 / ゴールド 770×48+5,000-22,000 = 19,960 → 一般が得
-  assert.strictEqual(x.cards[0].card.id, 'paypay');
-  assert.ok(x.items.some((i) => i.cat === 'card' && i.label.startsWith('PayPayカード 入会特典')));
+  // 2回線×24か月。一般カードの入会特典5,000ptは出典で確認できず（confidence: low）計算から外れるので、
+  // 一般 330×48 = 15,840 / ゴールド 770×48+5,000-22,000 = 19,960 → ゴールドが得
+  assert.strictEqual(x.cards[0].card.id, 'paypay-gold');
+  assert.ok(x.items.some((i) => i.cat === 'card' && i.label.startsWith('PayPayカード ゴールド 入会特典')));
+  assert.ok(!x.items.some((i) => i.cat === 'card' && i.label.startsWith('PayPayカード 入会特典')));
   // 対象の会社がいない組み合わせでは作らない
   const y = find(r, allSame('rakuten'));
   assert.strictEqual(y.cards.length, 0);
