@@ -111,9 +111,9 @@
         ],
       },
       {
-        id: 'linemo', name: 'LINEMO', group: 'softbank', switchFee: 3850, feeConfidence: 'mid', confidence: 'mid',
-        source: 'https://all-connect.co.jp/magazine/linemo-plan/',
-        note: '公式サイトが自動取得を拒否するため記事で確認',
+        id: 'linemo', name: 'LINEMO', group: 'softbank', switchFee: 3850, feeConfidence: 'high', confidence: 'high', checkedAt: '2026-11-15',
+        source: 'https://www.linemo.jp/plan/', feeSource: 'https://www.linemo.jp/plan/payment/',
+        note: '公式サイトは自動取得を拒否するため、ブラウザで開いて確認（2026-11-15）',
         plans: [
           { id: 'linemo-3', name: 'LINEMO ベストプラン（〜3GB）', capGB: 3, price: 990 },
           { id: 'linemo-10', name: 'LINEMO ベストプラン（〜10GB）', capGB: 10, price: 2090 },
@@ -660,10 +660,16 @@
         conditions: '他社から電話番号そのまま乗り換え（新規は9,000ポイント）。申込翌月末までに利用開始とRakuten Linkで10秒以上の通話が必要',
       },
       {
-        id: 'linemo-mnp', name: 'LINEMO 乗り換え特典', target: 'line', provider: 'linemo', amount: 12000, kind: 'points', mnpOnly: true,
+        id: 'linemo-mnp', name: 'LINEMO 乗り換え特典（ベストプランV）', target: 'line', provider: 'linemo', plans: ['linemo-30'], amount: 12000, kind: 'points', mnpOnly: true,
         todo: [{ phase: 'apply', text: 'LINEMO のキャンペーンページで対象条件・エントリーを確認してから申し込む' }],
-        confidence: 'mid', source: 'https://soldi.hikkoshizamurai.jp/articles/sim-campaign/',
-        conditions: 'PayPayポイント。通常は最大12,000円相当（増額期間あり）。ソフトバンク・ワイモバイルからは対象外',
+        checkedAt: '2026-11-15', confidence: 'high', source: 'https://www.linemo.jp/campaign/syukakusai/',
+        conditions: 'PayPayポイント12,000円相当（LINEMOベストプランVに他社から乗り換え。終了日未定）。週替わりの増額期間あり（計算には入れていない）。ソフトバンク・ワイモバイル・LINEモバイルからは対象外',
+      },
+      {
+        id: 'linemo-mnp-best', name: 'LINEMO 乗り換え特典（ベストプラン）', target: 'line', provider: 'linemo', plans: ['linemo-3', 'linemo-10'], amount: 10000, kind: 'points', mnpOnly: true,
+        todo: [{ phase: 'apply', text: 'LINEMO のキャンペーンページで対象条件・エントリーを確認してから申し込む' }],
+        checkedAt: '2026-11-15', confidence: 'high', source: 'https://www.linemo.jp/campaign/syukakusai/',
+        conditions: 'PayPayポイント10,000円相当（LINEMOベストプランに他社から乗り換え。終了日未定）。週替わりの増額期間あり（計算には入れていない）。ソフトバンク・ワイモバイル・LINEモバイルからは対象外',
       },
       {
         id: 'au-hikari-norikae', name: 'auひかり 乗りかえスタートサポート', target: 'hikari', provider: 'au-hikari', amount: 0, kind: 'cash',

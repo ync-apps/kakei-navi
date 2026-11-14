@@ -368,3 +368,12 @@ test('DUEMO用の文：手続きごとにページのURL（広告リンクがあ
   assert.ok(txt.includes('ビッグローブ光キャッシュバック（35,000円）の受け取り手続き（12か月目の2日から45日以内）（もらえる特典：35,000円'));
   assert.ok(txt.includes('（クーポン分30,000円）の受け取り手続き（24か月目の2日から45日以内）（もらえる特典：30,000円'));
 });
+
+test('LINEMOの乗り換え特典はプランで金額が違う（ベストプラン10,000円・ベストプランV 12,000円）、出典は公式', () => {
+  const r = E.compare(baseInput(), data);
+  const x = find(r, allSame('linemo'));
+  const camps = x.items.filter((i) => i.campaign && i.campaign.provider === 'linemo');
+  // 1人目20GB → ベストプランV（30GB）、2人目3GB → ベストプラン
+  assert.deepStrictEqual(camps.map((i) => -i.amount).sort((a, b) => a - b), [10000, 12000]);
+  for (const i of camps) assert.ok(i.src.startsWith('https://www.linemo.jp/'));
+});

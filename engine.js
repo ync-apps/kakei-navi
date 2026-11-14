@@ -136,6 +136,7 @@
         if (c.target !== 'line' || c.provider !== brand.id) return false;
         if (c.mnpOnly && !isMnp) return false;
         if (c.mnpOnly && fromGroup && fromGroup === brand.group) return false; // 同じグループ内の乗り換えは対象外
+        if (c.plans && !c.plans.includes(best.plan.id)) return false; // プランで金額が違う特典
         return meets(c.requires, lineCombo, area);
       });
       for (const c of camps) {
