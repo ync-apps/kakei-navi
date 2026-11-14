@@ -338,3 +338,19 @@ test('代理店のキャンペーン：リンクがあるときだけ、代理�
   assert.ok(!m2.items.some((i) => i.label.startsWith('メガ・エッグ 開通後キャッシュバック')));
   assert.strictEqual(m2.items.find((i) => i.label.startsWith('メガ・エッグ 代理店キャッシュバック')).amount, -20000);
 });
+
+test('リンク経由より公式経由の方が安い会社は、公式経由で計算しPRボタンを出さない（コミュファ光）', () => {
+  const opts = (links) => ({ includePoints: true, excludeUnverified: true, applyPolicy: 'full', today: '2026-11-14', links });
+  const inp = (links) => baseInput({ area: 'chubu', housing: 'house', hikari: { use: true, current: 'none', currentMonthly: 0, cancelFee: 0 }, options: opts(links) });
+  const r = E.compare(inp({ 'hikari:commufa': 'https://example.com/a8' }), data);
+  const x = find(r, (y) => y.combo.hikari === 'commufa');
+  // 24か月なら 980円キャンペーン（50,280円）＋WEB限定3,000円 の方が、3年割（21,360円）＋代理店25,000円 より得
+  assert.ok(x.items.some((i) => i.label.startsWith('コミュファ光 1年間980円キャンペーン')));
+  assert.ok(!x.items.some((i) => i.label.includes('代理店')));
+  assert.strictEqual(x.hikari.useLink, false);
+  // 4年（48か月）なら 3年割が36か月続くので代理店経由の方が得になる
+  const r4 = E.compare({ ...inp({ 'hikari:commufa': 'https://example.com/a8' }), months: 48 }, data);
+  const x4 = find(r4, (y) => y.combo.hikari === 'commufa');
+  assert.ok(x4.items.some((i) => i.label.includes('代理店「エルアイデア株式会社」')));
+  assert.strictEqual(x4.hikari.useLink, true);
+});

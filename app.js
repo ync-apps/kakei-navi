@@ -396,7 +396,8 @@
     const expired = D.campaigns.filter((c) => c.endsAt && c.endsAt < today);
     const list = D.campaigns
       .filter((c) => !(c.endsAt && c.endsAt < today))
-      .filter((c) => (!c.viaLink || affLinks[c.viaLink]) && !(c.notWithLink && affLinks[c.notWithLink]))
+      // 計算では「リンク経由」と「公式経由」の安い方を使うので、一覧には両方の特典を出す（リンク経由の特典はリンクがあるときだけ）
+      .filter((c) => !c.viaLink || affLinks[c.viaLink])
       .filter((c) => campFilter === 'all' || c.target === campFilter)
       .filter((c) => c.amount > 0 || c.amountMonths)
       .sort((a, b) => b.amount - a.amount);

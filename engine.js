@@ -374,8 +374,19 @@
       if (!r) return null; // 使う容量に合うプランがない
       lineResults.push(r);
     }
-    const hikari = hikariCost(input, combo, ctx);
-    const electric = energyCost('electric', data.electric, input.electric, combo, ctx);
+    // 広告リンク（代理店・広告ページ）経由と、公式経由の両方を計算して安い方を使う（useLink：リンク経由の方が安いか同じ）
+    const viaBest = (key, calc) => {
+      const links = ctx.opts.links || {};
+      const a = calc(ctx);
+      if (!key || !links[key]) return { ...a, useLink: false };
+      const rest = { ...links };
+      delete rest[key];
+      const b = calc({ ...ctx, opts: { ...ctx.opts, links: rest } });
+      const sum = (x) => x.items.reduce((t, it) => t + it.amount, 0);
+      return sum(b) < sum(a) ? { ...b, useLink: false } : { ...a, useLink: true };
+    };
+    const hikari = viaBest(combo.hikari ? `hikari:${combo.hikari}` : null, (c) => hikariCost(input, combo, c));
+    const electric = viaBest(combo.electric ? `electric:${combo.electric}` : null, (c) => energyCost('electric', data.electric, input.electric, combo, c));
 
     let gas;
     if (input.gas.type === 'city') {
@@ -573,7 +584,7 @@
         add('before', `今の${cur.name}で「事業者変更承諾番号」を取る`, { note: '光コラボ同士の乗り換えは工事なしで切り替えられる' });
       }
       const hEnd = r.hikari.items.map((it) => it.campaign && it.campaign.endsAt).filter(Boolean).sort()[0];
-      add('apply', `${r.hikari.svc.name}を申し込む${hEnd ? `（特典は${Number(hEnd.slice(5, 7))}月${Number(hEnd.slice(8, 10))}日までの申込）` : ''}`, { url: r.hikari.svc.source, signup: { cat: 'hikari', id: r.hikari.svc.id }, ...(hEnd ? { applyBy: hEnd } : {}) });
+      add('apply', `${r.hikari.svc.name}を申し込む${hEnd ? `（特典は${Number(hEnd.slice(5, 7))}月${Number(hEnd.slice(8, 10))}日までの申込）` : ''}`, { url: r.hikari.svc.source, ...(r.hikari.useLink ? { signup: { cat: 'hikari', id: r.hikari.svc.id } } : {}), ...(hEnd ? { applyBy: hEnd } : {}) });
       if (input.hikari.current !== 'none' && !r.hikari.jigyoushaHenkou) {
         add('after', `${r.hikari.svc.name}の開通を確認してから、今の${cur ? cur.name : '光回線'}を解約する`, { note: 'ルーターなどのレンタル機器は返却が必要なことが多い' });
       }
@@ -585,7 +596,7 @@
       const x = r[kind];
       if (!x.svc) continue;
       if (x.switching) {
-        add('apply', `${x.svc.name}を申し込む`, { url: x.svc.source, signup: { cat: kind, id: x.svc.id }, note: '今の会社への解約の連絡は不要（新しい会社が手続きする）。検針票のお客さま番号・供給地点特定番号を用意' });
+        add('apply', `${x.svc.name}を申し込む`, { url: x.svc.source, ...(x.useLink ? { signup: { cat: kind, id: x.svc.id } } : {}), note: '今の会社への解約の連絡は不要（新しい会社が手続きする）。検針票のお客さま番号・供給地点特定番号を用意' });
         for (const it of x.items) if (it.campaign) fromList(it.campaign.todo, it.campaign.source, moneyOf(it.campaign));
       }
       fromList(x.svc.todo && r.lines.some((l) => ['au', 'uq'].includes(l.brand.id)) ? x.svc.todo : null, x.svc.source);

@@ -524,8 +524,17 @@
       },
       {
         id: 'commufa-1y980', name: 'コミュファ光 1年間980円キャンペーン', target: 'hikari', amount: 4190, months: 12, confidence: 'high',
+        notWithLink: 'hikari:commufa', /* コミュファ光が指定するWEBページからの申込が条件。代理店（エルアイデア）経由では使えない */
         source: 'https://www.commufa.jp/services/information/',
         requires: { hikari: ['commufa'] },
+      },
+      {
+        // 代理店（エルアイデア）のページから申し込むときの公式割引（980円キャンペーンとは併用できない）。2026-11-14 に公式ページで確認
+        id: 'commufa-3nen', name: 'コミュファ光 光ネット3年割', target: 'hikari', amount: 890, months: 36, confidence: 'high', checkedAt: '2026-11-14',
+        viaLink: 'hikari:commufa',
+        source: 'https://www.commufa.jp/services/information/',
+        requires: { hikari: ['commufa'] },
+        note: 'ホーム1Gは月890円引き（開通翌月から36か月）。コミュファ光ネットの契約時に申し込みが必要',
       },
       {
         id: 'pikara-yonden', name: 'ピカラ光 四国電力のでんきセット', target: 'hikari', amount: 330, confidence: 'high',
