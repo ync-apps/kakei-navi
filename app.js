@@ -192,7 +192,8 @@
   const lastTodos = [];
   const shownTodos = [];
   function todoBlock(r, input, idx) {
-    const todos = E.buildTodos(r, input, D);
+    // link：広告リンクがある手続きはそのリンク（DUEMO にコピーする文にも入る）
+    const todos = E.buildTodos(r, input, D).map((t) => ({ ...t, link: affUrl(t.signup) }));
     lastTodos[idx] = E.todosText(todos, `まとめ割ナビ：乗り換えの手続き（${r.lines.map((l) => l.brand.name).filter((v, i, a) => a.indexOf(v) === i).join('・')}${r.hikari.svc ? '／' + r.hikari.svc.name : ''}）`, todayYmd());
     shownTodos[idx] = todos;
     if (!todos.length) return '';

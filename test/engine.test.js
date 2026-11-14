@@ -354,3 +354,17 @@ test('リンク経由より公式経由の方が安い会社は、公式経由�
   assert.ok(x4.items.some((i) => i.label.includes('代理店「エルアイデア株式会社」')));
   assert.strictEqual(x4.hikari.useLink, true);
 });
+
+test('DUEMO用の文：手続きごとにページのURL（広告リンクがあればそれ）と、分割受け取りは回ごとの金額が入る', () => {
+  const L = 'https://px.a8.net/svt/ejp?a8mat=TEST';
+  const inp = baseInput({ housing: 'house', hikari: { use: true, current: 'none', currentMonthly: 0, cancelFee: 0 }, options: { includePoints: true, excludeUnverified: true, applyPolicy: 'full', today: '2026-11-14', links: { 'hikari:biglobe-hikari': L } } });
+  const r = E.compare(inp, data);
+  const x = find(r, (y) => y.combo.hikari === 'biglobe-hikari');
+  const todos = E.buildTodos(x, inp, data).map((t) => ({ ...t, link: t.signup && t.signup.id === 'biglobe-hikari' ? L : '' }));
+  const txt = E.todosText(todos, 'テスト', '2026-11-14');
+  const lines = txt.split('\n');
+  const i = lines.findIndex((l) => l.startsWith('・ビッグローブ光を申し込む'));
+  assert.strictEqual(lines[i + 1], `　ページ：${L}`);
+  assert.ok(txt.includes('ビッグローブ光キャッシュバック（35,000円）の受け取り手続き（12か月目の2日から45日以内）（もらえる特典：35,000円'));
+  assert.ok(txt.includes('（クーポン分30,000円）の受け取り手続き（24か月目の2日から45日以内）（もらえる特典：30,000円'));
+});

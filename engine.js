@@ -548,7 +548,8 @@
       seen.add(text);
       todos.push({ phase, text, ...extra });
     };
-    const fromList = (list, src, money) => (list || []).forEach((t) => add(t.phase, t.text, { months: t.months, deadline: t.deadline, url: src, ...(money || {}) }));
+    // via：広告リンク経由の特典（viaLink）。申込のやることには、そのリンクで申し込めるよう signup を付ける
+    const fromList = (list, src, money, via) => (list || []).forEach((t) => add(t.phase, t.text, { months: t.months, deadline: t.deadline, url: src, ...(money || {}), ...(t.amount ? { amount: t.amount } : {}), ...(via && t.phase === 'apply' ? { signup: { cat: via.split(':')[0], id: via.split(':')[1] } } : {}) }));
     const moneyOf = (c) => (c && c.amount ? { amount: c.amount, kind: c.kind, ...(c.endsAt ? { applyBy: c.endsAt } : {}) } : null);
 
     // カード（申込前に作っておくと支払い方法をすぐ設定できる）
@@ -569,7 +570,7 @@
       const b = ls[0].brand;
       const who = ls.map((l) => `${l.label}：${l.plan.name}`).join('、');
       const campaigns = ls.flatMap((l) => l.items.filter((it) => it.campaign).map((it) => it.campaign));
-      for (const c of campaigns) fromList(c.todo, c.source, moneyOf(c));
+      for (const c of campaigns) fromList(c.todo, c.source, moneyOf(c), c.viaLink);
       add('apply', `${b.name}に乗り換えを申し込む（${who}）`, { url: b.source, signup: { cat: 'mobile', id: b.id }, note: '今の会社の解約は不要（乗り換えると自動で解約）' });
     }
     for (const c of r.cards || []) {
@@ -588,7 +589,7 @@
       if (input.hikari.current !== 'none' && !r.hikari.jigyoushaHenkou) {
         add('after', `${r.hikari.svc.name}の開通を確認してから、今の${cur ? cur.name : '光回線'}を解約する`, { note: 'ルーターなどのレンタル機器は返却が必要なことが多い' });
       }
-      for (const it of r.hikari.items) if (it.campaign) fromList(it.campaign.todo, it.campaign.source, moneyOf(it.campaign));
+      for (const it of r.hikari.items) if (it.campaign) fromList(it.campaign.todo, it.campaign.source, moneyOf(it.campaign), it.campaign.viaLink);
     }
 
     // 電気・ガス
@@ -597,7 +598,7 @@
       if (!x.svc) continue;
       if (x.switching) {
         add('apply', `${x.svc.name}を申し込む`, { url: x.svc.source, ...(x.useLink ? { signup: { cat: kind, id: x.svc.id } } : {}), note: '今の会社への解約の連絡は不要（新しい会社が手続きする）。検針票のお客さま番号・供給地点特定番号を用意' });
-        for (const it of x.items) if (it.campaign) fromList(it.campaign.todo, it.campaign.source, moneyOf(it.campaign));
+        for (const it of x.items) if (it.campaign) fromList(it.campaign.todo, it.campaign.source, moneyOf(it.campaign), it.campaign.viaLink);
       }
       fromList(x.svc.todo && r.lines.some((l) => ['au', 'uq'].includes(l.brand.id)) ? x.svc.todo : null, x.svc.source);
     }
@@ -647,7 +648,8 @@
     if (t.amount) lines.push(`もらえる特典：${t.amount.toLocaleString('ja-JP')}${t.kind === 'points' ? 'ポイント' : '円'}`);
     lines.push(`${t.deadline || (t.applyBy && dueOf(t, today).getTime() === new Date(t.applyBy + 'T00:00:00').getTime()) ? '期限' : 'やる日の目安'}：${jpDate(due)}まで${t.phase === 'later' && t.months ? `（開通から${t.months}か月後・開通日は今日から約1か月後として計算）` : ''}`);
     if (t.text !== lines[0]) lines.push(t.text);
-    if (t.url) lines.push(t.url);
+    // link：広告リンク（あれば）。DUEMO の「申請・解約のページのURL」欄に入る
+    if (t.link || t.url) lines.push(t.link || t.url);
     return lines.join('\n');
   }
 
@@ -665,6 +667,8 @@
         if (today) info.push(`${t.deadline ? '期限' : '目安'}：${jpDate(dueOf(t, today))}まで`);
         else if (t.months && !t.text.includes('か月')) info.push(`開通から${t.months}か月後`);
         lines.push(`・${t.text}${info.length ? `（${info.join('・')}）` : ''}`);
+        // 次の行にページのURL（DUEMO の「まとめて登録」で、その項目の「申請・解約のページのURL」欄に入る）
+        if (t.link || t.url) lines.push(`　ページ：${t.link || t.url}`);
       }
     }
     return lines.join('\n');
