@@ -25,7 +25,7 @@
       // 光回線
       'hikari:docomo-hikari': '', 'hikari:softbank-hikari': 'https://px.a8.net/svt/ejp?a8mat=4BGK84+6HZEAI+348K+1BN3TU', 'hikari:au-hikari': '', 'hikari:biglobe-hikari': 'https://px.a8.net/svt/ejp?a8mat=4BGK84+6NXQCA+B4+2N9S82',
       'hikari:rakuten-hikari': '', 'hikari:iij-hikari': '', 'hikari:sonet-hikari': '', 'hikari:en-hikari': '', 'hikari:nuro': '',
-      'hikari:eo-hikari': '', 'hikari:commufa': '', 'hikari:pikara': 'https://px.a8.net/svt/ejp?a8mat=4BGK84+6KYKBE+348K+1ZG8B6', 'hikari:megaegg': 'https://px.a8.net/svt/ejp?a8mat=4BGK84+6KD4PM+348K+2BCWEQ', 'hikari:bbiq': '',
+      'hikari:eo-hikari': '', 'hikari:commufa': 'https://px.a8.net/svt/ejp?a8mat=4BGK84+6NCAQI+5JPQ+5ZEMQ', 'hikari:pikara': 'https://px.a8.net/svt/ejp?a8mat=4BGK84+6KYKBE+348K+1ZG8B6', 'hikari:megaegg': 'https://px.a8.net/svt/ejp?a8mat=4BGK84+6KD4PM+348K+2BCWEQ', 'hikari:bbiq': '',
       // 電気
       'electric:au-denki': '', 'electric:softbank-denki': '', 'electric:docomo-denki': '', 'electric:rakuten-denki': '',
       'electric:tokyogas-denki': '', 'electric:cd-denki': '', 'electric:eo-denki': '', 'electric:osakagas-denki': '', 'electric:tohogas-denki': '',
