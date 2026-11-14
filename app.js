@@ -7,6 +7,10 @@
   function okUrlStrict(u) { return typeof u === 'string' && /^https:\/\//.test(u) ? u : ''; }
   const hasAffiliate = Object.values(AFF.links || {}).some((u) => okUrlStrict(u));
   const affLinks = Object.fromEntries(Object.entries(AFF.links || {}).filter(([, u]) => okUrlStrict(u)));
+  // DUEMO に保存する申込みのURL：広告リンクそのものではなく、このナビの申込み案内（keisan.html?moushikomi=…）にする。
+  // 広告のクリックが必ずナビの上で起き、あとで開いたときも最新の特典とリンクが出る
+  const naviApplyUrl = (signup) => affUrl(signup)
+    ? `${location.origin}${location.pathname.replace(/[^/]*$/, '')}keisan.html?moushikomi=${encodeURIComponent(`${signup.cat}:${signup.id}`)}` : '';
   const yen = E.yen;
   const STORE_KEY = 'kakei-navi:input:v3';
   const $ = (sel) => document.querySelector(sel);
@@ -24,6 +28,28 @@
 
   $('#notice').textContent = `⚠ ${D.notice}`;
   if (hasAffiliate && AFF.disclosure) { $('#pr-disclosure').textContent = AFF.disclosure; $('#pr-disclosure').hidden = false; }
+  // ---------- DUEMO から来たときの申込み案内（?moushikomi=hikari:biglobe-hikari など） ----------
+  (function showApplyPanel() {
+    let key = '';
+    try { key = new URLSearchParams(location.search).get('moushikomi') || ''; } catch (e) { return; }
+    const [cat, id] = key.split(':');
+    const url = affUrl({ cat, id });
+    const svc = url && listOf[cat] && listOf[cat].find((x) => x.id === id);
+    if (!svc) return;
+    const today = todayYmd();
+    const camps = D.campaigns.filter((c) => c.viaLink === key && !(c.endsAt && c.endsAt < today) && (c.amount > 0 || c.amountMonths));
+    const amt = (c) => c.amountMonths ? (c.monthlyCap ? `月${yen(c.monthlyCap)}まで×${c.amountMonths}か月` : `月額${c.amountMonths}か月分`) : yen(c.amount);
+    const box = document.createElement('section');
+    box.className = 'apply-panel';
+    box.innerHTML = `
+      <h2>${esc(svc.name)}の申し込み</h2>
+      <p>下のボタンから申し込むと、まとめ割ナビで計算した、このリンク経由の特典の対象になります。</p>
+      ${camps.length ? `<ul>${camps.map((c) => `<li><strong>${esc(c.name)}：${amt(c)}</strong>${c.agent ? `（代理店「${esc(c.agent)}」のページ）` : ''}<br><span class="meta">${esc(c.conditions || '')}（${esc(c.checkedAt || D.asOf)} 時点）</span></li>`).join('')}</ul>` : ''}
+      <a class="btn-signup btn-apply" href="${esc(url)}" target="_blank" rel="sponsored noopener">${esc(svc.name)}を申し込む<span class="pr">PR</span></a>
+      <p class="meta">特典の金額・条件は変わることがあります。申し込む前に、リンク先のページで確かめてください。</p>`;
+    $('#notice').after(box);
+  })();
+
   $('#foot-note').textContent = `まとめ割ナビ｜データ時点 ${D.asOf}。「要確認」の付いた金額は確認できなかった参考値です。実際の料金は使い方・時期・申込窓口によって変わります。`;
 
   // ---------- 選択肢 ----------
@@ -192,8 +218,8 @@
   const lastTodos = [];
   const shownTodos = [];
   function todoBlock(r, input, idx) {
-    // link：広告リンクがある手続きはそのリンク（DUEMO にコピーする文にも入る）
-    const todos = E.buildTodos(r, input, D).map((t) => ({ ...t, link: affUrl(t.signup) }));
+    // link：広告リンクがある手続きは、ナビの申込み案内のURL（DUEMO にコピーする文に入る。広告リンクを直接は入れない）
+    const todos = E.buildTodos(r, input, D).map((t) => ({ ...t, link: naviApplyUrl(t.signup) }));
     lastTodos[idx] = E.todosText(todos, `まとめ割ナビ：乗り換えの手続き（${r.lines.map((l) => l.brand.name).filter((v, i, a) => a.indexOf(v) === i).join('・')}${r.hikari.svc ? '／' + r.hikari.svc.name : ''}）`, todayYmd());
     shownTodos[idx] = todos;
     if (!todos.length) return '';

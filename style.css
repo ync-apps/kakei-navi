@@ -234,3 +234,11 @@ details.breakdown summary { cursor: pointer; font-size: .85rem; color: var(--acc
 .card-img { display: block; width: 100%; height: auto; border: 1px solid var(--line); border-radius: 10px; }
 a.btn-copyall { display: inline-block; text-decoration: none; border-style: solid; font-weight: 700; }
 a.btn-copyall.done { background: var(--accent-soft); }
+
+
+/* DUEMO から来たときの申込み案内 */
+.apply-panel { margin: 14px 0; padding: 16px; border: 2px solid var(--gold); border-radius: 12px; background: var(--surface); }
+.apply-panel h2 { margin: 0 0 6px; font-size: 1.1rem; }
+.apply-panel ul { margin: 8px 0; padding-left: 1.2em; }
+.apply-panel li { margin-bottom: 6px; }
+.apply-panel .btn-apply { display: inline-block; margin: 6px 0; padding: 10px 18px; font-size: .95rem; white-space: normal; }
