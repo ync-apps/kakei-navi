@@ -389,3 +389,30 @@ test('LINEMOの乗り換え特典はプランで金額が違う（ベストプ�
   assert.deepStrictEqual(camps.map((i) => -i.amount).sort((a, b) => a - b), [10000, 12000]);
   for (const i of camps) assert.ok(i.src.startsWith('https://www.linemo.jp/'));
 });
+
+test('比べるものを選べる：スマホだけ比べると、光回線・電気・ガスは今のままで料金を合計に入れない', () => {
+  const r = E.compare(baseInput({ compare: { mobile: true, hikari: false, electric: false, gas: false } }), data);
+  assert.ok(r.top.length > 1);
+  for (const x of r.results) {
+    assert.strictEqual(x.combo.hikari, 'docomo-hikari');
+    assert.strictEqual(x.combo.electric, 'std');
+    assert.ok(!x.hikari.switching && !x.electric.switching && !x.gas.switching);
+    assert.ok(x.items.every((it) => it.cat === 'line' || it.cat === 'card' || it.amount < 0));
+  }
+  assert.ok(r.current.total <= 15000 * 24);
+  // 光回線を比べないので、ドコモ光のセット割はスマホ側の割引として残る（ドコモのまま）
+  const stay = r.results.find((x) => x.combo.mobile.every((b) => b === 'docomo'));
+  assert.ok(stay.items.some((it) => it.cat === 'line' && it.amount < 0 && it.req && it.req.hikari));
+});
+
+test('比べるものを選べる：電気だけ比べると、スマホ・光回線は今のままで、上位には電気の違う案が並ぶ', () => {
+  const r = E.compare(baseInput({ compare: { mobile: false, hikari: false, electric: true, gas: false } }), data);
+  assert.ok(r.results.every((x) => x.combo.mobile.every((b) => b === 'docomo') && x.combo.hikari === 'docomo-hikari'));
+  assert.ok(r.top.length > 1);
+  assert.strictEqual(new Set(r.top.map((x) => x.combo.electric)).size, r.top.length);
+  // スマホ・光回線の割引は、電気の選び方で変わるもの（ドコモでんきセット割）だけ入れる（家族割・ドコモ光セット割は入れない）
+  assert.ok(r.results.every((x) => x.items.every((it) => it.cat === 'electric' || it.cat === 'card' || (it.req && it.req.electric))));
+  assert.ok(find(r, (x) => x.combo.electric === 'docomo-denki').items.some((it) => it.label.startsWith('ドコモでんきセット割')));
+  assert.strictEqual(r.current.total, 9000 * 24);
+  assert.deepStrictEqual(Object.keys(r.counts).filter((k) => r.counts[k] > 0), ['electric']);
+});

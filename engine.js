@@ -124,7 +124,7 @@
     items.push({ cat: 'line', who, label: `${best.plan.name} 月額（${months}か月）`, amount: best.plan.price * months, low: lowConf(brand), src: best.plan.source || brand.source });
     for (const d of best.applied) {
       const extra = d.months && d.months < months ? `・${d.months}か月` : '';
-      items.push({ cat: 'line', who, label: `${d.name}（月${yen(d.perMonth)}${extra}）`, amount: -d.total, low: lowConf(d), src: d.source });
+      items.push({ cat: 'line', who, label: `${d.name}（月${yen(d.perMonth)}${extra}）`, amount: -d.total, low: lowConf(d), src: d.source, req: d.requires });
     }
 
     const switching = line.current !== brand.id;
@@ -172,7 +172,7 @@
       const m = d.appliedMonths;
       if (!m) continue;
       const label = d.amount === 'full' ? `${d.name}（${m}か月分）` : `${d.name}（月${yen(Math.abs(d.perMonth))}${d.months ? `・${m}か月` : ''}）`;
-      items.push({ cat: 'hikari', label, amount: -d.total, low: lowConf(d), src: d.source, group: d.group });
+      items.push({ cat: 'hikari', label, amount: -d.total, low: lowConf(d), src: d.source, group: d.group, req: d.requires });
     }
     // 毎月のポイント還元（例：楽天ひかり＋楽天モバイルで毎月1,000ポイント）
     for (const d of discounts.filter((d) => d.pointAmount)) {
@@ -283,8 +283,8 @@
     }
     let pointSrc = svc.source;
     for (const d of data.discounts.filter((d) => d.target === kind && meets(d.requires, combo, area) && usable(d, opts) && housingOk(d, ctx))) {
-      if (d.rate) items.push({ cat: kind, label: d.name.includes('%') ? d.name : `${d.name}（${(d.rate * 100).toFixed(1)}%）`, amount: -Math.round(baseline * d.rate * months), low: lowConf(d), src: d.source });
-      if (d.amount) items.push({ cat: kind, label: `${d.name}（月${yen(d.amount)}）`, amount: -d.amount * Math.min(d.months || months, months), low: lowConf(d), src: d.source });
+      if (d.rate) items.push({ cat: kind, label: d.name.includes('%') ? d.name : `${d.name}（${(d.rate * 100).toFixed(1)}%）`, amount: -Math.round(baseline * d.rate * months), low: lowConf(d), src: d.source, req: d.requires });
+      if (d.amount) items.push({ cat: kind, label: `${d.name}（月${yen(d.amount)}）`, amount: -d.amount * Math.min(d.months || months, months), low: lowConf(d), src: d.source, req: d.requires });
       if (d.pointRate) { pointRate += d.pointRate; pointSrc = d.source || pointSrc; }
     }
     if (pointRate > 0 && opts.includePoints) {
@@ -330,7 +330,7 @@
           const amt = o.card.perLine[l.brand.id];
           if (!amt) continue;
           if (o.card.plans && !o.card.plans.includes(l.plan.id)) continue;
-          its.push({ cat: 'line', who: l.label, label: `${o.card.name}で支払う割引（月${yen(amt)}）`, amount: -amt * months, low: lowConf(o.card), src: o.card.source, line: l });
+          its.push({ cat: 'line', who: l.label, label: `${o.card.name}で支払う割引（月${yen(amt)}）`, amount: -amt * months, low: lowConf(o.card), src: o.card.source, line: l, req: { card: true } });
         }
         if (!its.length) continue; // 割引の対象の回線がない
         if (!o.owned) {
@@ -400,7 +400,11 @@
 
     const cards = chooseCards(input, lineResults, ctx);
 
-    const items = [...lineResults.flatMap((l) => l.items), ...hikari.items, ...electric.items, ...gas.items, ...cards.items];
+    // 比べないもの（今のまま）は料金を合計に入れない。比べるものの選び方で変わる割引（セット割・カード払い割）だけは入れる
+    const fixed = ctx.fixed || {};
+    const catOfReq = { mobile: 'line', hikari: 'hikari', electric: 'electric', gas: 'gas', card: 'card' };
+    const keep = (it) => !fixed[it.cat] || (it.amount < 0 && !!it.req && Object.keys(it.req).some((k) => catOfReq[k] && !fixed[catOfReq[k]]));
+    const items = [...lineResults.flatMap((l) => l.items), ...hikari.items, ...electric.items, ...gas.items, ...cards.items].filter(keep);
     const total = items.reduce((s, it) => s + it.amount, 0);
     const subtotal = { line: 0, hikari: 0, electric: 0, gas: 0, card: 0 };
     for (const it of items) subtotal[it.cat] += it.amount;
@@ -422,14 +426,16 @@
     };
   }
 
-  function currentTotal(input, months) {
-    const parts = [Number(input.mobileCurrentMonthly) || 0];
-    if (input.hikari.use && input.hikari.current !== 'none') parts.push(Number(input.hikari.currentMonthly) || 0);
-    parts.push(Number(input.electric.bill) || 0);
-    if (input.gas.type !== 'none') parts.push(Number(input.gas.bill) || 0);
-    const complete = Number(input.mobileCurrentMonthly) > 0 && (!input.hikari.use || input.hikari.current === 'none' || Number(input.hikari.currentMonthly) > 0);
+  function currentTotal(input, months, cmp = CMP_ALL) {
+    const parts = [];
+    if (cmp.mobile) parts.push(Number(input.mobileCurrentMonthly) || 0);
+    if (cmp.hikari && input.hikari.use && input.hikari.current !== 'none') parts.push(Number(input.hikari.currentMonthly) || 0);
+    if (cmp.electric) parts.push(Number(input.electric.bill) || 0);
+    if (cmp.gas && input.gas.type !== 'none') parts.push(Number(input.gas.bill) || 0);
+    const complete = (!cmp.mobile || Number(input.mobileCurrentMonthly) > 0) && (!cmp.hikari || !input.hikari.use || input.hikari.current === 'none' || Number(input.hikari.currentMonthly) > 0);
     return { total: parts.reduce((a, b) => a + b, 0) * months, complete };
   }
+  const CMP_ALL = { mobile: true, hikari: true, electric: true, gas: true };
 
   // この地域・住まいで比較する対象と、対象外の理由
   function scope(input, data) {
@@ -451,13 +457,25 @@
     const stdT = tariffOf(data.electric.find((x) => x.id === 'std'), input.area, data);
     const kWhInput = Number(input.electric.kWh);
     const kWh = kWhInput > 0 ? kWhInput : (estimateKWh(Number(input.electric.bill) || 0, stdT, amp, (data.energy || {}).renewableLevy || 0) || 0);
-    const ctx = { data, months, area: input.area, housing: input.housing, opts, amp, kWh };
+    // 比べるもの（スマホ・光回線・電気・ガス）。比べないものは今の会社のまま
+    const cmp = { ...CMP_ALL, ...(input.compare || {}) };
+    const fixed = { line: !cmp.mobile, hikari: !cmp.hikari, electric: !cmp.electric, gas: !cmp.gas, card: false };
+    const ctx = { data, months, area: input.area, housing: input.housing, opts, amp, kWh, fixed };
+    const allInput = input;
+    const has = (list, id) => list.some((x) => x.id === id);
+    // スマホを比べないとき：今の会社がデータにある人だけ、その会社のまま（セット割・家族割の計算に使う）
+    if (!cmp.mobile) input = { ...input, lines: input.lines.filter((l) => has(data.mobileBrands, l.current)) };
     const n = input.lines.length;
 
     const brands = data.mobileBrands.filter((b) => isAvailable(b, input.area, input.housing));
-    const hikaris = input.hikari.use ? data.hikari.filter((h) => isAvailable(h, input.area, input.housing)).map((h) => h.id) : ['none'];
-    const elecs = data.electric.filter((e) => isAvailable(e, input.area, input.housing)).map((e) => e.id);
-    const gases = input.gas.type === 'city' ? data.gas.filter((g) => isAvailable(g, input.area, input.housing)).map((g) => g.id) : ['keep'];
+    const hikaris = !input.hikari.use ? ['none']
+      : !cmp.hikari ? [has(data.hikari, input.hikari.current) ? input.hikari.current : 'none']
+      : data.hikari.filter((h) => isAvailable(h, input.area, input.housing)).map((h) => h.id);
+    const elecs = !cmp.electric ? [has(data.electric, input.electric.current) ? input.electric.current : 'std']
+      : data.electric.filter((e) => isAvailable(e, input.area, input.housing)).map((e) => e.id);
+    const gases = input.gas.type !== 'city' ? ['keep']
+      : !cmp.gas ? [has(data.gas, input.gas.current) ? input.gas.current : 'std']
+      : data.gas.filter((g) => isAvailable(g, input.area, input.housing)).map((g) => g.id);
 
     const resultsMap = new Map();
     let evaluated = 0;
@@ -473,6 +491,7 @@
       for (const electric of elecs) {
         for (const gas of gases) {
           const rest = { hikari, electric, gas };
+          if (!cmp.mobile) { add(input.lines.map((l) => l.current), rest); continue; }
           // 1) 家族全員が同じ会社（家族割が効く）
           for (const b of brands) add(Array(n).fill(b.id), rest);
           if (n < 2) continue;
@@ -510,7 +529,9 @@
     const top = [];
     const seen = new Set();
     for (const r of results) {
-      const key = r.combo.mobile.slice().sort().join(',') + '|' + r.combo.hikari;
+      const key = cmp.mobile || cmp.hikari
+        ? (cmp.mobile ? r.combo.mobile.slice().sort().join(',') : '') + '|' + (cmp.hikari ? r.combo.hikari : '')
+        : r.combo.electric + '|' + r.combo.gas;
       if (seen.has(key)) continue;
       seen.add(key);
       top.push(r);
@@ -519,17 +540,26 @@
 
     return {
       months,
-      current: currentTotal(input, months),
+      current: (() => {
+        // 比べないものに今ついている割引（セット割など）も、今のままの金額に入れる
+        const c = currentTotal(allInput, months, cmp);
+        if (Object.values(cmp).every(Boolean)) return c;
+        const stay = results.find((x) => x.lines.every((l) => !l.switching) && !x.hikari.switching && !x.electric.switching && !x.gas.switching);
+        if (!stay) return c; // 今の会社がデータにない（その他）ときは、割引なしとして比べる
+        const disc = stay.items.filter((it) => fixed[it.cat]).reduce((t, it) => t + it.amount, 0);
+        return { ...c, total: c.total + disc };
+      })(),
+      compared: cmp,
       results,
       top,
       // 家族全員を同じ会社にする場合の、会社ごとの一番安い組み合わせ
-      bestByBrand: brands
+      bestByBrand: !cmp.mobile ? [] : brands
         .map((b) => results.find((r) => r.combo.mobile.every((x) => x === b.id)))
         .filter(Boolean),
       combinations: evaluated,
       scope: scope(input, data),
       electricUsage: { kWh, amp, estimated: !(kWhInput > 0), hasTariff: !!stdT },
-      counts: { mobile: brands.length, hikari: input.hikari.use ? hikaris.length : 0, electric: elecs.length, gas: input.gas.type === 'city' ? gases.length : 0 },
+      counts: { mobile: cmp.mobile ? brands.length : 0, hikari: cmp.hikari && input.hikari.use ? hikaris.length : 0, electric: cmp.electric ? elecs.length : 0, gas: cmp.gas && input.gas.type === 'city' ? gases.length : 0 },
     };
   }
 

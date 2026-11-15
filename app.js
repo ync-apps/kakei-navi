@@ -108,7 +108,13 @@
   $('#add-line').addEventListener('click', () => addLine());
 
   // ---------- 入力の表示切り替え ----------
+  const cmpOf = () => Object.fromEntries([...form.querySelectorAll('[name="cmp"]')].map((el) => [el.value, el.checked]));
   function toggleBoxes() {
+    // 比べないものは、今の会社の欄だけ残す
+    const cmp = cmpOf();
+    form.querySelectorAll('[data-cmp]').forEach((el) => { el.hidden = !cmp[el.dataset.cmp]; });
+    form.querySelectorAll('[data-cmp-off]').forEach((el) => { el.hidden = cmp[el.dataset.cmpOff]; });
+    form.electricBill.required = cmp.electric;
     $('#hikari-box').hidden = !form.hikariUse.checked;
     const gt = form.gasType.value;
     $('#gasCurrentLabel').hidden = gt !== 'city';
@@ -116,6 +122,10 @@
     $('#gas-hint').hidden = gt !== 'propane';
   }
   form.hikariUse.addEventListener('change', toggleBoxes);
+  form.querySelectorAll('[name="cmp"]').forEach((el) => el.addEventListener('change', () => {
+    if (!Object.values(cmpOf()).some(Boolean)) { el.checked = true; toast('比べるものを1つ以上選んでください'); }
+    toggleBoxes();
+  }));
   form.gasType.addEventListener('change', toggleBoxes);
   $('#area').addEventListener('change', () => { fillAreaDependent(); renderScope(); });
   form.housing.addEventListener('change', () => { fillAreaDependent(); renderScope(); });
@@ -126,6 +136,7 @@
       area: form.area.value,
       housing: form.housing.value,
       months: Number(form.months.value),
+      compare: cmpOf(),
       lines: [...$('#lines').children].map((r) => ({
         current: r.querySelector('[data-k="current"]').value,
         gb: Number(r.querySelector('[data-k="gb"]').value),
@@ -146,6 +157,7 @@
 
   function writeInput(v) {
     form.area.value = v.area; form.housing.value = v.housing; form.months.value = String(v.months);
+    form.querySelectorAll('[name="cmp"]').forEach((el) => { el.checked = !v.compare || v.compare[el.value] !== false; });
     fillAreaDependent();
     $('#lines').innerHTML = '';
     (v.lines && v.lines.length ? v.lines : [{ current: 'docomo', gb: 10 }]).forEach(addLine);
@@ -345,7 +357,10 @@
     const u = res.electricUsage;
     if (u.hasTariff) summary += `<p class="meta">電気は月${u.kWh}kWh${u.estimated ? '（電気代からの推定。検針票の値を入れるとより正確）' : ''}・${u.amp}Aとして各社の料金表で計算しました。</p>`;
     else summary += `<p class="meta">この地域は電気の料金表を確認できなかったため、電気は今の金額のままで計算しました。</p>`;
-    summary += `<p class="meta">比べた対象：スマホ${c.mobile}社・光回線${c.hikari}社・電気${c.electric}社・ガス${c.gas}社（家族1人ずつ別の会社にする案も含めて ${res.combinations.toLocaleString()}通り）。<a href="#" data-goto="scope">比較対象の一覧</a></p></div>`;
+    const cmpNames = { mobile: 'スマホ', hikari: '光回線', electric: '電気', gas: 'ガス' };
+    const kept = Object.keys(cmpNames).filter((k) => !res.compared[k]).map((k) => cmpNames[k]);
+    const counted = Object.keys(cmpNames).filter((k) => res.compared[k]).map((k) => `${cmpNames[k]}${c[k]}社`).join('・');
+    summary += `<p class="meta">比べた対象：${counted}（${res.compared.mobile ? '家族1人ずつ別の会社にする案も含めて ' : ''}${res.combinations.toLocaleString()}通り）。${kept.length ? `${kept.join('・')}は今の会社のままで、料金は合計に入れていません（セット割などの割引だけ入れています）。` : ''}<a href="#" data-goto="scope">比較対象の一覧</a></p></div>`;
 
     const cards = res.top.map((r, i) => {
       const save = cur.complete && cur.total > 0 ? cur.total - r.total : null;
@@ -378,12 +393,12 @@
       <h2 class="h2">おすすめの組み合わせ</h2>
       ${summary}
       ${cards}
-      <h2 class="h2">家族全員を同じスマホ会社にする場合</h2>
+      ${brandRows ? `<h2 class="h2">家族全員を同じスマホ会社にする場合</h2>
       <p class="hint">「この会社にまとめたい」場合に、光回線・電気・ガスをどうすると安いか（家族割を含む）。</p>
       <div class="table-scroll"><table class="brand-table">
         <thead><tr><th>スマホ</th><th>光回線／電気／ガス</th><th>${m}か月の実質</th></tr></thead>
         <tbody>${brandRows}</tbody>
-      </table></div>`;
+      </table></div>` : ''}`;
     box.querySelectorAll('[data-todo]').forEach((link) => link.addEventListener('click', () => {
       // リンクで DUEMO を開く（ブラウザの標準動作）。その直前に同期でコピーする
       const [i, k] = link.dataset.todo.split(':').map(Number);

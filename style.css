@@ -243,3 +243,8 @@ a.btn-copyall.done { background: var(--accent-soft); }
 .apply-panel li { margin-bottom: 6px; }
 .apply-panel .btn-apply { display: inline-block; margin: 6px 0; padding: 10px 18px; font-size: .95rem; white-space: normal; }
 .pr-note { margin: 10px 0 0; font-size: .78rem; color: var(--muted); }
+.cmp-pick { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.cmp-chip { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--text); cursor: pointer; }
+.cmp-chip:has(input:checked) { border-color: var(--accent); background: var(--accent); color: #fff; }
+.cmp-chip input { accent-color: #fff; }
+[data-cmp][hidden] { display: none !important; }
