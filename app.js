@@ -231,10 +231,10 @@
         const due = E.dueOf(t, today);
         return `<li>
           <div class="todo-row">
-            <div>${linkText(t.text, t.url)}${t.amount ? `<span class="tag ok">${t.amount.toLocaleString('ja-JP')}${t.kind === 'points' ? 'pt' : '円'}</span>` : ''}
+            <div>${esc(t.text)}${t.amount ? `<span class="tag ok">${t.amount.toLocaleString('ja-JP')}${t.kind === 'points' ? 'pt' : '円'}</span>` : ''}
               <span class="sub">${t.deadline ? '期限' : '目安'}：${due.getMonth() + 1}/${due.getDate()}${due.getFullYear() !== new Date().getFullYear() ? `（${due.getFullYear()}年）` : ''}${t.note ? '・' + esc(t.note) : ''}</span></div>
             <div class="todo-actions">
-              ${affUrl(t.signup) ? `<a class="btn-signup" href="${esc(affUrl(t.signup))}" target="_blank" rel="sponsored noopener">申し込む</a>` : ''}
+              ${affUrl(t.signup) ? `<a class="btn-signup" href="${esc(affUrl(t.signup))}" target="_blank" rel="sponsored noopener">申し込む</a>` : okUrl(t.url) ? `<a class="btn-signup" href="${esc(t.url)}" target="_blank" rel="noopener">ページを開く</a>` : ''}
               <a class="btn-todo-duemo" href="${esc(D.duemoUrl)}" target="_blank" rel="noopener" data-todo="${idx}:${k}">DUEMOへ</a>
             </div>
           </div></li>`;
@@ -252,7 +252,7 @@
           </ol>
           <p class="meta">特に「開通から○か月後」の受け取り手続きは忘れやすく、期限を過ぎるともらえません。</p>
         </div>
-        ${todos.some((t) => affUrl(t.signup)) ? '<p class="pr-note">金色の「申し込む」ボタンは広告（PR）リンクです。順位は実質負担の安い順だけで決めていて、広告報酬では変えていません。</p>' : ''}
+        ${todos.some((t) => affUrl(t.signup)) ? '<p class="pr-note">「申し込む」ボタンは広告（PR）リンクです（「ページを開く」は広告ではありません）。順位は実質負担の安い順だけで決めていて、広告報酬では変えていません。</p>' : ''}
         ${groups}
         <a class="btn-sub btn-copyall" href="${esc(D.duemoUrl)}" target="_blank" rel="noopener" data-copyall="${idx}">全部まとめてDUEMOへ（${todos.length}件）</a>
       </details>`;
