@@ -586,7 +586,7 @@
         add('before', `今の${cur.name}で「事業者変更承諾番号」を取る`, { note: '光コラボ同士の乗り換えは工事なしで切り替えられる' });
       }
       const hEnd = r.hikari.items.map((it) => it.campaign && it.campaign.endsAt).filter(Boolean).sort()[0];
-      add('apply', `${r.hikari.svc.name}を申し込む${hEnd ? `（特典は${Number(hEnd.slice(5, 7))}月${Number(hEnd.slice(8, 10))}日までの申込）` : ''}`, { url: r.hikari.svc.source, ...(r.hikari.useLink ? { signup: { cat: 'hikari', id: r.hikari.svc.id } } : {}), ...(hEnd ? { applyBy: hEnd } : {}) });
+      add('apply', `${r.hikari.svc.name}を申し込む${hEnd ? `（特典は${Number(hEnd.slice(5, 7))}月${Number(hEnd.slice(8, 10))}日までの申込）` : ''}`, { main: true, url: r.hikari.svc.source, ...(r.hikari.useLink ? { signup: { cat: 'hikari', id: r.hikari.svc.id } } : {}), ...(hEnd ? { applyBy: hEnd } : {}) });
       if (input.hikari.current !== 'none' && !r.hikari.jigyoushaHenkou) {
         add('after', `${r.hikari.svc.name}の開通を確認してから、今の${cur ? cur.name : '光回線'}を解約する`, { note: 'ルーターなどのレンタル機器は返却が必要なことが多い' });
       }
@@ -598,7 +598,7 @@
       const x = r[kind];
       if (!x.svc) continue;
       if (x.switching) {
-        add('apply', `${x.svc.name}を申し込む`, { url: x.svc.source, ...(x.useLink ? { signup: { cat: kind, id: x.svc.id } } : {}), note: '今の会社への解約の連絡は不要（新しい会社が手続きする）。検針票のお客さま番号・供給地点特定番号を用意' });
+        add('apply', `${x.svc.name}を申し込む`, { main: true, url: x.svc.source, ...(x.useLink ? { signup: { cat: kind, id: x.svc.id } } : {}), note: '今の会社への解約の連絡は不要（新しい会社が手続きする）。検針票のお客さま番号・供給地点特定番号を用意' });
         for (const it of x.items) if (it.campaign) fromList(it.campaign.todo, it.campaign.source, moneyOf(it.campaign), it.campaign.viaLink);
       }
       fromList(x.svc.todo && r.lines.some((l) => ['au', 'uq'].includes(l.brand.id)) ? x.svc.todo : null, x.svc.source);
@@ -610,6 +610,17 @@
       if (!d.todo) continue;
       if ([...used].some((l) => l.startsWith(d.name))) fromList(d.todo, d.source);
     }
+
+    // 広告ページの特典に「リンク先から申し込む」があるときは、ふつうの「〇〇を申し込む」と2つにせず1つにまとめる
+    const key = (t) => (t.signup ? `${t.signup.cat}:${t.signup.id}` : '');
+    for (const m of todos.filter((t) => t.main && t.signup)) {
+      const via = todos.find((t) => !t.main && t.phase === 'apply' && key(t) === key(m));
+      if (!via) continue;
+      if (m.applyBy && (!via.applyBy || m.applyBy < via.applyBy)) via.applyBy = m.applyBy;
+      if (m.note && !via.note) via.note = m.note;
+      todos.splice(todos.indexOf(m), 1);
+    }
+    todos.forEach((t) => delete t.main);
 
     const order = PHASES.map((p) => p.id);
     todos.sort((a, b) => order.indexOf(a.phase) - order.indexOf(b.phase));

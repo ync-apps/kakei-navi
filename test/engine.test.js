@@ -371,6 +371,16 @@ test('DUEMO用の文：手続きごとにページのURL（広告リンクがあ
   assert.ok(txt.includes('（クーポン分30,000円）の受け取り手続き（24か月目の2日から45日以内）（もらえる特典：30,000円'));
 });
 
+test('広告ページの特典があるときは「申し込む」を1つにまとめ、文に（PR）は入れない', () => {
+  const inp = baseInput({ housing: 'house', hikari: { use: true, current: 'none', currentMonthly: 0, cancelFee: 0 }, options: { includePoints: true, excludeUnverified: true, applyPolicy: 'full', today: '2026-11-14', links: { 'hikari:biglobe-hikari': 'https://px.a8.net/svt/ejp?a8mat=TEST' } } });
+  const x = find(E.compare(inp, data), (y) => y.combo.hikari === 'biglobe-hikari');
+  const todos = E.buildTodos(x, inp, data);
+  const apply = todos.filter((t) => t.phase === 'apply' && t.signup && t.signup.id === 'biglobe-hikari');
+  assert.strictEqual(apply.length, 1);
+  assert.ok(apply[0].text.startsWith('ビッグローブ光を申し込む（リンク先のページで、クーポン「BWS」'));
+  assert.ok(todos.every((t) => !t.text.includes('PR') && !('main' in t)));
+});
+
 test('LINEMOの乗り換え特典はプランで金額が違う（ベストプラン10,000円・ベストプランV 12,000円）、出典は公式', () => {
   const r = E.compare(baseInput(), data);
   const x = find(r, allSame('linemo'));

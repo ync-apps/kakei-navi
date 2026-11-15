@@ -694,7 +694,7 @@
         source: 'https://www.nuro.jp/hikari/pr/sp/',
         conditions: '2.5ギガプランの場合（10ギガは80,000円）。このページからの申込のみ。申込画面でクーポン「myb」を入力（入れないと40,000円）。申込から12か月後の月末までに開通、開通10か月後の末日までに支払方法とメールアドレスを登録。受け取りまで解約しないこと。ほかの特典・キャンペーンとは併用不可',
         todo: [
-          { phase: 'apply', text: 'NURO光は「申し込む（PR）」のリンク先のページから申し込み、申込画面でクーポン「myb」を入力する（ほかのページからだと対象外）' },
+          { phase: 'apply', text: 'NURO光を申し込む（リンク先のページから申し込み、申込画面でクーポン「myb」を入力。ほかのページからだと対象外）' },
           { phase: 'after', text: 'NURO光の支払方法と連絡先メールアドレスを登録する（開通10か月後の末日まで。しないと案内メールが届かない）' },
           { phase: 'later', months: 11, amount: 15000, text: 'NURO光キャッシュバック1回目（15,000円）の受け取り手続き（案内メールから45日以内）' },
           { phase: 'later', months: 17, amount: 25000, text: 'NURO光キャッシュバック2回目（25,000円）の受け取り手続き（案内メールから45日以内）' },
@@ -724,7 +724,7 @@
         source: 'https://join.biglobe.ne.jp/ftth/hikari/lp/af/limited.html',
         conditions: '1ギガ3年プランの場合。リンク先のページから、クーポン「BWS」を入力して申し込む。申込から6か月以内に開通。受け取りまで解約・コース変更しないこと（24か月目の分は24か月目まで継続）',
         todo: [
-          { phase: 'apply', text: 'ビッグローブ光は「申し込む（PR）」のリンク先のページから、クーポン「BWS」を入力して申し込む' },
+          { phase: 'apply', text: 'ビッグローブ光を申し込む（リンク先のページで、クーポン「BWS」を入力）' },
           { phase: 'later', months: 11, amount: 35000, text: 'ビッグローブ光キャッシュバック（35,000円）の受け取り手続き（12か月目の2日から45日以内）' },
           { phase: 'later', months: 23, amount: 30000, text: 'ビッグローブ光キャッシュバック（クーポン分30,000円）の受け取り手続き（24か月目の2日から45日以内）' },
         ],
@@ -767,7 +767,7 @@
         source: 'https://softbank-hikaricollabo.com/campaign/cashback.php',
         conditions: '1ギガの新規申込。オプション不要。超おうち応援割を使うと15,000円減額。申込から1か月以内に支払方法を確定、申込月を含む6か月後の月末までに開通。8か月以上継続しないと全額返金',
         todo: [
-          { phase: 'apply', text: 'ソフトバンク光は「申し込む（PR）」の代理店（株式会社NEXT）のページから申し込む（ほかの窓口だとこのキャッシュバックは対象外）' },
+          { phase: 'apply', text: 'ソフトバンク光を申し込む（リンク先は代理店の株式会社NEXT。ほかの窓口だとこのキャッシュバックは対象外）' },
           { phase: 'after', text: 'ソフトバンク光の代理店キャッシュバック：SMSで届くフォームから振込口座を登録する' },
         ],
       },
@@ -778,7 +778,7 @@
         source: 'https://softbank-hikaricollabo.com/campaign/cashback.php',
         conditions: 'フレッツ光からの転用・他社光コラボからの事業者変更。オプション不要。超おうち応援割を使うと15,000円減額。8か月以上継続しないと全額返金',
         todo: [
-          { phase: 'apply', text: 'ソフトバンク光は「申し込む（PR）」の代理店（株式会社NEXT）のページから申し込む（事業者変更承諾番号を先に取っておく）' },
+          { phase: 'apply', text: 'ソフトバンク光を申し込む（リンク先は代理店の株式会社NEXT。事業者変更承諾番号を先に取っておく）' },
           { phase: 'after', text: 'ソフトバンク光の代理店キャッシュバック：SMSで届くフォームから振込口座を登録する' },
         ],
       },
@@ -789,7 +789,7 @@
         source: 'https://docomohikari-collabo.com/campaign/original-cashback/',
         conditions: '1ギガの新規申込。オプション加入不要。8か月以上継続。同じ住所・名義で過去に申込があると対象外',
         todo: [
-          { phase: 'apply', text: 'ドコモ光は「申し込む（PR）」の代理店（アイ・ティー・エックス）のページから申し込み、振込口座を伝える（SMSのフォームは14日以内）' },
+          { phase: 'apply', text: 'ドコモ光を申し込む（リンク先は代理店のアイ・ティー・エックス。振込口座を伝える。SMSのフォームは14日以内）' },
         ],
       },
       {
@@ -799,7 +799,7 @@
         source: 'https://docomohikari-collabo.com/campaign/original-cashback/',
         conditions: '1ギガの転用・事業者変更。オプション加入不要。8か月以上継続',
         todo: [
-          { phase: 'apply', text: 'ドコモ光は「申し込む（PR）」の代理店（アイ・ティー・エックス）のページから申し込み、振込口座を伝える（事業者変更承諾番号を先に取っておく）' },
+          { phase: 'apply', text: 'ドコモ光を申し込む（リンク先は代理店のアイ・ティー・エックス。振込口座を伝える。事業者変更承諾番号を先に取っておく）' },
         ],
       },
       {
@@ -809,7 +809,7 @@
         source: 'https://commufa-elidea.com/',
         conditions: '1ギガ以下のメニューは25,000円（それより上は最大30,000円）。全員対象・オプション条件なし。コミュファ光公式サイトの申込フォームからだと対象外',
         todo: [
-          { phase: 'apply', text: 'コミュファ光は「申し込む（PR）」の代理店（エルアイデア）のページから申し込み、確認の電話で振込口座を伝える' },
+          { phase: 'apply', text: 'コミュファ光を申し込む（リンク先は代理店のエルアイデア。確認の電話で振込口座を伝える）' },
         ],
       },
       {
@@ -819,7 +819,7 @@
         source: 'https://me-hikari.net/campaign/original.php',
         conditions: '光ベーシック・光10ギガの新規申込。オプション不要。申込から6か月以内に開通。8か月以上継続しないと全額返金。代理店から申し込むと、メガ・エッグ公式Web特典は対象外',
         todo: [
-          { phase: 'apply', text: 'メガ・エッグは「申し込む（PR）」の代理店（株式会社NEXT）のページから申し込む' },
+          { phase: 'apply', text: 'メガ・エッグを申し込む（リンク先は代理店の株式会社NEXT）' },
           { phase: 'after', text: 'メガ・エッグの代理店キャッシュバック：届いたフォームで振込口座を登録する' },
         ],
       },
@@ -830,7 +830,7 @@
         source: 'https://pikarahikari.net/campaign/original_cb.php',
         conditions: 'ピカラ光ねっとの新規申込。オプション不要。申込から6か月以内に開通。8か月以上継続しないと全額返金。2022年2月18日〜終了日未定',
         todo: [
-          { phase: 'apply', text: 'ピカラ光は「申し込む（PR）」の代理店（株式会社NEXT）のページから申し込む' },
+          { phase: 'apply', text: 'ピカラ光を申し込む（リンク先は代理店の株式会社NEXT）' },
           { phase: 'after', text: 'ピカラ光の代理店キャッシュバック：届いたフォームで振込口座を登録する' },
         ],
       },
@@ -851,7 +851,7 @@
         viaLink: 'electric:softbank-denki', endsAt: '2027-03-31', checkedAt: '2026-11-13', confidence: 'high', receive: 'auto', receiveNote: 'ほかの特典が終わった翌月から3か月、電気代から割引（電気代が1,100円より少ない月はその額まで）',
         requires: { area: ['hokkaido', 'tokyo', 'chubu', 'chugoku', 'shikoku'] }, source: 'https://www.softbank.jp/energy/special/site-limited/',
         conditions: '2026年10月1日〜2027年3月31日。個人・新規。北海道・東京・中部・中国・四国・沖縄電力エリア（関西電力エリアの「Powered by 関西電力」は対象外）。申込で「現在ご利用の電力会社のご契約情報」を「あり」にする。90日以内の開通。1年未満の解約は違約金5,000円',
-        todo: [{ phase: 'apply', text: 'ソフトバンクでんきは「申し込む（PR）」のリンク先のページで提供条件書を確認してから申し込む（「今の電力会社の契約情報」は「あり」を選ぶ）' }],
+        todo: [{ phase: 'apply', text: 'ソフトバンクでんきを申し込む（リンク先のページで提供条件書を確認。「今の電力会社の契約情報」は「あり」を選ぶ）' }],
       },
       {
         id: 'rakuten-denki-pt', name: '楽天でんき 秋の家計応援キャンペーン', target: 'electric', provider: 'rakuten-denki', amount: 5000, kind: 'points',
