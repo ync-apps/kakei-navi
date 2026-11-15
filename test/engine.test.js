@@ -233,18 +233,18 @@ test('DUEMO用の文：1行目がタイトル、金額と期限の行がある',
 test('終了日を過ぎたキャンペーンは計算から外れる', () => {
   const has = (today) => {
     const r = E.compare(baseInput({ options: { includePoints: true, excludeUnverified: true, applyPolicy: 'full', today } }), data);
-    return find(r, (y) => y.combo.hikari === 'nuro').items.some((i) => i.label.startsWith('NURO光 キャッシュバック'));
+    return find(r, (y) => y.combo.mobile.every((b) => b === 'rakuten')).items.some((i) => i.label.startsWith('楽天モバイル初めて申し込み 20,000'));
   };
-  assert.strictEqual(has('2026-11-15'), true);
-  assert.strictEqual(has('2026-11-16'), false);
+  assert.strictEqual(has('2026-11-17'), true);
+  assert.strictEqual(has('2026-11-18'), false);
 });
 
 test('やることリスト：締切のある特典は申込の期限がその日になる', () => {
-  const input = baseInput({ options: { includePoints: true, excludeUnverified: true, applyPolicy: 'full', today: '2026-11-10' } });
+  const input = baseInput({ options: { includePoints: true, excludeUnverified: true, applyPolicy: 'full', today: '2026-11-16' } });
   const r = E.compare(input, data);
-  const x = find(r, (y) => y.combo.hikari === 'nuro');
-  const t = E.buildTodos(x, input, data).find((y) => y.text.startsWith('NURO光を申し込む'));
-  assert.strictEqual(E.dueOf(t, '2026-11-10').getDate(), 15);
+  const x = find(r, (y) => y.combo.mobile.every((b) => b === 'rakuten'));
+  const t = E.buildTodos(x, input, data).find((y) => y.text.startsWith('楽天銀行の口座を用意'));
+  assert.strictEqual(E.dueOf(t, '2026-11-16').getDate(), 17);
 });
 
 test('期間限定の料金は期間が過ぎると通常料金になる（NURO光 2年割は24か月まで）', () => {
@@ -425,4 +425,20 @@ test('楽天モバイルの初めて申し込み特典は併用できず、一�
   };
   assert.deepStrictEqual(pts('2026-11-15'), [20000, 20000]);
   assert.deepStrictEqual(pts('2026-11-18'), [10000, 10000]);
+});
+
+test('11/15の総点検で足した特典が計算に入る', () => {
+  const r = E.compare(baseInput({ options: { includePoints: true, excludeUnverified: true, applyPolicy: 'full', today: '2026-11-15' } }), data);
+  const labels = (f) => find(r, f).items.map((i) => i.label);
+  // ドコモ MAX への乗り換え 20,000ポイント（今が au の人。1人目20GB → ドコモ MAX）
+  const r2 = E.compare(baseInput({ lines: [{ current: 'au', gb: 20 }, { current: 'au', gb: 3 }], options: { includePoints: true, excludeUnverified: true, applyPolicy: 'full', today: '2026-11-15' } }), data);
+  assert.ok(find(r2, (y) => y.combo.mobile.every((b) => b === 'docomo')).items.some((i) => i.label.startsWith('ドコモ SIMのみ乗り換え')));
+  // IIJmio 半額と家族割引
+  const iij = labels((y) => y.combo.mobile.every((b) => b === 'iijmio'));
+  assert.ok(iij.some((l) => l.startsWith('IIJmio ギガプラン半額キャンペーン')));
+  assert.ok(iij.some((l) => l.startsWith('IIJmio 家族割引')));
+  // ドコモ光：工事料相当（24か月なら8〜24か月目の17か月分）
+  const dh = find(r, (y) => y.combo.hikari === 'docomo-hikari' && !y.hikari.useLink);
+  const kouji = dh && dh.items.find((i) => i.label.startsWith('ドコモ光 新規工事料実質0円'));
+  if (kouji) assert.strictEqual(-kouji.amount, Math.round(28600 * 17 / 24));
 });

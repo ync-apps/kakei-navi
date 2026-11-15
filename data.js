@@ -179,6 +179,10 @@
     // group: 'home' のものは光・でんきのセット割と重ならない（大きい方だけ）
     familyDiscounts: [
       {
+        id: 'iij-family', name: 'IIJmio 家族割引', brand: 'iijmio', byCount: { 2: 100 }, confidence: 'high', checkedAt: '2026-11-15',
+        source: 'https://www.iijmio.jp/hdc/kazokuwaribiki/', note: '同じmioIDで音声SIM・音声eSIMを2回線以上使うと、1回線あたり月100円引き',
+      },
+      {
         id: 'docomo-family', name: 'みんなドコモ割', brand: 'docomo', countBrands: ['docomo', 'ahamo'], byCount: { 2: 550, 3: 1210 },
         todo: [{ phase: 'after', text: 'ドコモのファミリー割引グループに家族の回線を入れる（みんなドコモ割）' }],
         plans: ['docomo-max-1', 'docomo-max-3', 'docomo-max'], confidence: 'high', source: 'https://www.docomo.ne.jp/charge/discount/minna_docomo/',
@@ -258,7 +262,7 @@
       },
       {
         id: 'en-hikari', name: 'enひかり', type: 'collab', confidence: 'high', source: 'https://enhikari.jp/',
-        price: { house: 4620, mansion: 3520 }, setupFee: 3300, construction: { house: 16500, mansion: 16500 }, constructionFree: true,
+        price: { house: 4620, mansion: 3520 }, setupFee: 3300, setupFeeHenkou: 2200, construction: { house: 16500, mansion: 16500 }, constructionFree: true,
         note: 'プロバイダ込み。最低利用期間・解約手数料なし。工事費無料キャンペーン中',
       },
       {
@@ -468,6 +472,12 @@
         requires: { mobile: ['rakuten'], hikari: ['rakuten-hikari'] },
       },
       {
+        // 公式サイトからの新規申込だけ（代理店リンクから申し込むと対象外なので、リンクを貼ったら使わない）
+        id: 'pikara-official-5m', name: 'ピカラ光 公式サイト限定 5か月無料', target: 'hikari', amount: 'full', months: 5, startMonth: 2, notWithLink: 'hikari:pikara', confidence: 'high', checkedAt: '2026-11-15',
+        source: 'https://www.pikara.jp/lp/2502_hikari_ser/index.html', note: '2025年10月1日〜終了日未定。ピカラ公式サイトから新規申込で、開通月を除く5か月の月額基本料が無料（開通月の無料は計算に入れていない）。コールセンター経由は対象外',
+        requires: { hikari: ['pikara'] },
+      },
+      {
         id: 'iij-mio-wari', name: 'mio割（IIJmioひかり＋IIJmio）', target: 'hikari', amount: 660, confidence: 'high',
         todo: [{ phase: 'after', text: 'IIJmio の mio割を申し込む' }],
         source: 'https://www.iijmio.jp/imh/',
@@ -630,10 +640,56 @@
     // coversCancelFee: 今の光回線の解約金を負担（上限 cap）
     campaigns: [
       {
+        // ドコモ オンラインショップの SIMのみ契約。ドコモ MAX・ポイ活 MAX への乗り換えは20,000ポイント（ドコモ mini の金額は公式で確認できず入れていない）
+        id: 'docomo-mnp-max', name: 'ドコモ SIMのみ乗り換え dポイント（ドコモ MAX）', target: 'line', provider: 'docomo', plans: ['docomo-max-1', 'docomo-max-3', 'docomo-max'], amount: 20000, kind: 'points', mnpOnly: true,
+        checkedAt: '2026-11-15', confidence: 'high', receive: 'auto', receiveNote: '開通手続きの翌々月にdポイント（期間・用途限定）',
+        source: 'https://www.docomo.ne.jp/campaign_event/plan_norikae/index.html',
+        applyNote: 'ドコモオンラインショップで「SIMのみ」で申し込む',
+        conditions: 'ドコモオンラインショップでのSIMのみ契約。ドコモ MAX・ポイ活 MAX へののりかえで最大20,000ポイント（2025年6月5日〜終了日未定）。新規契約やドコモ miniは金額が違う',
+      },
+      {
+        // 本気割：乗り換えで 360GB（365日間）トッピングを買うと半額をau PAY 残高に還元
+        id: 'povo-mnp-360', name: 'povo 本気割（360GB・365日間トッピング）', target: 'line', provider: 'povo', plans: ['povo-360y'], amount: 13200, kind: 'cash', mnpOnly: true,
+        checkedAt: '2026-11-15', confidence: 'high', receive: 'auto', receiveNote: 'SIM有効化の翌月末までにau PAY 残高へ',
+        source: 'https://povo.jp/campaign/detail/mnp_aupay_cpn_2025_05/',
+        applyNote: 'SIMを有効化してから7日以内に「データ追加360GB（365日間）」を買う（au IDを連携しておく）',
+        conditions: '他社からの乗り換えで「通話＋データ」プラン。SIM有効化の7日後までに初めて対象トッピングを購入。au IDの連携とau PAYの利用開始が必要',
+      },
+      {
+        id: 'iij-half-5', name: 'IIJmio ギガプラン半額キャンペーン（5ギガ）', target: 'line', provider: 'iijmio', plans: ['iij-5'], amount: 950, kind: 'cash',
+        checkedAt: '2026-11-15', confidence: 'high', receive: 'auto', receiveNote: '利用開始月から最大3か月、月額基本料が半額（月475円引き）',
+        source: 'https://www.iijmio.jp/campaign/mio.html?cptype=simcp',
+        conditions: '2026年11月5日〜終了日未定。音声SIM・音声eSIMの新規・乗り換え。最大3か月半額だが、1か月目は日割りのため2か月分（950円）で計算。特典の間は同じ容量のプランを続けること',
+      },
+      {
+        id: 'iij-half-10', name: 'IIJmio ギガプラン半額キャンペーン（10ギガ）', target: 'line', provider: 'iijmio', plans: ['iij-10'], amount: 1400, kind: 'cash',
+        checkedAt: '2026-11-15', confidence: 'high', receive: 'auto', receiveNote: '利用開始月から最大3か月、月額基本料が半額（月700円引き）',
+        source: 'https://www.iijmio.jp/campaign/mio.html?cptype=simcp',
+        conditions: '2026年11月5日〜終了日未定。音声SIM・音声eSIMの新規・乗り換え。最大3か月半額だが、1か月目は日割りのため2か月分（1,400円）で計算。特典の間は同じ容量のプランを続けること',
+      },
+      {
+        id: 'iij-half-15', name: 'IIJmio ギガプラン半額キャンペーン（15ギガ）', target: 'line', provider: 'iijmio', plans: ['iij-15'], amount: 1600, kind: 'cash',
+        checkedAt: '2026-11-15', confidence: 'high', receive: 'auto', receiveNote: '利用開始月から最大3か月、月額基本料が半額（月800円引き）',
+        source: 'https://www.iijmio.jp/campaign/mio.html?cptype=simcp',
+        conditions: '2026年11月5日〜終了日未定。音声SIM・音声eSIMの新規・乗り換え。最大3か月半額だが、1か月目は日割りのため2か月分（1,600円）で計算。特典の間は同じ容量のプランを続けること',
+      },
+      {
+        id: 'iij-half-25', name: 'IIJmio ギガプラン半額キャンペーン（25ギガ）', target: 'line', provider: 'iijmio', plans: ['iij-25'], amount: 2000, kind: 'cash',
+        checkedAt: '2026-11-15', confidence: 'high', receive: 'auto', receiveNote: '利用開始月から最大3か月、月額基本料が半額（月1000円引き）',
+        source: 'https://www.iijmio.jp/campaign/mio.html?cptype=simcp',
+        conditions: '2026年11月5日〜終了日未定。音声SIM・音声eSIMの新規・乗り換え。最大3か月半額だが、1か月目は日割りのため2か月分（2,000円）で計算。特典の間は同じ容量のプランを続けること',
+      },
+      {
+        id: 'iij-half-35', name: 'IIJmio ギガプラン半額キャンペーン（35ギガ）', target: 'line', provider: 'iijmio', plans: ['iij-35'], amount: 2400, kind: 'cash',
+        checkedAt: '2026-11-15', confidence: 'high', receive: 'auto', receiveNote: '利用開始月から最大3か月、月額基本料が半額（月1200円引き）',
+        source: 'https://www.iijmio.jp/campaign/mio.html?cptype=simcp',
+        conditions: '2026年11月5日〜終了日未定。音声SIM・音声eSIMの新規・乗り換え。最大3か月半額だが、1か月目は日割りのため2か月分（2,400円）で計算。特典の間は同じ容量のプランを続けること',
+      },
+      {
         id: 'ahamo-mnp', name: 'ahamo 乗り換え特典', target: 'line', provider: 'ahamo', amount: 20000, kind: 'points', mnpOnly: true,
         todo: [{ phase: 'apply', text: 'ahamo のキャンペーンページで対象条件を確認してから申し込む' }],
-        confidence: 'mid', checkedAt: '2026-11-15', source: 'https://soldi.hikkoshizamurai.jp/articles/sim-campaign/',
-        conditions: 'SIMのみの乗り換え。dポイント（期間・用途限定）。ドコモからは対象外。公式ページは自動取得できず記事で確認',
+        confidence: 'high', checkedAt: '2026-11-15', receive: 'auto', receiveNote: '条件を満たした月の翌々月末から5か月、毎月4,000ポイント', source: 'https://ahamo.com/special/lp/dpointcp/001.html',
+        conditions: 'SIMのみの乗り換え（要エントリー）。dポイント（期間・用途限定）合計20,000ポイント。ドコモからは対象外。JALモバイルオプション同時申込は対象外',
       },
       {
         id: 'uq-mnp', name: 'UQモバイル 乗り換え特典', target: 'line', provider: 'uq', amount: 20000, kind: 'cash', mnpOnly: true,
@@ -644,8 +700,8 @@
       {
         id: 'au-ols-mnp', name: 'au Online Shop SIM乗り換え特典', target: 'line', provider: 'au', amount: 20000, kind: 'cash', mnpOnly: true,
         todo: [{ phase: 'apply', text: 'au は Online Shop から SIM のみで申し込む（特典の対象）' }],
-        confidence: 'high', source: 'https://www.au.com/mobile/campaign/ols-sim-2010/',
-        conditions: 'au Online Shop で SIM・eSIM のみの乗り換え。au PAY 残高で最大20,000円相当。UQ・povoからは対象外',
+        confidence: 'high', checkedAt: '2026-11-15', source: 'https://www.au.com/mobile/campaign/ols-sim-2010/',
+        conditions: '2026年9月17日〜終了日未定。au Online Shop で SIM・eSIM のみの乗り換え。au PAY 残高で最大20,000円相当。UQ・povoからは対象外',
       },
       {
         id: 'ym-mnp', name: 'ワイモバイル 乗り換え特典', target: 'line', provider: 'ymobile', amount: 15000, kind: 'points', mnpOnly: true,
@@ -690,10 +746,10 @@
       },
       {
         id: 'nuro-cb', name: 'NURO光 キャッシュバック', target: 'hikari', provider: 'nuro', amount: 15000, kind: 'cash',
-        endsAt: '2026-11-15', notWithLink: 'hikari:nuro', /* 広告リンク先の特典とは併用できない */
+        notWithLink: 'hikari:nuro', /* 広告リンク先の特典とは併用できない */
         todo: [{ phase: 'later', months: 17, text: 'NURO光のキャッシュバック受け取り手続き（開通17か月後に届くメールから。期限あり）' }],
-        checkedAt: '2026-11-10', confidence: 'high', receive: 'apply', receiveNote: '開通17か月後に届くメールからマイページで口座を指定（手続き期間45日）', source: 'https://www.nuro.jp/',
-        conditions: '11月15日まで。2年割の申込・12か月以内の開通・支払方法の登録が条件',
+        checkedAt: '2026-11-15', confidence: 'high', receive: 'apply', receiveNote: '開通17か月後に届くメールからマイページで口座を指定（手続き期間45日）', source: 'https://www.nuro.jp/',
+        conditions: '公式ページの申込特典（11/15時点で終了日の表示なし）。2年割の申込・12か月以内の開通・支払方法の登録が条件',
       },
       {
         // 広告（PR）リンク先の特別ページ（nuro.jp/hikari/pr/sp/）からの申込だけの特典。affiliate.js に NURO光のリンクがあるときだけ計算に入る
@@ -790,6 +846,31 @@
           { phase: 'apply', text: 'ソフトバンク光を申し込む（リンク先は代理店の株式会社NEXT。事業者変更承諾番号を先に取っておく）' },
           { phase: 'after', text: 'ソフトバンク光の代理店キャッシュバック：SMSで届くフォームから振込口座を登録する' },
         ],
+      },
+      {
+        // ドコモ光の公式Web申込特典（代理店のリンクから申し込むと対象外なので、リンクを貼ったら使わない）
+        id: 'docomo-hikari-web', name: 'ドコモ光 公式Web申込 dポイント', target: 'hikari', provider: 'docomo-hikari', amount: 20000, kind: 'points', notWithLink: 'hikari:docomo-hikari',
+        checkedAt: '2026-11-15', confidence: 'high', receive: 'auto',
+        source: 'https://nttdocomo-ssw.com/nssw/dhkr/19dec_b/',
+        conditions: 'ドコモ光 1ギガを公式Webで新規・事業者変更で申し込み（転用は15,000ポイント）。dポイント（期間・用途限定）',
+      },
+      {
+        id: 'docomo-hikari-cover', name: 'ドコモ光 他社解約金 dポイント', target: 'hikari', provider: 'docomo-hikari', amount: 0, kind: 'points', notWithLink: 'hikari:docomo-hikari',
+        coversCancelFee: true, cancelFeeCap: 11000, checkedAt: '2026-11-15', confidence: 'high', receive: 'apply',
+        source: 'https://nttdocomo-ssw.com/nssw/dhkr/19dec_b/', conditions: '他社からの乗り換えで、他社の解約金のうち最大11,000ポイント（1ギガ。10ギガは最大100,000ポイント）',
+      },
+      {
+        // 新規工事料（28,600円）相当を、利用開始の7か月後から24か月に分けてdポイントで進呈（spread）
+        id: 'docomo-hikari-kouji', name: 'ドコモ光 新規工事料実質0円（dポイント）', target: 'hikari', provider: 'docomo-hikari', amount: 28600, kind: 'points', newOnly: true,
+        spread: { startMonth: 8, months: 24 }, checkedAt: '2026-11-15', confidence: 'high', receive: 'auto',
+        source: 'https://www.docomo.ne.jp/campaign_event/hikari_shinkikojiryo_free/',
+        conditions: '新規申込。工事料相当のdポイントを利用開始月の7か月後の月から24か月に分けて進呈（比べる期間内にもらえる分だけ計算）。途中で解約するとそこで終わり',
+      },
+      {
+        id: 'osakagas-new', name: '大阪ガスの電気 新規申込で基本料金2か月0円', target: 'electric', provider: 'osakagas-denki', amount: 1527, kind: 'cash',
+        endsAt: '2026-11-30', checkedAt: '2026-11-15', confidence: 'high', receive: 'auto',
+        source: 'https://home.osakagas.co.jp/lp/electricity/cp_re/index.html',
+        conditions: '2026年10月1日〜11月30日に新規申込、2027年1月31日までに供給開始。関西エリア。取次事業者経由は対象外。金額は最低料金（15kWhまで）2か月分で計算',
       },
       {
         id: 'docomo-hikari-itx', name: 'ドコモ光 代理店キャッシュバック（新規）', agent: 'アイ・ティー・エックス株式会社', target: 'hikari', provider: 'docomo-hikari', amount: 40000, kind: 'cash',

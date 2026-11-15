@@ -203,7 +203,10 @@
         }
         // reduceIfGroup：その割引（例：ソフトバンク光 超おうち応援割）を使うとキャッシュバックが減るもの
         const cut = c.reduceIfGroup && items.some((it) => it.group === c.reduceIfGroup.group) ? c.reduceIfGroup.amount : 0;
-        const v = campaignValue(cut ? { ...c, amount: Math.max(0, c.amount - cut) } : c, opts);
+        // spread：分けてもらう特典（例：ドコモ光の工事料相当を8か月目から24か月）。比べる期間内にもらえる分だけ
+        const spreadAmt = c.spread ? Math.round(c.amount * Math.max(0, Math.min(c.spread.months, months - c.spread.startMonth + 1)) / c.spread.months) : c.amount;
+        const base = c.spread ? { ...c, amount: spreadAmt } : c;
+        const v = campaignValue(cut ? { ...base, amount: Math.max(0, base.amount - cut) } : base, opts);
         if (v > 0) items.push({ cat: 'hikari', label: campaignLabel(c, opts) + (cut ? `（${c.reduceIfGroup.label}を使うので${yen(cut)}減額）` : ''), amount: -v, low: lowConf(c), campaign: c, src: c.source });
       }
     }

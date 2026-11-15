@@ -22,6 +22,12 @@
      - 記事が開けない（403など）・数字が載っていない・記事の日付が古く公式とも合わない ときは、ほかの新しい記事か公式で確かめ直す。どこでも確かめられなければ `confidence: 'low'`（計算から外れる）にし、報告で「人の確認が必要」と書く
      - 記事の見出しと本文で数字が違うときは本文の数字を使う。特典に有料オプションの加入が必要なら `conditions` に書く
      - 2026-11-15 に、ワイモバイル（料金・家族割・超!おトク割）・IIJmio（料金）・eo光（料金・1年目の割引）・LINEMO（料金・手数料・乗り換え特典）は、人がブラウザで公式ページを開いて確かめ、出典を公式にした。これらの公式サイトは自動では読めないことがあるので、読めないときは日付の新しい記事2つ以上と照らし合わせ、数字が変わっていなければ `confidence: 'high'` のまま `checkedAt` は変えない。変わっていれば直して `'mid'` にし、報告に書く
+   - **すべての会社のキャンペーン一覧を毎週開く（取りこぼし防止）**：データにある特典を確かめるだけでなく、各社のキャンペーン一覧ページを開いて、**データにない新しい特典がないか**を見る。SIMのみ・申込だけでもらえるもの（端末購入・有料オプション・抽選が条件のものは入れない）を見つけたら追加する。2026-11-15 の総点検では、ドコモ（SIMのみ乗り換え）・ドコモ光（公式Web特典・工事料実質0円）・IIJmio（半額・家族割引）・povo（本気割）・ピカラ光（公式5か月無料）・大阪ガスの電気（基本料金2か月0円）が抜けていた
+     - スマホ：docomo.ne.jp/campaign_event/ ・ ahamo.com/campaigns ・ au.com/mobile/campaign/ ・ uqwimax.jp/mobile/ ・ povo.jp/campaign ・ softbank.jp/mobile/campaigns/ ・ ymobile.jp/store/ ・ linemo.jp/campaign/ ・ network.mobile.rakuten.co.jp/campaign/ ・ iijmio.jp/campaign/ ・ mineo.jp/campaign/ ・ nihontsushin.com ・ join.biglobe.ne.jp/mobile/campaign/
+     - 光回線：nttdocomo-ssw.com/nssw/dhkr/19dec_b/ ・ softbank.jp/internet/campaigns/list/ ・ au.com/internet/campaign/ ・ network.mobile.rakuten.co.jp/hikari/ ・ iijmio.jp/imh/ ・ so-net.ne.jp/access/hikari/1g/ ・ enhikari.jp ・ nuro.jp ・ eonet.jp ・ commufa.jp ・ pikara.jp/cp/ ・ megaegg.jp ・ bbiq.jp ・ join.biglobe.ne.jp/ftth/hikari/
+     - 電気・ガス：au.com/energy/denki/ ・ softbank.jp/energy/ ・ denki.docomo.ne.jp/campaign/ ・ energy.rakuten.co.jp ・ home.tokyo-gas.co.jp ・ cdedirect.co.jp ・ eonet.jp ・ home.osakagas.co.jp/campaign/ ・ tohogas.co.jp
+     - 終了日（endsAt）が今日・明日のものは、延長されていないか公式で確かめる（NURO光のキャッシュバックは 11/15 終了の予定だったが、延長されていた）
+     - 古いキャンペーンページが残っていることがある（例：楽天ひかり「1年無料」のページ）。その会社のトップページに載っている特典と照らし合わせてから入れる
    - **公式サイトが自動取得を拒否する会社の確かめ方**
      - 東京電力・関西電力：自社サイトは読めないため、同じ料金で売っている会社の公式料金表で確かめる。
        ソフトバンクでんき https://www.softbank.jp/energy/price/ （関西は「Powered by 関西電力」）と auでんき https://www.au.com/energy/denki/merit/plan/ の東京・関西の単価が、`electric` の `std` の `tokyo`・`kansai` と同じか見る。2社がそろって変わっていたら、大手電力の料金も変わったとみなして直す（2026-11-10 に一致を確認済み）
