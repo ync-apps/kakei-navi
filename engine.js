@@ -139,8 +139,9 @@
         if (c.plans && !c.plans.includes(best.plan.id)) return false; // プランで金額が違う特典
         return meets(c.requires, lineCombo, area);
       });
-      for (const c of camps) {
-        const v = campaignValue(c, opts);
+      // 同じ group の特典は併用できないので、一番多いものだけ使う
+      const vals = pickByGroup(camps.map((c) => ({ c, group: c.group, total: campaignValue(c, opts) })));
+      for (const { c, total: v } of vals) {
         if (v > 0) items.push({ cat: 'line', who, label: campaignLabel(c, opts), amount: -v, low: lowConf(c), campaign: c, src: c.source });
       }
     }
@@ -602,7 +603,8 @@
       const who = ls.map((l) => `${l.label}：${l.plan.name}`).join('、');
       const campaigns = ls.flatMap((l) => l.items.filter((it) => it.campaign).map((it) => it.campaign));
       for (const c of campaigns) fromList(c.todo, c.source, moneyOf(c), c.viaLink);
-      add('apply', `${b.name}に乗り換えを申し込む（${who}）`, { url: b.source, signup: { cat: 'mobile', id: b.id }, note: '今の会社の解約は不要（乗り換えると自動で解約）' });
+      const applyNotes = [...new Set(campaigns.map((c) => c.applyNote).filter(Boolean))];
+      add('apply', `${b.name}に乗り換えを申し込む（${who}）`, { url: b.source, signup: { cat: 'mobile', id: b.id }, note: [...applyNotes, '今の会社の解約は不要（乗り換えると自動で解約）'].join('。') });
     }
     for (const c of r.cards || []) {
       const brands = r.lines.filter((l) => c.card.perLine[l.brand.id]).map((l) => l.brand.name);

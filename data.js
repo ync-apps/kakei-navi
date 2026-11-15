@@ -654,10 +654,19 @@
         conditions: 'M/LプランにSIMのみの乗り換え。データ増量オプション（月550円）の加入が条件。PayPayポイント15,000円相当（ヤフー店は最大21,000円相当）。ソフトバンク・LINEMOからは対象外（記事は2026-11-13更新・終了日未定）',
       },
       {
-        id: 'rakuten-mnp', name: '楽天モバイル 乗り換えポイント', target: 'line', provider: 'rakuten', amount: 10000, kind: 'points', mnpOnly: true,
+        id: 'rakuten-mnp', name: '楽天モバイル 乗り換えポイント', target: 'line', provider: 'rakuten', amount: 10000, kind: 'points', mnpOnly: true, group: 'rakuten-first',
         todo: [{ phase: 'before', text: '楽天モバイルの乗り換えキャンペーンにエントリーする（申込前）' }],
         checkedAt: '2026-11-10', confidence: 'high', receive: 'apply', receiveNote: '事前エントリーが必要。条件達成の翌々月末ごろから3回に分けて受け取り手続き（4,000・3,000・3,000ポイント、有効3か月）', source: 'https://network.mobile.rakuten.co.jp/campaign/mnp/',
         conditions: '他社から電話番号そのまま乗り換え（新規は9,000ポイント）。申込翌月末までに利用開始とRakuten Linkで10秒以上の通話が必要',
+      },
+      {
+        // 楽天銀行と合同のキャンペーン（Web申込・11/18 10時まで）。楽天モバイル初めての申し込みは、ほかのポイント特典と併用できず一番多いものだけ（group）
+        id: 'rakuten-bank-first', name: '楽天モバイル初めて申し込み 20,000ポイント（楽天銀行口座あり・開設の人）', target: 'line', provider: 'rakuten', amount: 20000, kind: 'points', group: 'rakuten-first',
+        endsAt: '2026-11-17', checkedAt: '2026-11-15', confidence: 'high', receive: 'auto', receiveNote: '2027年2月から5か月、毎月末ごろに4,000ポイント（期間限定・有効3か月）',
+        source: 'https://network.mobile.rakuten.co.jp/campaign/bank-mobile-joint/',
+        conditions: 'Web申込限定（2026年11月9日〜11月18日10:00）。キャンペーンページの申し込みボタンから、クーポン「RBKBST00000001」を適用して申し込む。新規・乗り換えとも対象。楽天銀行口座が必要（なければ同じページの口座開設ボタンから11/18 10時までに申込）。12/31までに利用開始・Rakuten Linkで10秒以上発信・楽天銀行ハッピープログラムにエントリー（同じ楽天ID）。おひとり様1回。楽天モバイルショップで申し込む場合は、別のショップ限定20,000ポイント（11/19閉店まで）',
+        applyNote: 'キャンペーンページの申し込みボタンから申し込み、クーポン「RBKBST00000001」が表示されているか確認（11月18日10時まで）',
+        todo: [{ phase: 'before', text: '楽天銀行の口座を用意して、ハッピープログラムにエントリーする（口座がなければ楽天モバイルのキャンペーンページの口座開設ボタンから・11月18日10時まで）' }],
       },
       {
         id: 'linemo-mnp', name: 'LINEMO 乗り換え特典（ベストプランV）', target: 'line', provider: 'linemo', plans: ['linemo-30'], amount: 12000, kind: 'points', mnpOnly: true,

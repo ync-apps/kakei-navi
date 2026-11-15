@@ -416,3 +416,13 @@ test('比べるものを選べる：電気だけ比べると、スマホ・光�
   assert.strictEqual(r.current.total, 9000 * 24);
   assert.deepStrictEqual(Object.keys(r.counts).filter((k) => r.counts[k] > 0), ['electric']);
 });
+
+test('楽天モバイルの初めて申し込み特典は併用できず、一番多いものだけ（11/17までは楽天銀行の20,000、それ以降は乗り換え10,000）', () => {
+  const pts = (today) => {
+    const r = E.compare(baseInput({ options: { includePoints: true, excludeUnverified: true, applyPolicy: 'full', today } }), data);
+    const x = find(r, (y) => y.combo.mobile.every((b) => b === 'rakuten'));
+    return x.items.filter((i) => i.campaign && i.campaign.provider === 'rakuten').map((i) => -i.amount);
+  };
+  assert.deepStrictEqual(pts('2026-11-15'), [20000, 20000]);
+  assert.deepStrictEqual(pts('2026-11-18'), [10000, 10000]);
+});
