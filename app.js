@@ -351,11 +351,11 @@
         : `<p>今の組み合わせは十分お得です。乗り換えても大きな差はなさそうです。</p>`;
       summary += `<p class="meta">今のまま：${yen(cur.total)} ／ おすすめ：${yen(best.total)}（${m}か月の実質負担）</p>`;
     } else {
-      summary += `<p>いちばんお得な組み合わせは ${m}か月で</p><p class="big">${yen(best.total)}</p><p class="meta">今のスマホ代・光回線の月額を入れると「今よりいくらお得か」も出ます。</p>`;
+      summary += `<p>いちばんお得な組み合わせは ${m}か月で</p><p class="big">${yen(best.total)}</p><p class="meta">${[res.compared.mobile && '今のスマホ代', res.compared.hikari && '光回線の月額'].filter(Boolean).join('・') ? `${[res.compared.mobile && '今のスマホ代', res.compared.hikari && '光回線の月額'].filter(Boolean).join('・')}を入れると「今よりいくらお得か」も出ます。` : ''}</p>`;
     }
     const c = res.counts;
     const u = res.electricUsage;
-    if (u.hasTariff) summary += `<p class="meta">電気は月${u.kWh}kWh${u.estimated ? '（電気代からの推定。検針票の値を入れるとより正確）' : ''}・${u.amp}Aとして各社の料金表で計算しました。</p>`;
+    if (!res.compared.electric) { /* 電気は比べていない */ } else if (u.hasTariff) summary += `<p class="meta">電気は月${u.kWh}kWh${u.estimated ? '（電気代からの推定。検針票の値を入れるとより正確）' : ''}・${u.amp}Aとして各社の料金表で計算しました。</p>`;
     else summary += `<p class="meta">この地域は電気の料金表を確認できなかったため、電気は今の金額のままで計算しました。</p>`;
     const cmpNames = { mobile: 'スマホ', hikari: '光回線', electric: '電気', gas: 'ガス' };
     const kept = Object.keys(cmpNames).filter((k) => !res.compared[k]).map((k) => cmpNames[k]);
