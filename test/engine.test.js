@@ -35,15 +35,18 @@ test('家族1人ずつ別の会社にする案も計算される', () => {
   assert.ok(r.results.some((x) => new Set(x.combo.mobile).size > 1));
 });
 
-test('ソフトバンク光＋ソフトバンク：おうち割 光セットが1人ずつ・オプション代・応援割', () => {
-  const r = E.compare(baseInput(), data);
+test('ソフトバンク光＋ソフトバンク：おうち割 光セットが1人ずつ・オプション代・応援割（新規のみ）', () => {
+  const r = E.compare(baseInput({ hikari: { use: true, current: 'none', currentMonthly: '', cancelFee: 0 } }), data);
   const x = find(r, (y) => allSame('softbank')(y) && y.combo.hikari === 'softbank-hikari');
   assert.strictEqual(x.items.filter((i) => i.label.startsWith('おうち割 光セット')).length, 2);
   assert.ok(x.items.some((i) => i.label.startsWith('おうち割に必要な光の指定オプション代')));
   // マンションは月550円、課金開始から7か月目以降なので24か月の比較では18か月分
   const ouen = x.items.find((i) => i.label.startsWith('ソフトバンク光 超おうち応援割'));
   assert.strictEqual(ouen.amount, -550 * 18);
-  const house = E.compare(baseInput({ housing: 'house' }), data);
+  const house = E.compare(baseInput({ housing: 'house', hikari: { use: true, current: 'none', currentMonthly: '', cancelFee: 0 } }), data);
+  // 事業者変更（ドコモ光から）は応援割の対象外
+  const henkou = find(E.compare(baseInput(), data), (y) => allSame('softbank')(y) && y.combo.hikari === 'softbank-hikari');
+  assert.ok(!henkou.items.some((i) => i.label.startsWith('ソフトバンク光 超おうち応援割')));
   const xh = find(house, (y) => allSame('softbank')(y) && y.combo.hikari === 'softbank-hikari');
   assert.strictEqual(xh.items.find((i) => i.label.startsWith('ソフトバンク光 超おうち応援割')).amount, -880 * 18);
 });
@@ -137,13 +140,10 @@ test('申請が必要な特典の扱いを選べる（NURO光）', () => {
   assert.strictEqual(pick('none'), 0);
 });
 
-test('確認できていない特典は標準では入れない（ドコモ光の代理店キャッシュバック）', () => {
-  const has = (excludeUnverified) => {
-    const r = E.compare(baseInput({ hikari: { use: true, current: 'none', currentMonthly: '', cancelFee: 0 }, options: { includePoints: true, excludeUnverified, applyPolicy: 'full' } }), data);
-    return find(r, (y) => y.combo.hikari === 'docomo-hikari').items.some((i) => i.label.includes('代理店キャッシュバック'));
-  };
-  assert.strictEqual(has(true), false);
-  assert.strictEqual(has(false), true);
+test('確認できていない（low）ものは標準では計算に入れない', () => {
+  const lows = [...data.discounts, ...data.campaigns].filter((d) => d.confidence === 'low').map((d) => d.name);
+  const r = E.compare(baseInput({ options: { includePoints: true, excludeUnverified: true, applyPolicy: 'full', today: '2026-11-15' } }), data);
+  for (const x of r.results.slice(0, 200)) for (const it of x.items) assert.ok(!lows.some((n) => it.label.startsWith(n)), it.label);
 });
 
 test('大阪ガスの電気＋ガスのセットでガス代も約3%下がる', () => {
@@ -235,8 +235,8 @@ test('終了日を過ぎたキャンペーンは計算から外れる', () => {
     const r = E.compare(baseInput({ options: { includePoints: true, excludeUnverified: true, applyPolicy: 'full', today } }), data);
     return find(r, (y) => y.combo.mobile.every((b) => b === 'rakuten')).items.some((i) => i.label.startsWith('楽天モバイル初めて申し込み 20,000'));
   };
-  assert.strictEqual(has('2026-11-17'), true);
-  assert.strictEqual(has('2026-11-18'), false);
+  assert.strictEqual(has('2026-11-18'), true);
+  assert.strictEqual(has('2026-11-19'), false);
 });
 
 test('やることリスト：締切のある特典は申込の期限がその日になる', () => {
@@ -244,7 +244,11 @@ test('やることリスト：締切のある特典は申込の期限がその�
   const r = E.compare(input, data);
   const x = find(r, (y) => y.combo.mobile.every((b) => b === 'rakuten'));
   const t = E.buildTodos(x, input, data).find((y) => y.text.startsWith('楽天銀行の口座を用意'));
-  assert.strictEqual(E.dueOf(t, '2026-11-16').getDate(), 17);
+  assert.strictEqual(E.dueOf(t, '2026-11-16').getDate(), 18);
+  // 楽天モバイルの申し込み自体も、締切（11/18）が期限になる
+  const ap = E.buildTodos(x, input, data).find((y) => y.text.startsWith('楽天モバイルに'));
+  assert.strictEqual(E.dueOf(ap, '2026-11-16').getDate(), 18);
+  assert.ok(ap.url.includes('bank-mobile-joint'));
 });
 
 test('期間限定の料金は期間が過ぎると通常料金になる（NURO光 2年割は24か月まで）', () => {
@@ -333,12 +337,12 @@ test('代理店のキャンペーン：リンクがあるときだけ、代理�
   const x2 = find(r2, (y) => y.combo.hikari === 'softbank-hikari');
   assert.ok(x2.items.some((i) => i.label.startsWith('ソフトバンク光 代理店キャッシュバック（転用・事業者変更）')));
   assert.ok(!x2.items.some((i) => i.label.startsWith('ソフトバンク光 代理店キャッシュバック（新規）')));
-  // メガ・エッグ：代理店リンクがあると公式Web特典（10,000円）は外れ、代理店の20,000円になる
+  // メガ・エッグ：公式Web特典（10,000円＋基本料金2か月無料）の方が代理店の20,000円より得なので、リンクがあっても公式で計算する
   const mg = (links) => find(E.compare(baseInput({ area: 'chugoku', housing: 'house', hikari: { use: true, current: 'none', currentMonthly: 0, cancelFee: 0 }, options: opts(links) }), data), (y) => y.combo.hikari === 'megaegg');
   assert.ok(mg({}).items.some((i) => i.label.startsWith('メガ・エッグ 開通後キャッシュバック')));
   const m2 = mg({ 'hikari:megaegg': L });
-  assert.ok(!m2.items.some((i) => i.label.startsWith('メガ・エッグ 開通後キャッシュバック')));
-  assert.strictEqual(m2.items.find((i) => i.label.startsWith('メガ・エッグ 代理店キャッシュバック')).amount, -20000);
+  assert.strictEqual(m2.hikari.useLink, false);
+  assert.ok(m2.items.some((i) => i.label.startsWith('メガ・エッグ 公式Web特典')));
 });
 
 test('リンク経由より公式経由の方が安い会社は、公式経由で計算しPRボタンを出さない（コミュファ光）', () => {
@@ -423,8 +427,9 @@ test('楽天モバイルの初めて申し込み特典は併用できず、一�
     const x = find(r, (y) => y.combo.mobile.every((b) => b === 'rakuten'));
     return x.items.filter((i) => i.campaign && i.campaign.provider === 'rakuten').map((i) => -i.amount);
   };
-  assert.deepStrictEqual(pts('2026-11-15'), [20000, 20000]);
-  assert.deepStrictEqual(pts('2026-11-18'), [10000, 10000]);
+  // 楽天銀行の20,000ポイントは家族で1人分（おひとり様1回・口座が要る）。2人目は乗り換えの10,000
+  assert.deepStrictEqual(pts('2026-11-15'), [20000, 10000]);
+  assert.deepStrictEqual(pts('2026-11-19'), [10000, 10000]);
 });
 
 test('11/15の総点検で足した特典が計算に入る', () => {
@@ -441,4 +446,61 @@ test('11/15の総点検で足した特典が計算に入る', () => {
   const dh = find(r, (y) => y.combo.hikari === 'docomo-hikari' && !y.hikari.useLink);
   const kouji = dh && dh.items.find((i) => i.label.startsWith('ドコモ光 新規工事料実質0円'));
   if (kouji) assert.strictEqual(-kouji.amount, Math.round(28600 * 17 / 24));
+});
+
+// ---------- 6人チェック（2026-11-15）で見つかった問題の再発防止 ----------
+test('今の光回線を使い続ける人には、新規向け・期間限定の割引を付けない', () => {
+  const r = E.compare(baseInput({ compare: { mobile: false, hikari: true, electric: false, gas: false }, hikari: { use: true, current: 'nuro', currentMonthly: 5720, cancelFee: '' } }), data);
+  const stay = find(r, (y) => y.combo.hikari === 'nuro');
+  assert.ok(!stay.items.some((i) => i.label.startsWith('NURO光 2年割')));
+  assert.strictEqual(stay.total, 5720 * 24);
+});
+
+test('解約金の負担特典も「申請が要る特典を入れない」「ポイントを入れない」に従う', () => {
+  const r = E.compare(baseInput({ compare: { mobile: false, hikari: true, electric: false, gas: false }, hikari: { use: true, current: 'other', currentMonthly: '', cancelFee: 20000 }, options: { includePoints: false, applyPolicy: 'none', excludeUnverified: true, today: '2026-11-15' } }), data);
+  for (const x of r.results) assert.ok(!x.items.some((i) => i.label.includes('今の光回線の解約金を負担')));
+});
+
+test('ガスなしを選ぶと、前に入れたガス代は計算に入らない', () => {
+  const r = E.compare(baseInput({ gas: { type: 'none', current: 'std', bill: 5000 } }), data);
+  for (const x of r.results.slice(0, 50)) assert.strictEqual(x.items.filter((i) => i.cat === 'gas').length, 0);
+});
+
+test('povo：本気割があるので、10GBの人も360GB（1年）のトッピングで計算する', () => {
+  const r = E.compare(baseInput({ compare: { mobile: true, hikari: false, electric: false, gas: false }, lines: [{ current: 'docomo', gb: 10 }] }), data);
+  const p = find(r, (y) => y.combo.mobile[0] === 'povo');
+  assert.strictEqual(p.lines[0].plan.id, 'povo-360y');
+  assert.ok(p.items.some((i) => i.label.startsWith('povo 本気割')));
+});
+
+test('家族の一部だけを同じ会社にまとめる組み合わせも比べる（総当たりと同じ答え）', () => {
+  const inp = baseInput({ compare: { mobile: true, hikari: false, electric: false, gas: false }, months: 36, lines: [{ current: 'mineo', gb: 20 }, { current: 'ahamo', gb: 5 }, { current: 'mineo', gb: 3 }], options: { includePoints: false, applyPolicy: 'full', excludeUnverified: true, today: '2026-11-15' } });
+  const r = E.compare(inp, data);
+  // 総当たり
+  const ids = data.mobileBrands.map((b) => b.id);
+  let best = Infinity;
+  for (const a of ids) for (const b of ids) for (const c of ids) {
+    const one = E.compare({ ...inp, lines: inp.lines }, { ...data, mobileBrands: data.mobileBrands.filter((x) => [a, b, c].includes(x.id)) });
+    const hit = one.results.find((y) => y.combo.mobile.join() === [a, b, c].join());
+    if (hit && hit.total < best) best = hit.total;
+  }
+  assert.strictEqual(r.results[0].total, best);
+});
+
+test('同じ会社の申し込みはやることリストで1つにまとまる（電気・スマホ）', () => {
+  const r = E.compare(baseInput({ options: { includePoints: true, excludeUnverified: true, applyPolicy: 'full', today: '2026-11-15' } }), data);
+  for (const x of r.top) {
+    const todos = E.buildTodos(x, baseInput(), data).filter((t) => t.phase === 'apply');
+    for (const name of ['ソフトバンクでんき', 'auでんき', 'au ', 'UQ', 'LINEMO', 'ワイモバイル']) {
+      assert.ok(todos.filter((t) => t.text.startsWith(name)).length <= 1, name + ':' + todos.map((t) => t.text).join(' / '));
+    }
+  }
+});
+
+test('新しく契約する人には「乗り換え」「解約不要」と書かない', () => {
+  const inp = baseInput({ lines: [{ current: 'new', gb: 3 }] });
+  const x = E.compare(inp, data).results[0];
+  const ap = E.buildTodos(x, inp, data).find((t) => t.signup && t.signup.cat === 'mobile');
+  assert.ok(ap.text.includes('新規で申し込む'));
+  assert.ok(!(ap.note || '').includes('解約'));
 });

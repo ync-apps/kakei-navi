@@ -38,15 +38,17 @@
     if (!svc) return;
     const today = todayYmd();
     const camps = D.campaigns.filter((c) => c.viaLink === key && !(c.endsAt && c.endsAt < today) && (c.amount > 0 || c.amountMonths));
+    const lost = [...D.campaigns, ...D.discounts].filter((c) => c.notWithLink === key && !(c.endsAt && c.endsAt < today));
     const amt = (c) => c.amountMonths ? (c.monthlyCap ? `月${yen(c.monthlyCap)}まで×${c.amountMonths}か月` : `月額${c.amountMonths}か月分`) : yen(c.amount);
     const box = document.createElement('section');
     box.className = 'apply-panel';
     box.innerHTML = `
       <h2>${esc(svc.name)}の申し込み</h2>
-      <p>下のボタンから申し込むと、まとめ割ナビで計算した、このリンク経由の特典の対象になります。</p>
+      <p>下のボタンから申し込むと、まとめ割ナビで計算した、このリンク経由の特典の対象になります（条件あり）。</p>
       ${camps.length ? `<ul>${camps.map((c) => `<li><strong>${esc(c.name)}：${amt(c)}</strong>${c.agent ? `（代理店「${esc(c.agent)}」のページ）` : ''}<br><span class="meta">${esc(c.conditions || '')}（${esc(c.checkedAt || D.asOf)} 時点）</span></li>`).join('')}</ul>` : ''}
-      <a class="btn-signup btn-apply" href="${esc(url)}" target="_blank" rel="sponsored noopener">${esc(svc.name)}を申し込む</a>
-      <p class="meta">このボタンは広告（PR）リンクです。特典の金額・条件は変わることがあります。申し込む前に、リンク先のページで確かめてください。</p>`;
+      ${lost.length ? `<p class="meta">このリンクから申し込むと、公式ページから申し込んだときの特典（${lost.map((c) => esc(c.name)).join('・')}）は対象外です。</p>` : ''}
+      <p class="meta">このボタンは広告（PR）リンクです。特典の金額・条件は変わることがあります。申し込む前に、リンク先のページで確かめてください。</p>
+      <a class="btn-signup btn-apply" href="${esc(url)}" target="_blank" rel="sponsored noopener">${esc(svc.name)}を申し込む</a>`;
     $('#notice').after(box);
   })();
 
@@ -60,8 +62,10 @@
     const area = $('#area').value;
     const housing = form.housing.value;
     const keep = (sel, html) => { const v = sel.value; sel.innerHTML = html; if ([...sel.options].some((o) => o.value === v)) sel.value = v; };
-    keep($('#hikariCurrent'), option('none', 'なし（新しく引く）') + D.hikari.filter((h) => E.isAvailable(h, area, housing)).map((h) => option(h.id, h.name)).join('') + option('other', 'その他'));
-    keep($('#electricCurrent'), D.electric.filter((e) => E.isAvailable(e, area, housing)).map((e) => option(e.id, e.name)).join('') + option('other', 'その他'));
+    // 今の会社は「この住まいで新しく申し込めるか」に関係なく選べるように（マンションで auひかり・eo光 を使っている人など）
+    keep($('#hikariCurrent'), option('none', 'なし（新しく引く）') + D.hikari.filter((h) => E.isAvailable(h, area, 'house') || E.isAvailable(h, area, 'mansion')).map((h) => option(h.id, h.name)).join('') + option('other', 'その他'));
+    const elecName = { hokkaido: '北海道電力', tohoku: '東北電力', tokyo: '東京電力', chubu: '中部電力ミライズ', hokuriku: '北陸電力', kansai: '関西電力', chugoku: '中国電力', shikoku: '四国電力', kyushu: '九州電力', okinawa: '沖縄電力' }[area];
+    keep($('#electricCurrent'), D.electric.filter((e) => E.isAvailable(e, area, 'house') || E.isAvailable(e, area, 'mansion')).map((e) => option(e.id, e.id === 'std' && elecName ? `${elecName}（従量電灯・大手電力のふつうのプラン）` : e.name)).join('') + option('other', 'その他'));
     keep($('#gasCurrent'), D.gas.filter((g) => E.isAvailable(g, area, housing)).map((g) => option(g.id, g.name)).join('') + option('other', 'その他'));
   }
 
@@ -182,7 +186,7 @@
 
   function serviceRows(r, input) {
     const rows = [];
-    const lines = r.lines.map((l) => `<div>${esc(l.label)}：${linkText(l.brand.name, l.brand.source)}${tag(l.switching)}<span class="sub">${linkText(l.plan.name, l.plan.source || l.brand.source)}</span></div>`).join('');
+    const lines = r.lines.map((l) => `<div>${esc(l.label)}：${linkText(l.brand.name, l.brand.source)}${l.line && l.line.current === 'new' ? '<span class="tag new">新規</span>' : tag(l.switching)}<span class="sub">${linkText(l.plan.name, l.plan.source || l.brand.source)}</span></div>`).join('');
     rows.push(`<li><span class="cat">スマホ</span><span class="lines">${lines}</span></li>`);
     if (r.hikari.svc) {
       const sub = r.hikari.jigyoushaHenkou ? '<span class="sub">工事なしの「事業者変更」で乗り換え</span>' : '';
@@ -244,7 +248,7 @@
         return `<li>
           <div class="todo-row">
             <div>${esc(t.text)}${t.amount ? `<span class="tag ok">${t.amount.toLocaleString('ja-JP')}${t.kind === 'points' ? 'pt' : '円'}</span>` : ''}
-              <span class="sub">${t.deadline ? '期限' : '目安'}：${due.getMonth() + 1}/${due.getDate()}${due.getFullYear() !== new Date().getFullYear() ? `（${due.getFullYear()}年）` : ''}${t.note ? '・' + esc(t.note) : ''}</span></div>
+              <span class="sub">${t.deadline || (t.applyBy && due.getTime() === new Date(t.applyBy + 'T00:00:00').getTime()) ? '期限' : '目安'}：${due.getMonth() + 1}/${due.getDate()}${due.getFullYear() !== new Date().getFullYear() ? `（${due.getFullYear()}年）` : ''}${t.note ? '・' + esc(t.note) : ''}</span></div>
             <div class="todo-actions">
               ${affUrl(t.signup) ? `<a class="btn-signup" href="${esc(affUrl(t.signup))}" target="_blank" rel="sponsored noopener">申し込む</a>` : okUrl(t.url) ? `<a class="btn-signup" href="${esc(t.url)}" target="_blank" rel="noopener">申し込む</a>` : ''}
               <a class="btn-todo-duemo" href="${esc(D.duemoUrl)}" target="_blank" rel="noopener" data-todo="${idx}:${k}">DUEMOへ</a>
@@ -264,7 +268,7 @@
           </ol>
           <p class="meta">特に「開通から○か月後」の受け取り手続きは忘れやすく、期限を過ぎるともらえません。</p>
         </div>
-        ${todos.some((t) => affUrl(t.signup)) ? '<p class="pr-note">「申し込む」ボタンの一部は広告（PR）リンクです。順位は実質負担の安い順だけで決めていて、広告報酬では変えていません。</p>' : ''}
+        ${todos.some((t) => affUrl(t.signup)) ? '<p class="pr-note">「申し込む」ボタンの一部は広告（PR）リンクです。順位は実質負担（比べる期間の支払い合計から割引・特典を引いた額）の安い順で、広告報酬の額は使っていません。ただし、このサイトがリンクしている代理店・広告ページの特典は、リンクがある会社だけ計算に入れています（内訳に表示）。</p>' : ''}
         ${groups}
         <a class="btn-sub btn-copyall" href="${esc(D.duemoUrl)}" target="_blank" rel="noopener" data-copyall="${idx}">全部まとめてDUEMOへ（${todos.length}件）</a>
       </details>`;
@@ -336,6 +340,7 @@
     // 広告リンクを貼った会社は、リンク先のページの特典（viaLink）で計算する
     const res = E.compare({ ...input, options: { ...(input.options || {}), links: affLinks } }, D);
     const box = $('#result');
+    box.classList.remove('stale');
     if (!res.top.length) {
       box.innerHTML = '<div class="summary"><p>条件に合う組み合わせが見つかりませんでした。データ量などを見直してください。</p></div>';
       return;
@@ -348,11 +353,15 @@
       const diff = cur.total - best.total;
       summary += diff > 0
         ? `<p>いちばんお得な組み合わせにすると、${m}か月で</p><p class="big">約${yen(diff)} お得</p><p>（月あたり 約${yen(diff / m)}）</p>`
-        : `<p>今の組み合わせは十分お得です。乗り換えても大きな差はなさそうです。</p>`;
+        : diff < -1000
+          ? `<p>今の組み合わせのままがいちばん安い計算です。比べた中でいちばん安い案でも、${m}か月で約${yen(-diff)}高くなります。</p>`
+          : `<p>今の組み合わせは十分お得です。乗り換えても大きな差はなさそうです。</p>`;
       summary += `<p class="meta">今のまま：${yen(cur.total)} ／ おすすめ：${yen(best.total)}（${m}か月の実質負担）</p>`;
     } else {
       summary += `<p>いちばんお得な組み合わせは ${m}か月で</p><p class="big">${yen(best.total)}</p><p class="meta">${[res.compared.mobile && '今のスマホ代', res.compared.hikari && '光回線の月額'].filter(Boolean).join('・') ? `${[res.compared.mobile && '今のスマホ代', res.compared.hikari && '光回線の月額'].filter(Boolean).join('・')}を入れると「今よりいくらお得か」も出ます。` : ''}</p>`;
     }
+    summary += `<p class="meta">${(input.options || {}).includePoints !== false ? 'ポイント（期間限定ポイントを含む）' : ''}${(input.options || {}).includePoints !== false && (input.options || {}).applyPolicy !== 'none' ? 'と、' : ''}${(input.options || {}).applyPolicy === 'full' || !(input.options || {}).applyPolicy ? '自分で申請が必要な特典を全額' : (input.options || {}).applyPolicy === 'half' ? '自分で申請が必要な特典を半額' : ''}で含めた金額です（「計算の設定」で変えられます）。</p>`;
+    if (res.compared.hikari && input.hikari.use && !['none', 'other'].includes(input.hikari.current) && !(Number(input.hikari.cancelFee) > 0)) summary += '<p class="meta">今の光回線の解約金・工事費の残りを入れていないため、0円として計算しています。</p>';
     const c = res.counts;
     const u = res.electricUsage;
     if (!res.compared.electric) { /* 電気は比べていない */ } else if (u.hasTariff) summary += `<p class="meta">電気は月${u.kWh}kWh${u.estimated ? '（電気代からの推定。検針票の値を入れるとより正確）' : ''}・${u.amp}Aとして各社の料金表で計算しました。</p>`;
@@ -364,11 +373,11 @@
 
     const cards = res.top.map((r, i) => {
       const save = cur.complete && cur.total > 0 ? cur.total - r.total : null;
-      const saveHtml = save === null ? '' : save > 0 ? `<div class="save">今より約${yen(save)}お得</div>` : `<div class="save minus">今より約${yen(-save)}高い</div>`;
+      const saveHtml = save === null ? '' : Math.abs(save) < 1 ? '<div class="save">今と同じ</div>' : save > 0 ? `<div class="save">今より約${yen(save)}お得</div>` : `<div class="save minus">今より約${yen(-save)}高い</div>`;
       return `
       <article class="plan ${i === 0 ? 'is-best' : ''}">
         <div class="plan-head">
-          <div class="rank">${i === 0 ? '<span class="crown">★</span> いちばんお得' : `${i + 1}位`}</div>
+          <div class="rank">${i === 0 ? '<span class="crown">★</span> 比べた中でいちばんお得' : `${i + 1}位`}</div>
           <div>
             <div class="total">${yen(r.total)} <small>/ ${m}か月（月 約${yen(r.total / m)}）</small></div>
             ${saveHtml}
@@ -420,6 +429,10 @@
     box.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
+  // 入力を変えたら、前の結果は古いことがわかるようにする
+  const markStale = () => { const b = $('#result'); if (b && b.innerHTML.trim() && !b.classList.contains('stale')) { b.classList.add('stale'); b.insertAdjacentHTML('afterbegin', '<p class="stale-note">入力が変わりました。もう一度「計算する」を押してください。</p>'); } };
+  form.addEventListener('input', markStale);
+  form.addEventListener('change', markStale);
   form.addEventListener('submit', (e) => {
     e.preventDefault();
     const input = readInput();

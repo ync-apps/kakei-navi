@@ -44,7 +44,7 @@
       {
         id: 'docomo', name: 'ドコモ', group: 'docomo', confidence: 'high',
         source: 'https://www.docomo.ne.jp/charge/',
-        switchFee: 4950, feeConfidence: 'mid', feeSource: 'https://network.mobile.rakuten.co.jp/fee/saikyo-plan/',
+        switchFee: 0, feeConfidence: 'high', feeSource: 'https://www.docomo.ne.jp/support/procedure/subscribe/index.html', /* 契約事務手数料4,950円はドコモオンラインショップなら無料（乗り換え特典もオンラインショップ限定なので0円で計算） */
         plans: [
           { id: 'docomo-mini2-6', name: 'ドコモ mini2 6GB', capGB: 6, price: 3278, source: 'https://www.docomo.ne.jp/info/news_release/2026/09/25_00.html' },
           { id: 'docomo-mini2-12', name: 'ドコモ mini2 12GB', capGB: 12, price: 4598, source: 'https://www.docomo.ne.jp/info/news_release/2026/09/25_00.html' },
@@ -92,7 +92,7 @@
       },
       {
         id: 'softbank', name: 'ソフトバンク', group: 'softbank', confidence: 'high', source: 'https://www.softbank.jp/mobile/price_plan/',
-        switchFee: 4950, feeConfidence: 'mid', feeSource: 'https://network.mobile.rakuten.co.jp/fee/saikyo-plan/',
+        switchFee: 3850, feeConfidence: 'mid', feeSource: 'https://network.mobile.rakuten.co.jp/fee/saikyo-plan/',
         plans: [
           { id: 'sb-minifit2-2', name: 'ソフトバンク ミニフィット２（〜2GB）', capGB: 2, price: 5258 },
           { id: 'sb-minifit2-5', name: 'ソフトバンク ミニフィット２（〜5GB）', capGB: 5, price: 6358 },
@@ -131,7 +131,7 @@
         ],
       },
       {
-        id: 'iijmio', name: 'IIJmio', group: 'iij', switchFee: 3300, feeConfidence: 'mid', confidence: 'high', checkedAt: '2026-11-15',
+        id: 'iijmio', name: 'IIJmio', group: 'iij', switchFee: 3733, feeConfidence: 'mid', confidence: 'high', checkedAt: '2026-11-15',
         source: 'https://www.iijmio.jp/gigaplan/',
         note: '公式のギガプランのページをブラウザで開いて全プランの料金を確認（2026-11-15）。初期費用は12月1日申込から3,850円（記事 https://selectra.jp/telecom/news/iijmio-giga-plan-half-price-november-2026 ・11月6日更新）',
         plans: [
@@ -183,6 +183,11 @@
         source: 'https://www.iijmio.jp/hdc/kazokuwaribiki/', note: '同じmioIDで音声SIM・音声eSIMを2回線以上使うと、1回線あたり月100円引き',
       },
       {
+        id: 'docomo-family-mini', name: 'みんなドコモ割（ドコモ mini2）', brand: 'docomo', countBrands: ['docomo', 'ahamo'], byCount: { 2: 550 },
+        plans: ['docomo-mini2-6', 'docomo-mini2-12'], confidence: 'high', checkedAt: '2026-11-15', source: 'https://www.docomo.ne.jp/info/news_release/2026/09/25_00.html',
+        note: 'ドコモ mini2 は2回線以上で月550円引き（人数が増えても同じ）',
+      },
+      {
         id: 'docomo-family', name: 'みんなドコモ割', brand: 'docomo', countBrands: ['docomo', 'ahamo'], byCount: { 2: 550, 3: 1210 },
         todo: [{ phase: 'after', text: 'ドコモのファミリー割引グループに家族の回線を入れる（みんなドコモ割）' }],
         plans: ['docomo-max-1', 'docomo-max-3', 'docomo-max'], confidence: 'high', source: 'https://www.docomo.ne.jp/charge/discount/minna_docomo/',
@@ -201,10 +206,23 @@
         note: 'トクトクプラン2のみ。自宅セット割とは重ならない（公式で確認）。金額は記事',
       },
       {
-        id: 'sb-family', name: '新みんな家族割', brand: 'softbank', byCount: { 3: 1100 },
+        id: 'sb-family', name: '新みんな家族割', brand: 'softbank', byCount: { 2: 660, 3: 1210 },
         todo: [{ phase: 'after', text: 'ソフトバンク 新みんな家族割を申し込む' }],
-        plans: ['sb-teigaku', 'sb-paytoku2'], confidence: 'mid', source: 'https://www.softbank.jp/mobile/price_plan/',
-        note: '3回線以上の金額のみ確認（ページ内で1,100円と1,210円の表記あり、小さい方で計算）。2回線の金額は確認できず',
+        plans: ['sb-teigaku', 'sb-paytoku2'], confidence: 'high', checkedAt: '2026-11-15', source: 'https://cdn.softbank.jp/mobile/set/common/pdf/legal/spguide/price_plan/minna-kazoku.pdf',
+        note: 'ペイトク2・テイガク無制限：2回線 660円、3回線以上 1,210円（1回線あたり）',
+      },
+      {
+        id: 'sb-family-mini', name: '新みんな家族割（ミニフィット2）', brand: 'softbank', byCount: { 2: 220, 3: 550 },
+        plans: ['sb-minifit2-2', 'sb-minifit2-5'], confidence: 'high', checkedAt: '2026-11-15', source: 'https://cdn.softbank.jp/mobile/set/common/pdf/legal/spguide/price_plan/minna-kazoku.pdf',
+        note: 'ミニフィット2：2回線 220円、3回線以上 550円（1回線あたり）',
+      },
+      {
+        id: 'mineo-family', name: 'mineo 家族割引', brand: 'mineo', byCount: { 2: 55 }, confidence: 'high', checkedAt: '2026-11-15',
+        source: 'https://mineo.jp/price/', note: '家族で2回線以上なら1回線あたり月55円引き（3回線目以降のデュアルタイプはさらに割引があるが計算に入れていない）',
+      },
+      {
+        id: 'bm-multi', name: 'BIGLOBEモバイル 複数回線割', brand: 'biglobe-mobile', byCount: { 2: 220 }, secondLineOnwards: true, confidence: 'high', checkedAt: '2026-11-15',
+        source: 'https://join.biglobe.ne.jp/mobile/plan/', note: '2回線目から1回線あたり月220円引き',
       },
       {
         id: 'ym-family', name: 'ワイモバイル 家族割引サービス', brand: 'ymobile', byCount: { 2: 1100 }, secondLineOnwards: true, group: 'home',
@@ -237,8 +255,8 @@
       {
         id: 'au-hikari', name: 'auひかり', type: 'own', confidence: 'high', source: 'https://www.au.com/internet/auhikari_1g/',
         excludeAreas: { house: ['kansai', 'chubu', 'okinawa'], mansion: ['okinawa'] }, housing: ['house'],
-        price: { house: 5390, mansion: 0 }, setupFee: 4950, setupConfidence: 'high', setupSource: 'https://www.au.com/internet/auhikari_1g/charge/zuttogigatoku/', /* 新規登録料。2026年8月1日から3,300円→4,950円 */ construction: { house: 41250, mansion: 33000 }, constructionFree: true,
-        note: 'ホーム1G ずっとギガ得プラン 3年目以降の5,390円（1年目5,610円・2年目5,500円は下の差額で計算）。工事費は初期費用相当額割引で実質0円。マンションの料金は確認できず',
+        price: { house: 6490, mansion: 0 }, setupFee: 4950, setupConfidence: 'high', setupSource: 'https://www.au.com/internet/auhikari_1g/charge/zuttogigatoku/', /* 新規登録料。2026年8月1日から3,300円→4,950円 */ construction: { house: 41250, mansion: 33000 }, constructionFree: true,
+        note: 'ホーム1G ずっとギガ得プラン。2027年1月からの料金（3年目以降5,720円・1年目5,940円・2年目5,830円）に、光電話770円を足して計算。工事費の初期費用相当額割引（実質0円）と乗りかえスタートサポートは「ネット＋電話」が条件のため、電話込みで比べる。マンションの料金は確認できず', checkedAt: '2026-11-15',
       },
       {
         id: 'biglobe-hikari', name: 'ビッグローブ光', type: 'collab', confidence: 'high', source: 'https://join.biglobe.ne.jp/ftth/hikari/price/',
@@ -256,9 +274,9 @@
         note: '工事費は21か月利用で実質0円。最低利用24か月',
       },
       {
-        id: 'sonet-hikari', name: 'So-net光', type: 'collab', confidence: 'mid', source: 'https://www.so-net.ne.jp/access/hikari/',
+        id: 'sonet-hikari', name: 'So-net光', type: 'collab', confidence: 'high', checkedAt: '2026-11-15', source: 'https://www.so-net.ne.jp/access/hikari/',
         price: { house: 5995, mansion: 4895 }, setupFee: 6050, construction: { house: 39600, mansion: 39600 }, constructionFree: true,
-        note: 'So-net 光 M（1ギガ）。月額はページの読み取りが不確かなため要確認寄り。契約期間なし',
+        note: 'So-net 光 M（1ギガ）。契約期間なし。工事費39,600円の実質無料は新設のみ',
       },
       {
         id: 'en-hikari', name: 'enひかり', type: 'collab', confidence: 'high', source: 'https://enhikari.jp/',
@@ -279,7 +297,7 @@
       {
         id: 'commufa', name: 'コミュファ光', type: 'own', areas: ['chubu'], housing: ['house'], confidence: 'high', source: 'https://www.commufa.jp/services/information/',
         price: { house: 5170, mansion: 0 }, setupFee: 770, construction: { house: 27500, mansion: 27500 }, constructionFree: true,
-        note: 'ホーム1G（スタート割適用後）。工事費無料は条件付き',
+        note: 'ホーム1G（スタート割適用後）。工事費無料は「安心サポートPlus」の同時申込が条件（3か月無料・その後は解約できる）', checkedAt: '2026-11-15',
       },
       {
         id: 'pikara', name: 'ピカラ光', type: 'own', areas: ['shikoku'], housing: ['house'], confidence: 'high', source: 'https://www.pikara.jp/net/home.html',
@@ -327,9 +345,10 @@
         note: '料金表は大手電力と同じ（東京・北海道で1銭以内の差を確認）。ポイント：月8,000円未満0.5%、以上1%（au/UQ回線の人は申込が必要）',
       },
       {
-        id: 'softbank-denki', name: 'ソフトバンクでんき（おうちでんき）', areas: ['hokkaido', 'tohoku', 'tokyo', 'chubu', 'hokuriku', 'kansai', 'chugoku', 'shikoku'], sameAsStd: true,
-        confidence: 'high', source: 'https://www.softbank.jp/energy/price/',
-        note: '東京の料金表は大手電力と同じ。九州は提供なし',
+        id: 'softbank-denki', name: 'ソフトバンクでんき（おうちでんき）', areas: ['hokkaido', 'tokyo', 'chubu', 'kansai', 'chugoku', 'shikoku'], sameAsStd: true,
+        confidence: 'high', source: 'https://www.softbank.jp/energy/price/', checkedAt: '2026-11-15',
+        tariffs: { chubu: { type: 'B', base10A: 447.92, tiers: [[120, 21.03], [300, 25.47], [null, 28.39]] } },
+        note: '北海道・東京・関西・中国・四国は大手電力と同じ料金表。中部は1kWhあたり少し安い。東北は新規受付停止、北陸・九州は提供なし',
       },
       {
         id: 'docomo-denki', name: 'ドコモでんき Basic', areas: ALL_BUT_OKINAWA, sameAsStd: true, pointRate: 0.01, confidence: 'mid', source: 'https://denki.docomo.ne.jp/',
@@ -346,9 +365,10 @@
         },
       },
       {
-        id: 'tokyogas-denki', name: '東京ガスの電気（基本プラン）', areas: ['tokyo'], confidence: 'high', source: 'https://home.tokyo-gas.co.jp/gas_power/plan/power/price.html',
-        note: '2026年12月1日に料金メニューを改定予定（内容は未確認）',
-        tariffs: { tokyo: { type: 'B', base10A: 311.74, tiers: [[120, 29.70], [300, 35.69], [null, 39.50]] } },
+        id: 'tokyogas-denki', name: '東京ガスの電気（基本プラン）', areas: ['tokyo'], source: 'https://home.tokyo-gas.co.jp/gas_power/plan/power/price.html',
+        confidence: 'mid', checkedAt: '2026-11-15',
+        note: '2026年12月1日の改定後（2027年1月検針分から）の料金で計算。30Aの基本料金1,176.15円・1段目29.75円・2段目35.74円。3段目は公式に記載がなく、1・2段目と同じ+0.05円として39.55円',
+        tariffs: { tokyo: { type: 'B', base10A: 392.05, tiers: [[120, 29.75], [300, 35.74], [null, 39.55]] } },
       },
       {
         id: 'cd-denki', name: 'CDエナジー（ベーシックでんき）', areas: ['tokyo'], pointRate: 0.01, confidence: 'high', source: 'https://www.cdedirect.co.jp/plan/denki/basic_denki/',
@@ -360,12 +380,16 @@
         tariffs: { kansai: { type: 'A', min: 759.48, minKWh: 15, tiers: [[120, 20.69], [300, 26.03], [null, 28.98]] } },
       },
       {
-        id: 'osakagas-denki', name: '大阪ガスの電気', areas: ['kansai'], sameAsStd: true, confidence: 'high', source: 'https://home.osakagas.co.jp/energy/electricity/price/',
-        note: '単体では関西電力 従量電灯A相当。大阪ガスの都市ガスとセットで安くなる（下のセット割）',
+        id: 'osakagas-denki', name: '大阪ガスの電気（ベースプランA）', areas: ['kansai'], confidence: 'high', checkedAt: '2026-11-15', source: 'https://home.osakagas.co.jp/energy/electricity/price/plan_a/',
+        tariffs: { kansai: { type: 'A', min: 707.80, minKWh: 15, tiers: [[120, 20.89], [350, 25.88], [null, 28.69]] } },
+        note: 'ベースプランAの料金表。大阪ガスの都市ガスとセットならベースプランA-G（120kWhを超える分が少し安い。下のセット割）',
       },
       {
-        id: 'tohogas-denki', name: '東邦ガスの電気', areas: ['chubu'], sameAsStd: true, confidence: 'mid', source: 'https://www.tohogas.co.jp/denki/charge/01/index02.html',
-        note: '単体の料金表は段階が多く一部読み取れず、大手と同じとして計算。東邦ガスの都市ガスとセットのファミリープランの割引は下のセット割（公式の試算から計算）',
+        id: 'tohogas-denki', name: '東邦ガスの電気（ファミリープラン）', areas: ['chubu'], requiresCityGas: true, confidence: 'high', checkedAt: '2026-11-15', source: 'https://www.tohogas.co.jp/denki/charge/01/index02.html',
+        tariffs: { chubu: { type: 'B', base10A: 420.42, baseByAmp: { 20: 840.84, 30: 1288.76, 40: 1583.68, 50: 2031.60, 60: 2479.52 },
+          tiers: [[120, 21.23], [200, 25.38], [250, 25.40], [300, 25.42], [350, 26.65], [400, 27.18], [500, 27.79], [700, 28.62], [1000, 28.64], [null, 28.66]],
+          tiersHighAmp: [[120, 21.23], [200, 25.68], [250, 25.70], [300, 25.72], [350, 26.65], [400, 27.18], [500, 27.79], [700, 28.62], [1000, 28.64], [null, 28.66]] } },
+        note: 'シンプルプランⅠ ファミリープラン（2026年11月からの料金）。東邦ガスのガス（都市ガス・LPG）の契約が条件なので、都市ガスの家だけ比べる',
       },
     ],
 
@@ -397,15 +421,15 @@
       {
         id: 'au-smartvalue', name: 'auスマートバリュー', target: 'line', group: 'home', confidence: 'high',
         todo: [{ phase: 'after', text: 'auスマートバリューを申し込む（光回線の開通後）' }],
-        source: 'https://www.au.com/mobile/charge/smartphone/plan/sp-mini-plus/', note: '対象の光回線：auひかり・ビッグローブ光・So-net光・eo光・コミュファ光（記載を確認できたもの）',
-        requires: { mobile: ['au'], hikari: ['au-hikari', 'biglobe-hikari', 'sonet-hikari', 'eo-hikari', 'commufa'] },
+        source: 'https://www.au.com/mobile/charge/smartphone/plan/sp-mini-plus/', note: '「ネット＋電話」が条件（光電話の月額は下の「セット割に必要な光電話代」で計算）。対象の光回線：auひかり・ビッグローブ光・So-net光・eo光・コミュファ光・ピカラ光・メガ・エッグ・BBIQ など', checkedAt: '2026-11-15',
+        requires: { mobile: ['au'], hikari: ['au-hikari', 'biglobe-hikari', 'sonet-hikari', 'eo-hikari', 'commufa', 'pikara', 'megaegg', 'bbiq'] },
         plans: { 'au-mini-1': 1100, 'au-mini-3': 1100, 'au-mini-5': 1100, 'au-max': 1100 },
       },
       {
         id: 'uq-home-net', name: 'UQ 自宅セット割（インターネットコース）', target: 'line', group: 'home', confidence: 'high',
         todo: [{ phase: 'after', text: 'UQ 自宅セット割を申し込む（光回線の開通後）' }],
-        source: 'https://www.uqwimax.jp/mobile/newplan/setwari/jitaku/', note: 'コミコミプランバリューは対象外',
-        requires: { mobile: ['uq'], hikari: ['au-hikari', 'biglobe-hikari', 'sonet-hikari', 'eo-hikari', 'commufa'] },
+        source: 'https://www.uqwimax.jp/mobile/newplan/setwari/jitaku/', note: '「ネット＋電話」が条件（光電話の月額は下の「セット割に必要な光電話代」で計算）。コミコミプランバリューは対象外', checkedAt: '2026-11-15',
+        requires: { mobile: ['uq'], hikari: ['au-hikari', 'biglobe-hikari', 'sonet-hikari', 'eo-hikari', 'commufa', 'pikara', 'megaegg', 'bbiq'] },
         plans: { 'uq-tokutoku-5': 1100, 'uq-tokutoku-30': 1100 },
       },
       {
@@ -445,24 +469,30 @@
         requires: { mobile: ['softbank', 'ymobile'], hikari: ['softbank-hikari'] },
       },
       {
-        id: 'sb-hikari-ouen', name: 'ソフトバンク光 超おうち応援割', target: 'hikari', amount: 880, months: 25, startMonth: 7, housing: ['house'], group: 'sb-ouen', checkedAt: '2026-11-10', confidence: 'high',
-        source: 'https://www.softbank.jp/internet/campaigns/list/sbhikari-1g-2026/', note: 'おうち割を使う場合。課金開始から7か月目以降の25か月。他社サービス利用の証明書の提出が必要',
+        // auスマートバリュー・UQ 自宅セット割は「ネット＋電話」が条件。光電話の月額（約770円）を足す（auひかりは月額に電話代を入れてあるので除く）
+        id: 'au-set-phone', name: 'auスマートバリュー・自宅セット割に必要な光電話代', target: 'hikari', amount: -770, confidence: 'mid', checkedAt: '2026-11-15',
+        source: 'https://www.au.com/mobile/charge/charge-discount/smartvalue/', note: '公式の例で光電話 月770円。光回線の会社により金額が少し違う',
+        requires: { mobile: ['au', 'uq'], hikari: ['biglobe-hikari', 'sonet-hikari', 'eo-hikari', 'commufa', 'pikara', 'megaegg', 'bbiq'] },
+      },
+      {
+        id: 'sb-hikari-ouen', name: 'ソフトバンク光 超おうち応援割', target: 'hikari', amount: 880, months: 19, startMonth: 7, newOnly: true, housing: ['house'], group: 'sb-ouen', checkedAt: '2026-11-10', confidence: 'high',
+        source: 'https://www.softbank.jp/internet/campaigns/list/sbhikari-1g-2026/', note: 'おうち割を使う場合。新規申込のみ。課金開始月を1か月目として7〜25か月目（19か月）。他社サービス利用の証明書の提出が必要',
         requires: { mobile: ['softbank', 'ymobile'], hikari: ['softbank-hikari'] },
         todo: [{ phase: 'apply', text: 'ソフトバンク光の超おうち応援割のため、今の光回線の利用証明書を提出する' }],
       },
       {
-        id: 'sb-hikari-ouen-m', name: 'ソフトバンク光 超おうち応援割（マンション）', target: 'hikari', amount: 550, months: 25, startMonth: 7, housing: ['mansion'], group: 'sb-ouen', checkedAt: '2026-11-10', confidence: 'high',
+        id: 'sb-hikari-ouen-m', name: 'ソフトバンク光 超おうち応援割（マンション）', target: 'hikari', amount: 550, months: 19, startMonth: 7, newOnly: true, housing: ['mansion'], group: 'sb-ouen', checkedAt: '2026-11-10', confidence: 'high',
         source: 'https://www.softbank.jp/internet/campaigns/list/sbhikari-1g-2026/', note: 'おうち割を使う場合',
         requires: { mobile: ['softbank', 'ymobile'], hikari: ['softbank-hikari'] },
         todo: [{ phase: 'apply', text: 'ソフトバンク光の超おうち応援割のため、今の光回線の利用証明書を提出する' }],
       },
       {
-        id: 'sb-hikari-ouen-solo', name: 'ソフトバンク光 超おうち応援割（おうち割なし）', target: 'hikari', amount: 440, months: 25, startMonth: 7, housing: ['house'], group: 'sb-ouen', checkedAt: '2026-11-10', confidence: 'high',
+        id: 'sb-hikari-ouen-solo', name: 'ソフトバンク光 超おうち応援割（おうち割なし）', target: 'hikari', amount: 440, months: 19, startMonth: 7, newOnly: true, housing: ['house'], group: 'sb-ouen', checkedAt: '2026-11-10', confidence: 'high',
         source: 'https://www.softbank.jp/internet/campaigns/list/sbhikari-1g-2026/',
         requires: { hikari: ['softbank-hikari'] },
       },
       {
-        id: 'sb-hikari-ouen-solo-m', name: 'ソフトバンク光 超おうち応援割（おうち割なし・マンション）', target: 'hikari', amount: 275, months: 25, startMonth: 7, housing: ['mansion'], group: 'sb-ouen', checkedAt: '2026-11-10', confidence: 'high',
+        id: 'sb-hikari-ouen-solo-m', name: 'ソフトバンク光 超おうち応援割（おうち割なし・マンション）', target: 'hikari', amount: 275, months: 19, startMonth: 7, newOnly: true, housing: ['mansion'], group: 'sb-ouen', checkedAt: '2026-11-10', confidence: 'high',
         source: 'https://www.softbank.jp/internet/campaigns/list/sbhikari-1g-2026/',
         requires: { hikari: ['softbank-hikari'] },
       },
@@ -494,11 +524,11 @@
         requires: { mobile: ['iijmio'], hikari: ['iij-hikari'] },
       },
       {
-        id: 'sonet-new', name: 'So-net光 新設の月額割引（11か月）', target: 'hikari', amount: 2015, months: 11, housing: ['house'], confidence: 'mid',
+        id: 'sonet-new', name: 'So-net光 新設の月額割引（戸建・11か月）', target: 'hikari', amount: 2015, months: 11, housing: ['house'], newOnly: true, confidence: 'high', checkedAt: '2026-11-15',
         source: 'https://www.so-net.ne.jp/access/hikari/', requires: { hikari: ['sonet-hikari'] },
       },
       {
-        id: 'sonet-new-m', name: 'So-net光 新設の月額割引（11か月）', target: 'hikari', amount: 915, months: 11, housing: ['mansion'], confidence: 'mid',
+        id: 'sonet-new-m', name: 'So-net光 新設の月額割引（マンション・11か月）', target: 'hikari', amount: 915, months: 11, housing: ['mansion'], newOnly: true, confidence: 'high', checkedAt: '2026-11-15',
         source: 'https://www.so-net.ne.jp/access/hikari/', requires: { hikari: ['sonet-hikari'] },
       },
       {
@@ -533,7 +563,21 @@
         requires: { hikari: ['eo-hikari'] },
       },
       {
-        id: 'commufa-1y980', name: 'コミュファ光 1年間980円キャンペーン', target: 'hikari', amount: 4190, months: 12, confidence: 'high',
+        id: 'sonet-henkou', name: 'So-net光 事業者変更の月額割引（戸建・5か月）', target: 'hikari', amount: 2015, months: 5, housing: ['house'], henkouOnly: true, confidence: 'high', checkedAt: '2026-11-15',
+        source: 'https://www.so-net.ne.jp/access/hikari/1g/', requires: { hikari: ['sonet-hikari'] },
+      },
+      {
+        id: 'sonet-henkou-m', name: 'So-net光 事業者変更の月額割引（マンション・5か月）', target: 'hikari', amount: 915, months: 5, housing: ['mansion'], henkouOnly: true, confidence: 'high', checkedAt: '2026-11-15',
+        source: 'https://www.so-net.ne.jp/access/hikari/1g/', requires: { hikari: ['sonet-hikari'] },
+      },
+      {
+        // メガ・エッグ 公式Web特典：光ベーシックの基本料金が開通月＋2か月無料（開通月は日割りのため2か月分で計算）。代理店リンクからは対象外
+        id: 'megaegg-official-free', name: 'メガ・エッグ 公式Web特典 基本料金2か月無料', target: 'hikari', amount: 'full', months: 2, startMonth: 2, notWithLink: 'hikari:megaegg', confidence: 'high', checkedAt: '2026-11-15',
+        source: 'https://www.megaegg.jp/benefit/official202510/', note: '公式サイトから新規申込・工事費は分割払いを選ぶ',
+        requires: { hikari: ['megaegg'] },
+      },
+      {
+        id: 'commufa-1y980', name: 'コミュファ光 1年間980円キャンペーン', target: 'hikari', amount: 4190, months: 12, startMonth: 2, confidence: 'high', checkedAt: '2026-11-15',
         notWithLink: 'hikari:commufa', /* コミュファ光が指定するWEBページからの申込が条件。代理店（エルアイデア）経由では使えない */
         source: 'https://www.commufa.jp/services/information/',
         requires: { hikari: ['commufa'] },
@@ -563,13 +607,14 @@
         requires: { hikari: ['bbiq'] },
       },
       {
-        id: 'sb-denki-ouen', name: 'ソフトバンクでんき でんき応援割（3か月）', target: 'electric', amount: 1100, months: 3, endsAt: '2027-03-31', checkedAt: '2026-11-10', confidence: 'mid',
-        source: 'https://www.softbank.jp/energy/', note: '毎月「最大」1,100円の割引を3か月。最大額で計算',
-        requires: { electric: ['softbank-denki'] },
+        id: 'sb-denki-ouen', name: 'ソフトバンクでんき でんき応援割（3か月）', target: 'electric', amount: 1100, months: 3, endsAt: '2027-03-31', checkedAt: '2026-11-15', confidence: 'mid', newOnly: true,
+        notWithLink: 'electric:softbank-denki', /* 比較サイト限定ページ（sb-denki-site）と同じ割引。リンクを貼ったらそちらで計算し、2回数えない */
+        source: 'https://www.softbank.jp/energy/', note: '毎月「最大」1,100円の割引を3か月。北海道・東京・中部・中国・四国のみ。1年未満の解約は違約金5,000円',
+        requires: { electric: ['softbank-denki'], area: ['hokkaido', 'tokyo', 'chubu', 'chugoku', 'shikoku'] },
       },
       {
-        id: 'osakagas-set-e', name: '大阪ガス ガス・電気セット（電気：ベースプランA-G）', target: 'electric', rate: 0.03, confidence: 'high',
-        source: 'https://home.osakagas.co.jp/energy/electricity/price/', note: '公式の試算：従量電灯A 年135,000円 → 131,000円',
+        id: 'osakagas-set-e', name: '大阪ガス ガス・電気セット（電気：ベースプランA-G）', target: 'electric', rate: 0.009, confidence: 'mid', checkedAt: '2026-11-15',
+        source: 'https://home.osakagas.co.jp/energy/electricity/price/plan_ag/', note: 'ベースプランA-GはAより120〜350kWhが0.40円、350kWh超が0.29円安い。月260kWhで約0.9%として計算',
         requires: { area: ['kansai'], electric: ['osakagas-denki'], gas: ['std'] },
       },
       {
@@ -582,11 +627,6 @@
         todo: [{ phase: 'after', text: '東京ガス「ガス・電気セット割」を申し込む' }],
         source: 'https://home.tokyo-gas.co.jp/gas_power/plan/gp_plan/set.html', note: '申込が必要',
         requires: { area: ['tokyo'], electric: ['tokyogas-denki'], gas: ['std'] },
-      },
-      {
-        id: 'tohogas-family', name: '東邦ガスの電気 ファミリープラン（ガスとセット）', target: 'electric', rate: 0.015, confidence: 'mid',
-        source: 'https://www.tohogas.co.jp/denki/charge/01/index02.html', note: '公式の試算（40A・月350kWhで年約1,900円お得）から計算した割合',
-        requires: { area: ['chubu'], electric: ['tohogas-denki'], gas: ['std'] },
       },
     ],
 
@@ -641,11 +681,12 @@
     campaigns: [
       {
         // ドコモ オンラインショップの SIMのみ契約。ドコモ MAX・ポイ活 MAX への乗り換えは20,000ポイント（ドコモ mini の金額は公式で確認できず入れていない）
-        id: 'docomo-mnp-max', name: 'ドコモ SIMのみ乗り換え dポイント（ドコモ MAX）', target: 'line', provider: 'docomo', plans: ['docomo-max-1', 'docomo-max-3', 'docomo-max'], amount: 20000, kind: 'points', mnpOnly: true,
-        checkedAt: '2026-11-15', confidence: 'high', receive: 'auto', receiveNote: '開通手続きの翌々月にdポイント（期間・用途限定）',
+        id: 'docomo-mnp-max', name: 'ドコモ SIMのみ乗り換え dポイント（ドコモ MAX）', target: 'line', provider: 'docomo', plans: ['docomo-max-1', 'docomo-max-3', 'docomo-max'], amount: 15000, kind: 'points', mnpOnly: true,
+        checkedAt: '2026-11-15', confidence: 'mid', receive: 'apply', receiveNote: '開通手続きの翌々月から（分割の場合あり）dポイント（期間・用途限定）',
+        todo: [{ phase: 'before', text: 'ドコモのSIMのみ契約キャンペーンにWebエントリーする（申込前）' }],
         source: 'https://www.docomo.ne.jp/campaign_event/plan_norikae/index.html',
         applyNote: 'ドコモオンラインショップで「SIMのみ」で申し込む',
-        conditions: 'ドコモオンラインショップでのSIMのみ契約。ドコモ MAX・ポイ活 MAX へののりかえで最大20,000ポイント（2025年6月5日〜終了日未定）。新規契約やドコモ miniは金額が違う',
+        conditions: 'ドコモオンラインショップでのSIMのみ契約（要Webエントリー）。公式は「最大20,000pt」だが、個人のドコモ MAX・ポイ活 MAX へののりかえは15,000ポイント（2026年11月1日以降の申込、マイナビ・なるはやネットの記事で確認。オンラインショップのページは読み取れず）。新規は10,000ポイント',
       },
       {
         // 本気割：乗り換えで 360GB（365日間）トッピングを買うと半額をau PAY 残高に還元
@@ -653,7 +694,7 @@
         checkedAt: '2026-11-15', confidence: 'high', receive: 'auto', receiveNote: 'SIM有効化の翌月末までにau PAY 残高へ',
         source: 'https://povo.jp/campaign/detail/mnp_aupay_cpn_2025_05/',
         applyNote: 'SIMを有効化してから7日以内に「データ追加360GB（365日間）」を買う（au IDを連携しておく）',
-        conditions: '他社からの乗り換えで「通話＋データ」プラン。SIM有効化の7日後までに初めて対象トッピングを購入。au IDの連携とau PAYの利用開始が必要',
+        conditions: '他社からの乗り換えで「通話＋データ」プラン（au・UQ・povo1.0からは対象外）。SIM有効化の7日後までに初めて対象トッピングを購入。au IDの連携とau PAYの利用開始が必要',
       },
       {
         id: 'iij-half-5', name: 'IIJmio ギガプラン半額キャンペーン（5ギガ）', target: 'line', provider: 'iijmio', plans: ['iij-5'], amount: 950, kind: 'cash',
@@ -686,6 +727,67 @@
         conditions: '2026年11月5日〜終了日未定。音声SIM・音声eSIMの新規・乗り換え。最大3か月半額だが、1か月目は日割りのため2か月分（2,400円）で計算。特典の間は同じ容量のプランを続けること',
       },
       {
+        id: 'au-ols-new', name: 'au Online Shop SIM新規契約特典', target: 'line', provider: 'au', plans: ['au-max'], amount: 10000, kind: 'cash', newLineOnly: true,
+        checkedAt: '2026-11-15', confidence: 'high', receive: 'auto', source: 'https://www.au.com/mobile/campaign/ols-sim-2010/',
+        conditions: 'au Online Shop で SIM・eSIM のみの新規契約（5〜12歳は20,000円）。スマホミニプラン＋は対象外',
+      },
+      {
+        id: 'docomo-new-max', name: 'ドコモ SIMのみ新規契約 dポイント（ドコモ MAX）', target: 'line', provider: 'docomo', plans: ['docomo-max-1', 'docomo-max-3', 'docomo-max'], amount: 10000, kind: 'points', newLineOnly: true,
+        checkedAt: '2026-11-15', confidence: 'mid', receive: 'apply', source: 'https://www.docomo.ne.jp/campaign_event/plan_norikae/index.html',
+        todo: [{ phase: 'before', text: 'ドコモのSIMのみ契約キャンペーンにWebエントリーする（申込前）' }],
+        conditions: 'ドコモオンラインショップでのSIMのみ新規契約（要Webエントリー）。金額は記事（マイナビ 2026-11-12）で確認',
+      },
+      {
+        id: 'ym-mnp-s', name: 'ワイモバイル 乗り換え特典（S）', target: 'line', provider: 'ymobile', plans: ['ym-s'], amount: 5000, kind: 'points', mnpOnly: true,
+        confidence: 'mid', checkedAt: '2026-11-15', source: 'https://selectra.jp/telecom/mobile/ymobile-campaigns',
+        conditions: 'SプランにSIMのみの乗り換え。データ増量オプション（6か月無料）の加入が条件。ソフトバンク・LINEMOからは対象外（公式ページは自動で読めず記事で確認）',
+      },
+      {
+        id: 'ym-new', name: 'ワイモバイル 新規契約特典（M・L）', target: 'line', provider: 'ymobile', plans: ['ym-m', 'ym-l'], amount: 5000, kind: 'points', newLineOnly: true,
+        confidence: 'mid', checkedAt: '2026-11-15', source: 'https://selectra.jp/telecom/mobile/ymobile-campaigns',
+        conditions: 'M/LプランにSIMのみの新規契約（5〜18歳は10,000円相当）。データ増量オプション（6か月無料）の加入が条件',
+      },
+      {
+        id: 'rakuten-new', name: '楽天モバイル 新規申し込みポイント', target: 'line', provider: 'rakuten', amount: 9000, kind: 'points', newLineOnly: true, group: 'rakuten-first',
+        checkedAt: '2026-11-15', confidence: 'high', receive: 'apply', source: 'https://network.mobile.rakuten.co.jp/campaign/mnp/',
+        conditions: '電話番号を新しく取る申し込み（9,000ポイント）。事前エントリー・Rakuten Linkで10秒以上の通話が必要',
+      },
+      {
+        id: 'linemo-new', name: 'LINEMO 新規契約特典（ベストプランV）', target: 'line', provider: 'linemo', plans: ['linemo-30'], amount: 6000, kind: 'points', newLineOnly: true,
+        confidence: 'mid', checkedAt: '2026-11-15', source: 'https://selectra.jp/telecom/mobile/linemo-campaign',
+        conditions: '新しい番号での契約（ベストプランは3,000ポイント）。公式ページは自動で読めず記事で確認',
+      },
+      {
+        id: 'linemo-new-best', name: 'LINEMO 新規契約特典（ベストプラン）', target: 'line', provider: 'linemo', plans: ['linemo-3', 'linemo-10'], amount: 3000, kind: 'points', newLineOnly: true,
+        confidence: 'mid', checkedAt: '2026-11-15', source: 'https://selectra.jp/telecom/mobile/linemo-campaign',
+        conditions: '新しい番号での契約。公式ページは自動で読めず記事で確認',
+      },
+      {
+        id: 'mineo-pittari-3', name: 'mineo 秋のピッタリ割（3GB）', target: 'line', provider: 'mineo', plans: ['mineo-3'], amount: 2508, kind: 'cash', endsAt: '2026-11-30',
+        checkedAt: '2026-11-15', confidence: 'high', receive: 'auto', source: 'https://mineo.jp/campaign/cp-20260917-1/',
+        conditions: 'マイピタ デュアルタイプ（音声）の新規申込。利用開始月から最大6か月、月418円引き（11月30日までの申込・12月31日までに開通）。法人は対象外',
+      },
+      {
+        id: 'mineo-pittari-7', name: 'mineo 秋のピッタリ割（7GB）', target: 'line', provider: 'mineo', plans: ['mineo-7'], amount: 3168, kind: 'cash', endsAt: '2026-11-30',
+        checkedAt: '2026-11-15', confidence: 'high', receive: 'auto', source: 'https://mineo.jp/campaign/cp-20260917-1/',
+        conditions: 'マイピタ デュアルタイプ（音声）の新規申込。利用開始月から最大6か月、月528円引き（11月30日までの申込・12月31日までに開通）。法人は対象外',
+      },
+      {
+        id: 'mineo-pittari-15', name: 'mineo 秋のピッタリ割（15GB）', target: 'line', provider: 'mineo', plans: ['mineo-15'], amount: 5808, kind: 'cash', endsAt: '2026-11-30',
+        checkedAt: '2026-11-15', confidence: 'high', receive: 'auto', source: 'https://mineo.jp/campaign/cp-20260917-1/',
+        conditions: 'マイピタ デュアルタイプ（音声）の新規申込。利用開始月から最大6か月、月968円引き（11月30日までの申込・12月31日までに開通）。法人は対象外',
+      },
+      {
+        id: 'mineo-pittari-30', name: 'mineo 秋のピッタリ割（30GB）', target: 'line', provider: 'mineo', plans: ['mineo-30'], amount: 5148, kind: 'cash', endsAt: '2026-11-30',
+        checkedAt: '2026-11-15', confidence: 'high', receive: 'auto', source: 'https://mineo.jp/campaign/cp-20260917-1/',
+        conditions: 'マイピタ デュアルタイプ（音声）の新規申込。利用開始月から最大6か月、月858円引き（11月30日までの申込・12月31日までに開通）。法人は対象外',
+      },
+      {
+        id: 'mineo-pittari-50', name: 'mineo 秋のピッタリ割（50GB）', target: 'line', provider: 'mineo', plans: ['mineo-50'], amount: 5148, kind: 'cash', endsAt: '2026-11-30',
+        checkedAt: '2026-11-15', confidence: 'high', receive: 'auto', source: 'https://mineo.jp/campaign/cp-20260917-1/',
+        conditions: 'マイピタ デュアルタイプ（音声）の新規申込。利用開始月から最大6か月、月858円引き（11月30日までの申込・12月31日までに開通）。法人は対象外',
+      },
+      {
         id: 'ahamo-mnp', name: 'ahamo 乗り換え特典', target: 'line', provider: 'ahamo', amount: 20000, kind: 'points', mnpOnly: true,
         todo: [{ phase: 'apply', text: 'ahamo のキャンペーンページで対象条件を確認してから申し込む' }],
         confidence: 'high', checkedAt: '2026-11-15', receive: 'auto', receiveNote: '条件を満たした月の翌々月末から5か月、毎月4,000ポイント', source: 'https://ahamo.com/special/lp/dpointcp/001.html',
@@ -694,20 +796,20 @@
       {
         id: 'uq-mnp', name: 'UQモバイル 乗り換え特典', target: 'line', provider: 'uq', amount: 20000, kind: 'cash', mnpOnly: true,
         todo: [{ phase: 'apply', text: 'UQモバイルは「SIMのみ」でオンライン申込（特典の対象）' }],
-        confidence: 'mid', checkedAt: '2026-11-15', receive: 'auto', receiveNote: '開通翌月下旬以降にau PAY 残高へ', source: 'https://soldi.hikkoshizamurai.jp/articles/sim-campaign/',
-        conditions: 'SIMのみの乗り換え。増量オプションⅡの加入が条件。金額は「最大」。au・povoからは対象外（記事は2026-11-06更新・終了日未定）',
+        confidence: 'high', checkedAt: '2026-11-15', receive: 'auto', receiveNote: '開通翌月下旬以降にau PAY 残高へ', source: 'https://shop.uqmobile.jp/shop/cashback/',
+        conditions: '2026年9月17日から20,000円。SIM・eSIMのみの乗り換えで、トクトクプラン2かコミコミプランバリュー。増量オプションⅡ（月550円・7か月無料、その間に外せば0円）の加入が条件。au・povoからは対象外',
       },
       {
-        id: 'au-ols-mnp', name: 'au Online Shop SIM乗り換え特典', target: 'line', provider: 'au', amount: 20000, kind: 'cash', mnpOnly: true,
+        id: 'au-ols-mnp', name: 'au Online Shop SIM乗り換え特典', target: 'line', provider: 'au', plans: ['au-max'], amount: 20000, kind: 'cash', mnpOnly: true,
         todo: [{ phase: 'apply', text: 'au は Online Shop から SIM のみで申し込む（特典の対象）' }],
         confidence: 'high', checkedAt: '2026-11-15', source: 'https://www.au.com/mobile/campaign/ols-sim-2010/',
-        conditions: '2026年9月17日〜終了日未定。au Online Shop で SIM・eSIM のみの乗り換え。au PAY 残高で最大20,000円相当。UQ・povoからは対象外',
+        conditions: '2026年9月17日〜終了日未定。スマホミニプラン＋は対象外。au Online Shop で SIM・eSIM のみの乗り換え。au PAY 残高で最大20,000円相当。UQ・povoからは対象外',
       },
       {
-        id: 'ym-mnp', name: 'ワイモバイル 乗り換え特典', target: 'line', provider: 'ymobile', amount: 15000, kind: 'points', mnpOnly: true,
+        id: 'ym-mnp', name: 'ワイモバイル 乗り換え特典（M・L）', target: 'line', provider: 'ymobile', plans: ['ym-m', 'ym-l'], amount: 15000, kind: 'points', mnpOnly: true,
         todo: [{ phase: 'apply', text: 'ワイモバイルは特典が載っているページから SIM のみで申し込む' }],
         confidence: 'mid', checkedAt: '2026-11-15', source: 'https://selectra.jp/telecom/mobile/ymobile-campaigns',
-        conditions: 'M/LプランにSIMのみの乗り換え。データ増量オプション（月550円）の加入が条件。PayPayポイント15,000円相当（ヤフー店は最大21,000円相当）。ソフトバンク・LINEMOからは対象外（記事は2026-11-13更新・終了日未定）',
+        conditions: 'M/LプランにSIMのみの乗り換え。データ増量オプション（月550円・6か月無料、その間に外せば0円）の加入が条件。PayPayポイント15,000円相当（ヤフー店は最大21,000円相当）。ソフトバンク・LINEMOからは対象外（記事は2026-11-13更新・終了日未定）',
       },
       {
         id: 'rakuten-mnp', name: '楽天モバイル 乗り換えポイント', target: 'line', provider: 'rakuten', amount: 10000, kind: 'points', mnpOnly: true, group: 'rakuten-first',
@@ -718,7 +820,9 @@
       {
         // 楽天銀行と合同のキャンペーン（Web申込・11/18 10時まで）。楽天モバイル初めての申し込みは、ほかのポイント特典と併用できず一番多いものだけ（group）
         id: 'rakuten-bank-first', name: '楽天モバイル初めて申し込み 20,000ポイント（楽天銀行口座あり・開設の人）', target: 'line', provider: 'rakuten', amount: 20000, kind: 'points', group: 'rakuten-first',
-        endsAt: '2026-11-17', checkedAt: '2026-11-15', confidence: 'high', receive: 'auto', receiveNote: '2027年2月から5か月、毎月末ごろに4,000ポイント（期間限定・有効3か月）',
+        onePerHousehold: true, /* おひとり様1回・楽天銀行口座とハッピープログラムが必要なので、家族のうち1人分だけ計算する */
+        applyUrl: 'https://network.mobile.rakuten.co.jp/campaign/bank-mobile-joint/',
+        endsAt: '2026-11-18', /* 11月18日10:00まで */ checkedAt: '2026-11-15', confidence: 'high', receive: 'auto', receiveNote: '2027年2月から5か月、毎月末ごろに4,000ポイント（期間限定・有効3か月）',
         source: 'https://network.mobile.rakuten.co.jp/campaign/bank-mobile-joint/',
         conditions: 'Web申込限定（2026年11月9日〜11月18日10:00）。キャンペーンページの申し込みボタンから、クーポン「RBKBST00000001」を適用して申し込む。新規・乗り換えとも対象。楽天銀行口座が必要（なければ同じページの口座開設ボタンから11/18 10時までに申込）。12/31までに利用開始・Rakuten Linkで10秒以上発信・楽天銀行ハッピープログラムにエントリー（同じ楽天ID）。おひとり様1回。楽天モバイルショップで申し込む場合は、別のショップ限定20,000ポイント（11/19閉店まで）',
         applyNote: 'キャンペーンページの申し込みボタンから申し込み、クーポン「RBKBST00000001」が表示されているか確認（11月18日10時まで）',
@@ -741,15 +845,15 @@
         coversCancelFee: true, cancelFeeCap: 30000, checkedAt: '2026-11-10', 
         confidence: 'high', receive: 'apply', receiveNote: '申込月を含む12か月以内に申請書と解約明細を送付。約1か月後にau PAY 残高（最大10,000円）＋月額割引（最大20,000円）',
         source: 'https://www.au.com/internet/campaign/norikae-startsupport-home/',
-        conditions: '他社からの乗り換えで、今の光回線の解約違約金相当を合計最大30,000円まで還元（対象プロバイダの場合。Asahi Net・DTI は最大15,000円）',
+        conditions: 'ずっとギガ得プラン＋電話。他社からの乗り換えで、今の光回線の解約違約金相当を合計最大30,000円まで還元（対象プロバイダの場合。Asahi Net・DTI は最大15,000円）',
         todo: [{ phase: 'after', text: 'auひかり「乗りかえスタートサポート」の申請書と、今の光回線の解約金がわかる明細を送る（申込から12か月以内）' }],
       },
       {
         id: 'nuro-cb', name: 'NURO光 キャッシュバック', target: 'hikari', provider: 'nuro', amount: 15000, kind: 'cash',
-        notWithLink: 'hikari:nuro', /* 広告リンク先の特典とは併用できない */
+        endsAt: '2026-11-15', notWithLink: 'hikari:nuro', /* 広告リンク先の特典とは併用できない */
         todo: [{ phase: 'later', months: 17, text: 'NURO光のキャッシュバック受け取り手続き（開通17か月後に届くメールから。期限あり）' }],
         checkedAt: '2026-11-15', confidence: 'high', receive: 'apply', receiveNote: '開通17か月後に届くメールからマイページで口座を指定（手続き期間45日）', source: 'https://www.nuro.jp/',
-        conditions: '公式ページの申込特典（11/15時点で終了日の表示なし）。2年割の申込・12か月以内の開通・支払方法の登録が条件',
+        conditions: '11月15日まで（公式ページのバナーに「期間限定 11/15まで」）。2年割の申込・12か月以内の開通・支払方法の登録が条件',
       },
       {
         // 広告（PR）リンク先の特別ページ（nuro.jp/hikari/pr/sp/）からの申込だけの特典。affiliate.js に NURO光のリンクがあるときだけ計算に入る
@@ -803,9 +907,9 @@
         todo: [{ phase: 'after', text: 'ビッグローブ光の「解約金サポート申込書」（入会資料に同封）で、前の光回線の解約金を申請する' }],
       },
       {
-        id: 'eo-cash', name: 'eo光 現金3,000円プレゼント', target: 'hikari', provider: 'eo-hikari', amount: 3000, kind: 'cash',
-        coversCancelFee: true, cancelFeeCap: 60000, checkedAt: '2026-11-10', 
-        confidence: 'high', source: 'https://eonet.jp/sp/home-pickup/', conditions: '戸建て向け。ネット開通後。他社の違約金も最大60,000円まで補填',
+        id: 'eo-cash', name: 'eo光 他社の違約金・撤去費の補填', target: 'hikari', provider: 'eo-hikari', amount: 0, kind: 'cash',
+        coversCancelFee: true, cancelFeeCap: 60000, checkedAt: '2026-11-15', receive: 'apply',
+        confidence: 'high', source: 'https://eonet.jp/sp/home-pickup/', conditions: '戸建て向け。他社の違約金・撤去費を最大60,000円まで補填（機器の残債は10,000円まで、利用開始6か月目末までに申請）。現金3,000円プレゼントは10ギガの「eo光シンプルプラン」だけなので計算に入れていない',
         todo: [{ phase: 'after', text: 'eo光の現金プレゼント・他社違約金補填の手続きを確認する' }],
       },
       {
@@ -817,11 +921,7 @@
         id: 'megaegg-cb', name: 'メガ・エッグ 開通後キャッシュバック', target: 'hikari', provider: 'megaegg', amount: 10000, kind: 'cash', notWithLink: 'hikari:megaegg', /* 公式ホームページからの申込が条件。代理店リンクから申し込むと対象外 */
         todo: [{ phase: 'after', text: 'メガ・エッグの特典を申請（他社の解約金の明細を用意）' }],
         coversCancelFee: true, cancelFeeCap: 50000,
-        checkedAt: '2026-11-10', confidence: 'high', receive: 'apply', receiveNote: '開通翌月16日ごろの案内メールから30日以内に口座登録', source: 'https://www.megaegg.jp/', conditions: '公式Web特典（光ベーシック）。標準工事費の分割払いを選ぶ。他社の解約金も最大50,000円まで負担（開通後2か月以内に申請）',
-      },
-      {
-        id: 'docomo-hikari-agent', name: 'ドコモ光 代理店キャッシュバック', target: 'hikari', provider: 'docomo-hikari', amount: 20000, kind: 'cash', notWithLink: 'hikari:docomo-hikari',
-        confidence: 'low', conditions: '公式のキャンペーンは無し（公式で確認）。代理店経由の金額は代理店ごとに違い、確認できていない',
+        checkedAt: '2026-11-10', confidence: 'high', receive: 'apply', receiveNote: '開通翌月16日ごろの案内メールから30日以内に口座登録', source: 'https://www.megaegg.jp/', conditions: 'auひかりからの乗り換えは解約金負担の対象外。公式Web特典（光ベーシック）。標準工事費の分割払いを選ぶ。他社の解約金も最大50,000円まで負担（開通後2か月以内に申請）',
       },
       // ---------- 代理店のキャンペーン（A8.netで提携した代理店のページ。affiliate.js にその会社のリンクがあるときだけ計算に入る） ----------
       // 条件なし（有料オプション不要）でもらえる金額だけを入れる。2026-11-13 に各代理店のキャンペーンページで確認
@@ -855,9 +955,9 @@
         conditions: 'ドコモ光 1ギガを公式Webで新規・事業者変更で申し込み（転用は15,000ポイント）。dポイント（期間・用途限定）',
       },
       {
-        id: 'docomo-hikari-cover', name: 'ドコモ光 他社解約金 dポイント', target: 'hikari', provider: 'docomo-hikari', amount: 0, kind: 'points', notWithLink: 'hikari:docomo-hikari',
-        coversCancelFee: true, cancelFeeCap: 11000, checkedAt: '2026-11-15', confidence: 'high', receive: 'apply',
-        source: 'https://nttdocomo-ssw.com/nssw/dhkr/19dec_b/', conditions: '他社からの乗り換えで、他社の解約金のうち最大11,000ポイント（1ギガ。10ギガは最大100,000ポイント）',
+        id: 'docomo-hikari-cover', name: 'ドコモ光 他社解約金 dポイント', target: 'hikari', provider: 'docomo-hikari', amount: 0, kind: 'points',
+        coversCancelFee: true, cancelFeeCap: 100000, newOnly: true, checkedAt: '2026-11-15', confidence: 'high', receive: 'apply',
+        source: 'https://nttdocomo-ssw.com/nssw/dhkr/19dec_b/', conditions: '他社からの乗り換えで、他社の解約金のうち最大100,000ポイント（転用は対象外）。代理店経由でも対象。利用開始4か月目末までに証明書を提出、6か月目にポイント',
       },
       {
         // 新規工事料（28,600円）相当を、利用開始の7か月後から24か月に分けてdポイントで進呈（spread）
@@ -867,10 +967,10 @@
         conditions: '新規申込。工事料相当のdポイントを利用開始月の7か月後の月から24か月に分けて進呈（比べる期間内にもらえる分だけ計算）。途中で解約するとそこで終わり',
       },
       {
-        id: 'osakagas-new', name: '大阪ガスの電気 新規申込で基本料金2か月0円', target: 'electric', provider: 'osakagas-denki', amount: 1527, kind: 'cash',
+        id: 'osakagas-new', name: '大阪ガスの電気 新規申込で基本料金2か月0円', target: 'electric', provider: 'osakagas-denki', amount: 1416, kind: 'cash',
         endsAt: '2026-11-30', checkedAt: '2026-11-15', confidence: 'high', receive: 'auto',
         source: 'https://home.osakagas.co.jp/lp/electricity/cp_re/index.html',
-        conditions: '2026年10月1日〜11月30日に新規申込、2027年1月31日までに供給開始。関西エリア。取次事業者経由は対象外。金額は最低料金（15kWhまで）2か月分で計算',
+        conditions: '2026年10月1日〜11月30日に新規申込、2027年1月31日までに供給開始。関西エリア。取次事業者経由は対象外。金額はベースプランAの最低料金（707.80円）2か月分で計算',
       },
       {
         id: 'docomo-hikari-itx', name: 'ドコモ光 代理店キャッシュバック（新規）', agent: 'アイ・ティー・エックス株式会社', target: 'hikari', provider: 'docomo-hikari', amount: 40000, kind: 'cash',
@@ -951,9 +1051,9 @@
         conditions: '2026年12月2日9:59までの新規申込。利用開始月と翌月の電気代が合計6,000円以上、5か月目末まで継続',
       },
       {
-        id: 'tokyogas-first', name: '東京ガスの電気 基本料金1か月分割引', target: 'electric', provider: 'tokyogas-denki', amount: 935, kind: 'cash',
-        confidence: 'high', receive: 'auto', source: 'https://home.tokyo-gas.co.jp/gas_power/plan/power/discount_power.html',
-        conditions: '30Aの場合の金額。新規申込',
+        id: 'tokyogas-first', name: '東京ガスの電気 基本料金1か月分割引', target: 'electric', provider: 'tokyogas-denki', amount: 1176, kind: 'cash',
+        confidence: 'high', checkedAt: '2026-11-15', receive: 'auto', source: 'https://home.tokyo-gas.co.jp/gas_power/plan/power/discount_power.html',
+        conditions: '30Aの場合の金額（2026年12月改定後の基本料金1,176円。改定前は935円）。新規申込',
       },
       {
         id: 'cd-shukuwari', name: 'CDエナジー 登録特典', target: 'electric', provider: 'cd-denki', amount: 1000, kind: 'points',
@@ -978,7 +1078,7 @@
       { category: '光回線', name: 'フレッツ光（NTT東日本・西日本）', reason: 'プロバイダ料金が別にかかり、組み合わせが多すぎるため（光コラボで代わりに比較）' },
       { category: '光回線', name: 'J:COM NET', reason: '月額が郵便番号ごとのシミュレーションでしか出ない' },
       { category: '光回線', name: 'auひかり・eo光・コミュファ光・ピカラ光・メガ・エッグ・BBIQ のマンション', reason: '建物ごとに料金が違い、一般的な金額を確認できなかった（戸建てのみ比較）' },
-      { category: '光回線', name: '代理店キャッシュバック', reason: '代理店ごとに金額・条件が違い、公式に確認できない。公式の特典だけで計算' },
+      { category: '光回線', name: 'リンクのない代理店のキャッシュバック', reason: '代理店ごとに金額・条件が違い、確認できない。このサイトがリンクしている代理店・広告ページの特典だけ計算に入れる' },
       { category: '電気', name: '東京電力・関西電力の公式ページ', reason: '自動取得を拒否された（403）。料金は他の公式資料と記事から計算' },
       { category: '電気', name: '沖縄電力', reason: '公式サイトが自動取得を拒否した（403）。沖縄は電気の比較なし' },
       { category: '電気', name: 'Looopでんき', reason: '30分ごとに単価が変わる市場連動型のため、月額を決められない' },

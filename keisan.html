@@ -73,7 +73,7 @@
           <button type="button" class="btn-sub" id="add-line">＋ 1人追加</button>
           <p class="hint cmp-off" data-cmp-off="mobile" hidden>今回は比べません（今の会社のまま）。セット割の計算に使うので、今の会社だけ選んでください。</p>
           <label data-cmp="mobile">今のスマホ代（家族合計・月）
-            <span class="yen"><input type="number" name="mobileCurrentMonthly" min="0" step="100" inputmode="numeric" placeholder="例 15000"></span>
+            <span class="yen"><input type="number" name="mobileCurrentMonthly" min="0" max="300000" step="1" inputmode="numeric" placeholder="例 15000"></span>
           </label>
         </fieldset>
 
@@ -87,10 +87,10 @@
             <p class="hint cmp-off" data-cmp-off="hikari" hidden>今回は比べません（今の会社のまま）。セット割の計算に使うので、今の会社だけ選んでください。</p>
             <div class="grid2" data-cmp="hikari">
               <label>今の光回線の月額
-                <span class="yen"><input type="number" name="hikariCurrentMonthly" min="0" step="10" inputmode="numeric" placeholder="例 4400"></span>
+                <span class="yen"><input type="number" name="hikariCurrentMonthly" min="0" max="50000" step="1" inputmode="numeric" placeholder="例 4400"></span>
               </label>
               <label>乗り換えるときの解約金など
-                <span class="yen"><input type="number" name="hikariCancelFee" min="0" step="100" inputmode="numeric" placeholder="わからなければ空欄"></span>
+                <span class="yen"><input type="number" name="hikariCancelFee" min="0" max="200000" step="1" inputmode="numeric" placeholder="わからなければ空欄"></span>
               </label>
             </div>
           </div>
@@ -102,8 +102,8 @@
             <label>今の電気の会社
               <select name="electricCurrent" id="electricCurrent"></select>
             </label>
-            <label data-cmp="electric">1か月の電気代（平均）
-              <span class="yen"><input type="number" name="electricBill" min="0" step="100" inputmode="numeric" placeholder="例 9000" required></span>
+            <label data-cmp="electric">1か月の電気代（平均）<span class="req">必須</span>
+              <span class="yen"><input type="number" name="electricBill" min="0" max="200000" step="1" inputmode="numeric" placeholder="例 9000" required></span>
             </label>
             <label data-cmp="electric">契約アンペア
               <select name="electricAmp">
@@ -133,7 +133,7 @@
               <select name="gasCurrent" id="gasCurrent"></select>
             </label>
             <label data-cmp="gas">1か月のガス代（平均）
-              <span class="yen"><input type="number" name="gasBill" min="0" step="100" inputmode="numeric" placeholder="例 5000"></span>
+              <span class="yen"><input type="number" name="gasBill" min="0" max="200000" step="1" inputmode="numeric" placeholder="例 5000"></span>
             </label>
           </div>
           <p class="hint cmp-off" data-cmp-off="gas" hidden>今回は比べません（今の会社のまま）。セット割の計算に使うので、今の会社だけ選んでください。</p>

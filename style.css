@@ -209,7 +209,7 @@ details.breakdown summary { cursor: pointer; font-size: .85rem; color: var(--acc
 .todo-actions { display: flex; flex-direction: column; gap: 6px; align-items: stretch; }
 .btn-signup {
   white-space: nowrap; padding: 6px 10px; border-radius: 999px; text-align: center; font-size: .8rem; font-weight: 700;
-  background: var(--gold); color: #fff !important; text-decoration: none !important;
+  background: #8a6400; color: #fff !important; text-decoration: none !important; /* 白文字とのコントラスト 5:1 以上 */
 }
 .pr { display: inline-block; margin-left: 4px; padding: 0 4px; border-radius: 4px; font-size: .65rem; background: rgba(255,255,255,.3); vertical-align: 1px; }
 .foot-links a { color: var(--muted); margin-right: 8px; }
@@ -248,3 +248,6 @@ a.btn-copyall.done { background: var(--accent-soft); }
 .cmp-chip:has(input:checked) { border-color: var(--accent); background: var(--accent); color: #fff; }
 .cmp-chip input { accent-color: #fff; }
 [data-cmp][hidden] { display: none !important; }
+.result.stale > *:not(.stale-note) { opacity: .45; }
+.stale-note { margin: 0 0 10px; padding: 10px 12px; border-radius: 10px; background: var(--surface); border: 1px solid var(--gold); font-weight: 700; }
+.req { margin-left: 6px; padding: 0 6px; border-radius: 4px; font-size: .7rem; background: #b3261e; color: #fff; vertical-align: 1px; }

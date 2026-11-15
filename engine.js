@@ -88,6 +88,25 @@
     const candidates = brand.plans.filter((p) => p.capGB === null || p.capGB >= gb);
     if (candidates.length === 0) return null;
     const lineCombo = { ...combo, mobile: brand.id };
+    const switching = line.current !== brand.id;
+    const fromGroup = (data.mobileBrands.find((b) => b.id === line.current) || {}).group;
+    const isMnp = line.current !== 'new';
+    const used = ctx.usedOnce || new Set();
+    // 乗り換え特典（プランで金額が違うものもあるので、プランごとに出してプラン選びにも使う）
+    const campsFor = (plan) => {
+      if (!switching) return [];
+      const camps = data.campaigns.filter((c) => {
+        if (c.target !== 'line' || c.provider !== brand.id) return false;
+        if (c.mnpOnly && !isMnp) return false;
+        if (c.newLineOnly && isMnp) return false; // 新しい番号での契約だけの特典
+        if (c.mnpOnly && fromGroup && fromGroup === brand.group) return false; // 同じグループ内の乗り換えは対象外
+        if (c.plans && !c.plans.includes(plan.id)) return false; // プランで金額が違う特典
+        if (c.onePerHousehold && used.has(c.id)) return false; // 家族で1回だけの特典（2人目以降は使えない）
+        return meets(c.requires, lineCombo, area);
+      });
+      // 同じ group の特典は併用できないので、一番多いものだけ使う
+      return pickByGroup(camps.map((c) => ({ c, group: c.group, total: campaignValue(c, opts) }))).filter((x) => x.total > 0);
+    };
 
     let best = null;
     for (const plan of candidates) {
@@ -115,8 +134,9 @@
         }
       }
       const applied = pickByGroup(discounts);
-      const total = plan.price * months - applied.reduce((s, d) => s + d.total, 0);
-      if (!best || total < best.total) best = { plan, applied, total };
+      const camps = campsFor(plan);
+      const total = plan.price * months - applied.reduce((s, d) => s + d.total, 0) - camps.reduce((s, x) => s + x.total, 0);
+      if (!best || total < best.total) best = { plan, applied, camps, total };
     }
 
     const who = line.label;
@@ -127,26 +147,14 @@
       items.push({ cat: 'line', who, label: `${d.name}（月${yen(d.perMonth)}${extra}）`, amount: -d.total, low: lowConf(d), src: d.source, req: d.requires });
     }
 
-    const switching = line.current !== brand.id;
     if (switching) {
       if (brand.switchFee) items.push({ cat: 'line', who, label: `${brand.name} 契約事務手数料`, amount: brand.switchFee, low: lowConf({ confidence: brand.feeConfidence || brand.confidence }), src: brand.feeSource || brand.source });
-      const fromGroup = (data.mobileBrands.find((b) => b.id === line.current) || {}).group;
-      const isMnp = line.current !== 'new';
-      const camps = data.campaigns.filter((c) => {
-        if (c.target !== 'line' || c.provider !== brand.id) return false;
-        if (c.mnpOnly && !isMnp) return false;
-        if (c.mnpOnly && fromGroup && fromGroup === brand.group) return false; // 同じグループ内の乗り換えは対象外
-        if (c.plans && !c.plans.includes(best.plan.id)) return false; // プランで金額が違う特典
-        return meets(c.requires, lineCombo, area);
-      });
-      // 同じ group の特典は併用できないので、一番多いものだけ使う
-      const vals = pickByGroup(camps.map((c) => ({ c, group: c.group, total: campaignValue(c, opts) })));
-      for (const { c, total: v } of vals) {
-        if (v > 0) items.push({ cat: 'line', who, label: campaignLabel(c, opts), amount: -v, low: lowConf(c), campaign: c, src: c.source });
+      for (const { c, total: v } of best.camps) {
+        items.push({ cat: 'line', who, label: campaignLabel(c, opts), amount: -v, low: lowConf(c), campaign: c, src: c.source });
       }
     }
     const total = items.reduce((s, it) => s + it.amount, 0);
-    return { brand, plan: best.plan, items, switching, total, label: who };
+    return { brand, plan: best.plan, items, switching, total, label: who, line };
   }
 
   // ---------- 光回線 ----------
@@ -161,8 +169,15 @@
 
     const items = [{ cat: 'hikari', label: `${svc.name} 月額（${months}か月）`, amount: monthly * months, low: lowConf(svc), src: svc.source }];
 
+    const currentSvc = data.hikari.find((x) => x.id === h.current);
+    const jigyoushaHenkou = !staying && !!currentSvc && currentSvc.type === 'collab' && svc.type === 'collab';
+    // 今の光回線を使い続ける人：今の月額を入れていれば割引はもう入っているので足さない。
+    // 入れていなくても、新規向け・期間限定の割引（months / startMonth / newOnly）はもらえない
+    // （今の組み合わせですでに受けている割引だけ外す。スマホを替えて新しく受けられるセット割は入れる）
+    const stayOk = (d) => !staying || (!d.months && !d.startMonth && !d.newOnly && !d.henkouOnly && !(Number(h.currentMonthly) > 0 && ctx.currentCombo && meets(d.requires, ctx.currentCombo, area)));
     const discounts = data.discounts
       .filter((d) => d.target === 'hikari' && meets(d.requires, combo, area) && usable(d, opts) && housingOk(d, ctx))
+      .filter((d) => stayOk(d) && !(d.newOnly && jigyoushaHenkou) && !(d.henkouOnly && !jigyoushaHenkou))
       .map((d) => {
         const perMonth = d.amount === 'full' ? monthly : (d.amount || 0);
         // startMonth：何か月目から割引が始まるか（比較期間を過ぎた分は数えない）
@@ -179,11 +194,9 @@
     for (const d of discounts.filter((d) => d.pointAmount)) {
       if (!opts.includePoints) continue;
       const m = Math.min(d.months || months, months);
-      items.push({ cat: 'hikari', label: `${d.name}（毎月${d.pointAmount.toLocaleString('ja-JP')}ポイント）`, amount: -d.pointAmount * m, low: lowConf(d), src: d.source });
+      items.push({ cat: 'hikari', label: `${d.name}（毎月${d.pointAmount.toLocaleString('ja-JP')}ポイント）`, amount: -d.pointAmount * m, low: lowConf(d), src: d.source, req: d.requires });
     }
 
-    const currentSvc = data.hikari.find((x) => x.id === h.current);
-    const jigyoushaHenkou = !staying && !!currentSvc && currentSvc.type === 'collab' && svc.type === 'collab';
     if (!staying) {
       // 事業者変更（光コラボ→光コラボ）で手数料が違う会社は、その金額（例：楽天ひかり 新規880円・事業者変更1,980円）
       const setupFee = jigyoushaHenkou && svc.setupFeeHenkou !== undefined ? svc.setupFeeHenkou : svc.setupFee;
@@ -197,12 +210,21 @@
       // newOnly：新設のみ（事業者変更は対象外）／henkouOnly：事業者変更のときだけ
       for (const c of data.campaigns.filter((c) => c.target === 'hikari' && c.provider === svc.id && meets(c.requires, combo, area) && !(c.newOnly && jigyoushaHenkou) && !(c.henkouOnly && !jigyoushaHenkou) && housingOk(c, ctx))) {
         // 今の光回線の解約金を負担してくれる特典
-        if (c.coversCancelFee && h.current !== 'none' && Number(h.cancelFee) > 0 && usable(c, opts)) {
-          const cover = Math.min(Number(h.cancelFee), c.cancelFeeCap || Infinity);
-          items.push({ cat: 'hikari', label: `${c.name}（今の光回線の解約金を負担）`, amount: -cover, low: lowConf(c), campaign: c, src: c.source });
+        // ポイントを入れない・申請が要る特典を入れない設定にも従う（campaignValue を通す）
+        if (c.coversCancelFee && h.current !== 'none' && Number(h.cancelFee) > 0) {
+          const cover = campaignValue({ ...c, amount: Math.min(Number(h.cancelFee), c.cancelFeeCap || Infinity) }, opts);
+          if (cover > 0) items.push({ cat: 'hikari', label: `${c.name}（今の光回線の解約金を負担）`, amount: -cover, low: lowConf(c), campaign: c, src: c.source });
         }
-        // reduceIfGroup：その割引（例：ソフトバンク光 超おうち応援割）を使うとキャッシュバックが減るもの
-        const cut = c.reduceIfGroup && items.some((it) => it.group === c.reduceIfGroup.group) ? c.reduceIfGroup.amount : 0;
+        // reduceIfGroup：その割引（例：ソフトバンク光 超おうち応援割）を使うとキャッシュバックが減るもの。
+        // 割引の合計より減額の方が大きいなら、割引を使わずにキャッシュバックを満額もらう方を選ぶ
+        let cut = 0;
+        if (c.reduceIfGroup && usable(c, opts)) {
+          const grp = items.filter((it) => it.group === c.reduceIfGroup.group);
+          const grpTotal = -grp.reduce((s, it) => s + it.amount, 0);
+          if (grp.length && c.reduceIfGroup.amount > grpTotal) {
+            for (const it of grp) items.splice(items.indexOf(it), 1);
+          } else if (grp.length) cut = c.reduceIfGroup.amount;
+        }
         // spread：分けてもらう特典（例：ドコモ光の工事料相当を8か月目から24か月）。比べる期間内にもらえる分だけ
         const spreadAmt = c.spread ? Math.round(c.amount * Math.max(0, Math.min(c.spread.months, months - c.spread.startMonth + 1)) / c.spread.months) : c.amount;
         const base = c.spread ? { ...c, amount: spreadAmt } : c;
@@ -226,9 +248,11 @@
     if (t.type === 'flat') return kWh * t.unit;
     let cost = 0;
     let prev = 0;
-    if (t.type === 'B') cost += t.base10A * (amp / 10);
+    // baseByAmp：アンペアごとの基本料金（10Aあたりで比例しない会社）／tiersHighAmp：40A以上で単価が違う会社（例：東邦ガス）
+    if (t.type === 'B') cost += t.baseByAmp && t.baseByAmp[amp] !== undefined ? t.baseByAmp[amp] : t.base10A * (amp / 10);
     if (t.type === 'A') { cost += t.min; prev = t.minKWh; }
-    for (const [limit, unit] of t.tiers) {
+    const tiers = t.tiersHighAmp && amp >= 40 ? t.tiersHighAmp : t.tiers;
+    for (const [limit, unit] of tiers) {
       const top = limit === null ? Infinity : limit;
       if (kWh > prev) cost += (Math.min(kWh, top) - prev) * unit;
       prev = top;
@@ -267,9 +291,10 @@
       const tCur = tariffOf(currentSvc, area, data) || tariffOf(data.electric.find((x) => x.id === 'std'), area, data);
       const cNew = tariffCost(tNew, kWh, ctx.amp);
       const cCur = tariffCost(tCur, kWh, ctx.amp);
-      monthly = staying || cNew === null || cCur === null ? bill : Math.round(bill + cNew - cCur);
+      monthly = staying || cNew === null || cCur === null ? bill : Math.max(0, Math.round(bill + cNew - cCur));
       baseline = monthly;
-      const diff = staying || cNew === null || cCur === null ? '' : `・今の料金表より月${cNew - cCur <= 0 ? '約' + yen(cCur - cNew) + '安い' : '約' + yen(cNew - cCur) + '高い'}`;
+      const d0 = cNew - cCur;
+      const diff = staying || cNew === null || cCur === null ? '' : Math.abs(d0) < 50 ? '・料金表は今とほぼ同じ' : `・今の料金表より月${d0 < 0 ? '約' + yen(-d0) + '安い' : '約' + yen(d0) + '高い'}`;
       label = `${svc.name}（月${kWh}kWh・${ctx.amp}Aで計算${diff}）`;
       if (!tNew) label = svc.name;
       src = (tNew && tNew.source) || svc.source;
@@ -286,7 +311,9 @@
       for (const t of svc.pointRateTiers) if (monthly >= t.min) pointRate = t.rate;
     }
     let pointSrc = svc.source;
-    for (const d of data.discounts.filter((d) => d.target === kind && meets(d.requires, combo, area) && usable(d, opts) && housingOk(d, ctx))) {
+    // 今の会社を使い続ける人：請求額にもう入っている割引（セット割など）や、新規向けの期間限定の割引は足さない（ポイントは請求額に入らないので残す）
+    const stayOk = (d) => !staying || (!d.months && !d.newOnly && !(bill > 0 && ctx.currentCombo && meets(d.requires, ctx.currentCombo, area)));
+    for (const d of data.discounts.filter((d) => d.target === kind && meets(d.requires, combo, area) && usable(d, opts) && housingOk(d, ctx) && stayOk(d))) {
       if (d.rate) items.push({ cat: kind, label: d.name.includes('%') ? d.name : `${d.name}（${(d.rate * 100).toFixed(1)}%）`, amount: -Math.round(baseline * d.rate * months), low: lowConf(d), src: d.source, req: d.requires });
       if (d.amount) items.push({ cat: kind, label: `${d.name}（月${yen(d.amount)}）`, amount: -d.amount * Math.min(d.months || months, months), low: lowConf(d), src: d.source, req: d.requires });
       if (d.pointRate) { pointRate += d.pointRate; pointSrc = d.source || pointSrc; }
@@ -373,10 +400,12 @@
       lines.push({ line: { ...line, label: line.label || `${i + 1}人目` }, brandId: b, rank });
     });
     const lineResults = [];
+    const usedOnce = new Set(); // 家族で1回だけの特典（onePerHousehold）を使ったか
     for (const l of lines) {
       const brand = data.mobileBrands.find((x) => x.id === l.brandId);
-      const r = lineCost(l.line, brand, combo, ctx, { assignment, index: lineResults.length });
+      const r = lineCost(l.line, brand, combo, { ...ctx, usedOnce }, { assignment, index: lineResults.length });
       if (!r) return null; // 使う容量に合うプランがない
+      for (const it of r.items) if (it.campaign && it.campaign.onePerHousehold) usedOnce.add(it.campaign.id);
       lineResults.push(r);
     }
     // 広告リンク（代理店・広告ページ）経由と、公式経由の両方を計算して安い方を使う（useLink：リンク経由の方が安いか同じ）
@@ -397,9 +426,9 @@
     if (input.gas.type === 'city') {
       gas = energyCost('gas', data.gas, input.gas, combo, ctx);
     } else {
-      const bill = Number(input.gas.bill) || 0;
-      const label = input.gas.type === 'propane' ? 'プロパンガス（今のまま・比較対象外）' : 'ガスなし（オール電化など）';
-      gas = { svc: null, items: bill > 0 ? [{ cat: 'gas', label, amount: bill * ctx.months }] : [], switching: false };
+      // ガスなし：前に入れたガス代が残っていても0円（入力欄が隠れているため）
+      const bill = input.gas.type === 'propane' ? Number(input.gas.bill) || 0 : 0;
+      gas = { svc: null, items: bill > 0 ? [{ cat: 'gas', label: 'プロパンガス（今のまま・比較対象外）', amount: bill * ctx.months }] : [], switching: false };
     }
 
     const cards = chooseCards(input, lineResults, ctx);
@@ -407,7 +436,8 @@
     // 比べないもの（今のまま）は料金を合計に入れない。比べるものの選び方で変わる割引（セット割・カード払い割）だけは入れる
     const fixed = ctx.fixed || {};
     const catOfReq = { mobile: 'line', hikari: 'hikari', electric: 'electric', gas: 'gas', card: 'card' };
-    const keep = (it) => !fixed[it.cat] || (it.amount < 0 && !!it.req && Object.keys(it.req).some((k) => catOfReq[k] && !fixed[catOfReq[k]]));
+    // （セット割に必要なオプション代のようなプラスの項目も、比べるものの選び方で変わるなら入れる）
+    const keep = (it) => !fixed[it.cat] || (!!it.req && Object.keys(it.req).some((k) => catOfReq[k] && !fixed[catOfReq[k]]));
     const items = [...lineResults.flatMap((l) => l.items), ...hikari.items, ...electric.items, ...gas.items, ...cards.items].filter(keep);
     const total = items.reduce((s, it) => s + it.amount, 0);
     const subtotal = { line: 0, hikari: 0, electric: 0, gas: 0, card: 0 };
@@ -464,11 +494,18 @@
     // 比べるもの（スマホ・光回線・電気・ガス）。比べないものは今の会社のまま
     const cmp = { ...CMP_ALL, ...(input.compare || {}) };
     const fixed = { line: !cmp.mobile, hikari: !cmp.hikari, electric: !cmp.electric, gas: !cmp.gas, card: false };
-    const ctx = { data, months, area: input.area, housing: input.housing, opts, amp, kWh, fixed };
-    const allInput = input;
+    // 今の組み合わせ（今の会社のまま使い続けるものに、もう付いている割引を見分けるのに使う）
+    const currentCombo = { mobile: input.lines.map((l) => l.current), hikari: input.hikari.use ? input.hikari.current : 'none', electric: input.electric.current, gas: input.gas.type === 'city' ? input.gas.current : 'keep' };
+    const ctx = { data, months, area: input.area, housing: input.housing, opts, amp, kWh, fixed, currentCombo };
     const has = (list, id) => list.some((x) => x.id === id);
+    // 「1人目」「2人目」は入力した順の番号のまま（比べない人を外しても番号がずれないように）
+    input = { ...input, lines: input.lines.map((l, i) => ({ ...l, label: l.label || `${i + 1}人目` })) };
+    const allInput = input;
     // スマホを比べないとき：今の会社がデータにある人だけ、その会社のまま（セット割・家族割の計算に使う）
     if (!cmp.mobile) input = { ...input, lines: input.lines.filter((l) => has(data.mobileBrands, l.current)) };
+    // 電気・ガスを比べないで、今の会社が「その他」のとき：乗り換えにしない（地域の大手と同じとして、今のまま）
+    if (!cmp.electric && !has(data.electric, input.electric.current)) input = { ...input, electric: { ...input.electric, current: 'std' } };
+    if (!cmp.gas && input.gas.type === 'city' && !has(data.gas, input.gas.current)) input = { ...input, gas: { ...input.gas, current: 'std' } };
     const n = input.lines.length;
 
     const brands = data.mobileBrands.filter((b) => isAvailable(b, input.area, input.housing));
@@ -476,7 +513,8 @@
       : !cmp.hikari ? [has(data.hikari, input.hikari.current) ? input.hikari.current : 'none']
       : data.hikari.filter((h) => isAvailable(h, input.area, input.housing)).map((h) => h.id);
     const elecs = !cmp.electric ? [has(data.electric, input.electric.current) ? input.electric.current : 'std']
-      : data.electric.filter((e) => isAvailable(e, input.area, input.housing)).map((e) => e.id);
+      // requiresCityGas：ガスもその会社で契約することが条件の電気（例：東邦ガスの電気）は、都市ガスの家だけ
+      : data.electric.filter((e) => isAvailable(e, input.area, input.housing) && (!e.requiresCityGas || input.gas.type === 'city')).map((e) => e.id);
     const gases = input.gas.type !== 'city' ? ['keep']
       : !cmp.gas ? [has(data.gas, input.gas.current) ? input.gas.current : 'std']
       : data.gas.filter((g) => isAvailable(g, input.area, input.housing)).map((g) => g.id);
@@ -521,6 +559,33 @@
               if (extra < bestExtra) { bestExtra = extra; bestI = i; }
             });
             if (bestI >= 0) { const a = indep.slice(); a[bestI] = b.id; add(a, rest); }
+          }
+          // 4) 2人以上（全員ではない）を同じ会社にまとめて家族割を受ける形も試す（その会社にしても高くなりにくい人から順に）
+          for (const b of brands) {
+            const extras = perLine.map((c, i) => {
+              const hit = c.find((x) => x.id === b.id);
+              return hit ? { i, extra: hit.total - c[0].total } : null;
+            }).filter(Boolean).sort((x, y) => x.extra - y.extra);
+            for (let k = 2; k < Math.min(n, extras.length + 1); k++) {
+              const a = indep.slice();
+              for (const e of extras.slice(0, k)) a[e.i] = b.id;
+              add(a, rest);
+            }
+          }
+          // 5) 2つの会社に分ける形（2人ずつなど）も試す
+          if (n >= 3) {
+            for (const b1 of brands) {
+              for (const b2 of brands) {
+                if (b1.id >= b2.id) continue;
+                const a = perLine.map((c) => {
+                  const x1 = c.find((x) => x.id === b1.id);
+                  const x2 = c.find((x) => x.id === b2.id);
+                  if (!x1 && !x2) return null;
+                  return !x2 || (x1 && x1.total <= x2.total) ? b1.id : b2.id;
+                });
+                if (a.every(Boolean)) add(a, rest);
+              }
+            }
           }
         }
       }
@@ -584,7 +649,8 @@
       todos.push({ phase, text, ...extra });
     };
     // via：広告リンク経由の特典（viaLink）。申込のやることには、そのリンクで申し込めるよう signup を付ける
-    const fromList = (list, src, money, via) => (list || []).forEach((t) => add(t.phase, t.text, { months: t.months, deadline: t.deadline, url: src, ...(money || {}), ...(t.amount ? { amount: t.amount } : {}), ...(via && t.phase === 'apply' ? { signup: { cat: via.split(':')[0], id: via.split(':')[1] } } : {}) }));
+    // owner：どの会社の手続きか（同じ会社の「申し込む」が2つに分かれないよう、あとで1つにまとめる）
+    const fromList = (list, src, money, via, owner) => (list || []).forEach((t) => add(t.phase, t.text, { months: t.months, deadline: t.deadline, url: src, owner, ...(money || {}), ...(t.amount ? { amount: t.amount } : {}), ...(via && t.phase === 'apply' ? { signup: { cat: via.split(':')[0], id: via.split(':')[1] } } : {}) }));
     const moneyOf = (c) => (c && c.amount ? { amount: c.amount, kind: c.kind, ...(c.endsAt ? { applyBy: c.endsAt } : {}) } : null);
 
     // カード（申込前に作っておくと支払い方法をすぐ設定できる）
@@ -604,10 +670,16 @@
     for (const [, ls] of byBrand) {
       const b = ls[0].brand;
       const who = ls.map((l) => `${l.label}：${l.plan.name}`).join('、');
-      const campaigns = ls.flatMap((l) => l.items.filter((it) => it.campaign).map((it) => it.campaign));
-      for (const c of campaigns) fromList(c.todo, c.source, moneyOf(c), c.viaLink);
+      const campaigns = [...new Set(ls.flatMap((l) => l.items.filter((it) => it.campaign).map((it) => it.campaign)))];
+      for (const c of campaigns) fromList(c.todo, c.source, moneyOf(c), c.viaLink, `mobile:${b.id}`);
       const applyNotes = [...new Set(campaigns.map((c) => c.applyNote).filter(Boolean))];
-      add('apply', `${b.name}に乗り換えを申し込む（${who}）`, { url: b.source, signup: { cat: 'mobile', id: b.id }, note: [...applyNotes, '今の会社の解約は不要（乗り換えると自動で解約）'].join('。') });
+      // 申込の締切がある特典（例：楽天銀行の20,000ポイントは11/18 10時まで）は、申し込みの期限もその日にする
+      const mEnd = campaigns.map((c) => c.applyEndsAt || c.endsAt).filter(Boolean).sort()[0];
+      const applyUrl = (campaigns.find((c) => c.applyUrl) || {}).applyUrl; // キャンペーンページから申し込む必要があるもの
+      const allNew = ls.every((l) => l.line && l.line.current === 'new');
+      const anyNew = ls.some((l) => l.line && l.line.current === 'new');
+      const verb = allNew ? '新規で申し込む' : anyNew ? '申し込む（乗り換え・新規）' : '乗り換えを申し込む';
+      add('apply', `${b.name}に${verb}（${who}）`, { main: true, owner: `mobile:${b.id}`, url: applyUrl || b.source, signup: { cat: 'mobile', id: b.id }, ...(mEnd ? { applyBy: mEnd } : {}), note: [...applyNotes, ...(allNew ? [] : ['今の会社の解約は不要（乗り換えると自動で解約）'])].join('。') });
     }
     for (const c of r.cards || []) {
       const brands = r.lines.filter((l) => c.card.perLine[l.brand.id]).map((l) => l.brand.name);
@@ -621,11 +693,11 @@
         add('before', `今の${cur.name}で「事業者変更承諾番号」を取る`, { note: '光コラボ同士の乗り換えは工事なしで切り替えられる' });
       }
       const hEnd = r.hikari.items.map((it) => it.campaign && it.campaign.endsAt).filter(Boolean).sort()[0];
-      add('apply', `${r.hikari.svc.name}を申し込む${hEnd ? `（特典は${Number(hEnd.slice(5, 7))}月${Number(hEnd.slice(8, 10))}日までの申込）` : ''}`, { main: true, url: r.hikari.svc.source, ...(r.hikari.useLink ? { signup: { cat: 'hikari', id: r.hikari.svc.id } } : {}), ...(hEnd ? { applyBy: hEnd } : {}) });
+      add('apply', `${r.hikari.svc.name}を申し込む${hEnd ? `（特典は${Number(hEnd.slice(5, 7))}月${Number(hEnd.slice(8, 10))}日までの申込）` : ''}`, { main: true, owner: `hikari:${r.hikari.svc.id}`, url: r.hikari.svc.source, ...(r.hikari.useLink ? { signup: { cat: 'hikari', id: r.hikari.svc.id } } : {}), ...(hEnd ? { applyBy: hEnd } : {}) });
       if (input.hikari.current !== 'none' && !r.hikari.jigyoushaHenkou) {
         add('after', `${r.hikari.svc.name}の開通を確認してから、今の${cur ? cur.name : '光回線'}を解約する`, { note: 'ルーターなどのレンタル機器は返却が必要なことが多い' });
       }
-      for (const it of r.hikari.items) if (it.campaign) fromList(it.campaign.todo, it.campaign.source, moneyOf(it.campaign), it.campaign.viaLink);
+      for (const it of r.hikari.items) if (it.campaign) fromList(it.campaign.todo, it.campaign.source, moneyOf(it.campaign), it.campaign.viaLink, `hikari:${r.hikari.svc.id}`);
     }
 
     // 電気・ガス
@@ -633,8 +705,8 @@
       const x = r[kind];
       if (!x.svc) continue;
       if (x.switching) {
-        add('apply', `${x.svc.name}を申し込む`, { main: true, url: x.svc.source, ...(x.useLink ? { signup: { cat: kind, id: x.svc.id } } : {}), note: '今の会社への解約の連絡は不要（新しい会社が手続きする）。検針票のお客さま番号・供給地点特定番号を用意' });
-        for (const it of x.items) if (it.campaign) fromList(it.campaign.todo, it.campaign.source, moneyOf(it.campaign), it.campaign.viaLink);
+        add('apply', `${x.svc.name}を申し込む`, { main: true, owner: `${kind}:${x.svc.id}`, url: x.svc.source, ...(x.useLink ? { signup: { cat: kind, id: x.svc.id } } : {}), note: '今の会社への解約の連絡は不要（新しい会社が手続きする）。検針票のお客さま番号・供給地点特定番号を用意' });
+        for (const it of x.items) if (it.campaign) fromList(it.campaign.todo, it.campaign.source, moneyOf(it.campaign), it.campaign.viaLink, `${kind}:${x.svc.id}`);
       }
       fromList(x.svc.todo && r.lines.some((l) => ['au', 'uq'].includes(l.brand.id)) ? x.svc.todo : null, x.svc.source);
     }
@@ -655,7 +727,16 @@
       if (m.note && !via.note) via.note = m.note;
       todos.splice(todos.indexOf(m), 1);
     }
-    todos.forEach((t) => delete t.main);
+    // 同じ会社の「〇〇は Web から申し込む」のような申込の注意は、「〇〇を申し込む」の1つにまとめる（DUEMO に2件入らないように）
+    for (const m of todos.filter((t) => t.main && t.owner)) {
+      for (const o of todos.filter((t) => t !== m && !t.main && t.phase === 'apply' && t.owner === m.owner && !t.signup)) {
+        m.note = [o.text, m.note].filter(Boolean).join('。');
+        if (!m.amount && o.amount) { m.amount = o.amount; m.kind = o.kind; }
+        if (o.applyBy && (!m.applyBy || o.applyBy < m.applyBy)) m.applyBy = o.applyBy;
+        todos.splice(todos.indexOf(o), 1);
+      }
+    }
+    todos.forEach((t) => { delete t.main; delete t.owner; });
 
     const order = PHASES.map((p) => p.id);
     todos.sort((a, b) => order.indexOf(a.phase) - order.indexOf(b.phase));
