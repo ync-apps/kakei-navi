@@ -19,7 +19,7 @@ function baseInputRaw(over = {}) {
     hikari: { use: true, current: 'docomo-hikari', currentMonthly: 4400, cancelFee: 0 },
     electric: { current: 'std', bill: 9000, amp: 30, kWh: 260 },
     gas: { type: 'city', current: 'std', bill: 5000 },
-    options: { includePoints: true, excludeUnverified: true, applyPolicy: 'full' },
+    options: { includePoints: true, excludeUnverified: true, applyPolicy: 'full', today: '2026-11-17' },
     ...over,
   };
 }
@@ -43,14 +43,17 @@ test('家族1人ずつ別の会社にする案も計算される', () => {
 });
 
 test('ソフトバンク光＋ソフトバンク：おうち割 光セットが1人ずつ・オプション代・応援割（新規のみ）', () => {
-  const r = E.compare(baseInput({ hikari: { use: true, current: 'none', currentMonthly: '', cancelFee: 0 } }), data);
+  // 今の光回線が「その他」（光コラボではない）→ 新規扱い。応援割は今の回線の証明が要るので「なし」の人は対象外
+  const r = E.compare(baseInput({ hikari: { use: true, current: 'other', currentMonthly: '', cancelFee: 0 } }), data);
   const x = find(r, (y) => allSame('softbank')(y) && y.combo.hikari === 'softbank-hikari');
   assert.strictEqual(x.items.filter((i) => i.label.startsWith('おうち割 光セット')).length, 2);
   assert.ok(x.items.some((i) => i.label.startsWith('おうち割に必要な光の指定オプション代')));
   // マンションは月550円、課金開始から7か月目以降なので24か月の比較では18か月分
   const ouen = x.items.find((i) => i.label.startsWith('ソフトバンク光 超おうち応援割'));
   assert.strictEqual(ouen.amount, -550 * 18);
-  const house = E.compare(baseInput({ housing: 'house', hikari: { use: true, current: 'none', currentMonthly: '', cancelFee: 0 } }), data);
+  const house = E.compare(baseInput({ housing: 'house', hikari: { use: true, current: 'other', currentMonthly: '', cancelFee: 0 } }), data);
+  const none = find(E.compare(baseInput({ hikari: { use: true, current: 'none', currentMonthly: '', cancelFee: 0 } }), data), (y) => allSame('softbank')(y) && y.combo.hikari === 'softbank-hikari');
+  assert.ok(!none.items.some((i) => i.label.startsWith('ソフトバンク光 超おうち応援割')));
   // 事業者変更（ドコモ光から）は応援割の対象外
   const henkou = find(E.compare(baseInput(), data), (y) => allSame('softbank')(y) && y.combo.hikari === 'softbank-hikari');
   assert.ok(!henkou.items.some((i) => i.label.startsWith('ソフトバンク光 超おうち応援割')));
@@ -137,7 +140,7 @@ test('電気：使用量が空欄なら電気代から推定する', () => {
 
 test('申請が必要な特典の扱いを選べる（NURO光）', () => {
   const pick = (applyPolicy) => {
-    const r = E.compare(baseInput({ options: { includePoints: true, excludeUnverified: true, applyPolicy } }), data);
+    const r = E.compare(baseInput({ options: { includePoints: true, excludeUnverified: true, applyPolicy, today: '2026-11-17' } }), data);
     const x = find(r, (y) => y.combo.hikari === 'nuro');
     const it = x.items.find((i) => i.label.startsWith('NURO光 キャッシュバック'));
     return it ? it.amount : 0;
@@ -395,7 +398,7 @@ test('広告ページの特典があるときは「申し込む」を1つにま�
 test('LINEMOの乗り換え特典はプランで金額が違う（ベストプラン10,000円・ベストプランV 12,000円）、出典は公式', () => {
   const r = E.compare(baseInput(), data);
   const x = find(r, allSame('linemo'));
-  const camps = x.items.filter((i) => i.campaign && i.campaign.provider === 'linemo');
+  const camps = x.items.filter((i) => i.campaign && i.campaign.provider === 'linemo' && i.campaign.kind === 'points');
   // 1人目20GB → ベストプランV（30GB）、2人目3GB → ベストプラン
   assert.deepStrictEqual(camps.map((i) => -i.amount).sort((a, b) => a - b), [10000, 12000]);
   for (const i of camps) assert.ok(i.src.startsWith('https://www.linemo.jp/'));
@@ -444,11 +447,11 @@ test('11/15の総点検で足した特典が計算に入る', () => {
   const r = E.compare(baseInput({ options: { includePoints: true, excludeUnverified: true, applyPolicy: 'full', today: '2026-11-15' } }), data);
   const labels = (f) => find(r, f).items.map((i) => i.label);
   // ドコモ MAX への乗り換え 20,000ポイント（今が au の人。1人目20GB → ドコモ MAX）
-  // （2026-11-17 に金額を確かめられず「要確認」にしたため、要確認も入れる設定で確かめる。標準設定では入らない）
+  // （公式は「最大20,000pt」のみ。個人は15,000ptと新しい記事3本が一致しているので「記事で確認」として標準設定でも入れる）
   const r2 = E.compare(baseInput({ lines: [{ current: 'au', gb: 20 }, { current: 'au', gb: 3 }], options: { includePoints: true, excludeUnverified: false, applyPolicy: 'full', today: '2026-11-15' } }), data);
   assert.ok(find(r2, (y) => y.combo.mobile.every((b) => b === 'docomo')).items.some((i) => i.label.startsWith('ドコモ SIMのみ乗り換え')));
   const r3 = E.compare(baseInput({ lines: [{ current: 'au', gb: 20 }, { current: 'au', gb: 3 }], options: { includePoints: true, excludeUnverified: true, applyPolicy: 'full', today: '2026-11-15' } }), data);
-  assert.ok(!find(r3, (y) => y.combo.mobile.every((b) => b === 'docomo')).items.some((i) => i.label.startsWith('ドコモ SIMのみ乗り換え')));
+  assert.strictEqual(find(r3, (y) => y.combo.mobile.every((b) => b === 'docomo')).items.find((i) => i.label.startsWith('ドコモ SIMのみ乗り換え')).amount, -15000);
   // IIJmio 半額と家族割引
   const iij = labels((y) => y.combo.mobile.every((b) => b === 'iijmio'));
   assert.ok(iij.some((l) => l.startsWith('IIJmio ギガプラン半額キャンペーン')));
@@ -514,4 +517,17 @@ test('新しく契約する人には「乗り換え」「解約不要」と書�
   const ap = E.buildTodos(x, inp, data).find((t) => t.signup && t.signup.cat === 'mobile');
   assert.ok(ap.text.includes('新規で申し込む'));
   assert.ok(!(ap.note || '').includes('解約'));
+});
+
+test('2回目チェックの再発防止：最初にやることは申込期限より前・代理店CBは減額後の金額・その他の会社にセット割を付けない', () => {
+  const inp = baseInput({ area: 'chubu', housing: 'house', lines: [{ current: 'softbank', gb: 20 }, { current: 'softbank', gb: 3 }, { current: 'softbank', gb: 3 }], hikari: { use: true, current: 'softbank-hikari', currentMonthly: 6050, cancelFee: 0 }, options: { includePoints: true, excludeUnverified: true, applyPolicy: 'full', today: '2026-11-17' } });
+  const r = E.compare(inp, data);
+  for (const x of r.top) {
+    const todos = E.buildTodos(x, inp, data);
+    const end = todos.filter((t) => t.phase === 'apply' && t.applyBy).map((t) => t.applyBy).sort()[0];
+    if (end) for (const t of todos.filter((t) => t.phase === 'before')) assert.ok(E.dueOf(t, '2026-11-17') <= new Date(end + 'T00:00:00'), t.text);
+  }
+  // ガスが「その他」で比べないとき、大阪ガスのセット割は付かない
+  const k = E.compare(baseInput({ area: 'kansai', compare: { mobile: false, hikari: false, electric: true, gas: false }, gas: { type: 'city', current: 'other', bill: 5000 } }), data);
+  for (const x of k.results) assert.ok(!x.items.some((i) => /^大阪ガス (ガス・電気セット|まとめトク)/.test(i.label)), 'set discount with other gas');
 });

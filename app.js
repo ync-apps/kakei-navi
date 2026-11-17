@@ -38,7 +38,7 @@
     if (!svc) return;
     const today = todayYmd();
     const camps = D.campaigns.filter((c) => c.viaLink === key && !(c.endsAt && c.endsAt < today) && (c.amount > 0 || c.amountMonths));
-    const lost = [...D.campaigns, ...D.discounts].filter((c) => c.notWithLink === key && !(c.endsAt && c.endsAt < today));
+    const lost = [...D.campaigns, ...D.discounts].filter((c) => c.notWithLink === key && !c.replacedByLink && !(c.endsAt && c.endsAt < today));
     const amt = (c) => c.amountMonths ? (c.monthlyCap ? `月${yen(c.monthlyCap)}まで×${c.amountMonths}か月` : `月額${c.amountMonths}か月分`) : yen(c.amount);
     const box = document.createElement('section');
     box.className = 'apply-panel';
@@ -187,7 +187,7 @@
   function serviceRows(r, input) {
     const rows = [];
     const lines = r.lines.map((l) => `<div>${esc(l.label)}：${linkText(l.brand.name, l.brand.source)}${l.line && l.line.current === 'new' ? '<span class="tag new">新規</span>' : tag(l.switching)}<span class="sub">${linkText(l.plan.name, l.plan.source || l.brand.source)}</span></div>`).join('');
-    rows.push(`<li><span class="cat">スマホ</span><span class="lines">${lines}</span></li>`);
+    if (r.lines.length) rows.push(`<li><span class="cat">スマホ</span><span class="lines">${lines}</span></li>`);
     if (r.hikari.svc) {
       const sub = r.hikari.jigyoushaHenkou ? '<span class="sub">工事なしの「事業者変更」で乗り換え</span>' : '';
       rows.push(`<li><span class="cat">光回線</span><span>${linkText(r.hikari.svc.name, r.hikari.svc.source)}${tag(r.hikari.switching)}${sub}</span></li>`);
@@ -204,7 +204,7 @@
   const amt = (n) => n < 0 ? '−' + yen(-n) : yen(n);
 
   // 内訳：スマホ（人ごと）・光回線・電気・ガスに分けて小計を出す
-  function breakdown(r, months) {
+  function breakdown(r, months, res) {
     const itemRow = (it) => `
       <tr class="${it.amount < 0 ? 'gain' : ''}">
         <td>${linkText(it.label, it.src)}${it.low ? ' <span class="tag low">要確認</span>' : ''}</td>
@@ -212,16 +212,17 @@
       </tr>`;
     const section = (title, items, subtotal) => items.length ? `
       <tbody class="bd-group">
-        <tr class="bd-head"><th>${esc(title)}</th><th class="num">${yen(subtotal)}<span class="meta"> （月 約${yen(subtotal / months)}）</span></th></tr>
+        <tr class="bd-head"><th>${esc(title)}</th><th class="num">${amt(subtotal)}<span class="meta"> （月 約${amt(Math.round(subtotal / months))}）</span></th></tr>
         ${items.map(itemRow).join('')}
       </tbody>` : '';
     let html = '<table class="bd">';
     // スマホは人ごと
     const lineItems = r.items.filter((it) => it.cat === 'line');
-    html += `<tbody class="bd-group"><tr class="bd-head"><th>スマホ（家族${r.lines.length}人分）</th><th class="num">${yen(r.subtotal.line)}<span class="meta"> （月 約${yen(r.subtotal.line / months)}）</span></th></tr></tbody>`;
+    if (lineItems.length) html += `<tbody class="bd-group"><tr class="bd-head"><th>スマホ（家族${r.lines.length}人分）${res && res.compared && !res.compared.mobile ? '・今のまま（セット割などの割引だけ）' : ''}</th><th class="num">${amt(r.subtotal.line)}<span class="meta"> （月 約${amt(Math.round(r.subtotal.line / months))}）</span></th></tr></tbody>`;
     for (const l of r.lines) {
       const its = lineItems.filter((it) => it.who === l.label);
-      html += `<tbody class="bd-sub"><tr class="bd-subhead"><td>${esc(l.label)}：${esc(l.brand.name)}</td><td class="num">${yen(l.total)}</td></tr>${its.map(itemRow).join('')}</tbody>`;
+      if (!its.length) continue;
+      html += `<tbody class="bd-sub"><tr class="bd-subhead"><td>${esc(l.label)}：${esc(l.brand.name)}</td><td class="num">${amt(its.reduce((t, it) => t + it.amount, 0))}</td></tr>${its.map(itemRow).join('')}</tbody>`;
     }
     for (const cat of ['hikari', 'electric', 'gas', 'card']) {
       html += section(catLabel[cat], r.items.filter((it) => it.cat === cat), r.subtotal[cat]);
@@ -360,7 +361,11 @@
     } else {
       summary += `<p>いちばんお得な組み合わせは ${m}か月で</p><p class="big">${yen(best.total)}</p><p class="meta">${[res.compared.mobile && '今のスマホ代', res.compared.hikari && '光回線の月額'].filter(Boolean).join('・') ? `${[res.compared.mobile && '今のスマホ代', res.compared.hikari && '光回線の月額'].filter(Boolean).join('・')}を入れると「今よりいくらお得か」も出ます。` : ''}</p>`;
     }
-    summary += `<p class="meta">${(input.options || {}).includePoints !== false ? 'ポイント（期間限定ポイントを含む）' : ''}${(input.options || {}).includePoints !== false && (input.options || {}).applyPolicy !== 'none' ? 'と、' : ''}${(input.options || {}).applyPolicy === 'full' || !(input.options || {}).applyPolicy ? '自分で申請が必要な特典を全額' : (input.options || {}).applyPolicy === 'half' ? '自分で申請が必要な特典を半額' : ''}で含めた金額です（「計算の設定」で変えられます）。</p>`;
+    {
+      const o = input.options || {};
+      const parts = [o.includePoints !== false && 'ポイント（期間限定ポイントを含む）', (o.applyPolicy || 'full') === 'full' && '自分で申請が必要な特典（全額）', o.applyPolicy === 'half' && '自分で申請が必要な特典（半額）'].filter(Boolean);
+      summary += `<p class="meta">${parts.length ? `${parts.join('と、')}を含めた金額です` : 'ポイントと、自分で申請が必要な特典は含めていません'}（「計算の設定」で変えられます）。</p>`;
+    }
     if (res.compared.hikari && input.hikari.use && !['none', 'other'].includes(input.hikari.current) && !(Number(input.hikari.cancelFee) > 0)) summary += '<p class="meta">今の光回線の解約金・工事費の残りを入れていないため、0円として計算しています。</p>';
     const c = res.counts;
     const u = res.electricUsage;
@@ -368,7 +373,7 @@
     else summary += `<p class="meta">この地域は電気の料金表を確認できなかったため、電気は今の金額のままで計算しました。</p>`;
     const cmpNames = { mobile: 'スマホ', hikari: '光回線', electric: '電気', gas: 'ガス' };
     const kept = Object.keys(cmpNames).filter((k) => !res.compared[k]).map((k) => cmpNames[k]);
-    const counted = Object.keys(cmpNames).filter((k) => res.compared[k]).map((k) => `${cmpNames[k]}${c[k]}社`).join('・');
+    const counted = Object.keys(cmpNames).filter((k) => res.compared[k] && c[k] > 0).map((k) => `${cmpNames[k]}${c[k]}社`).join('・');
     summary += `<p class="meta">比べた対象：${counted}（${res.compared.mobile ? '家族1人ずつ別の会社にする案も含めて ' : ''}${res.combinations.toLocaleString()}通り）。${kept.length ? `${kept.join('・')}は今の会社のままで、料金は合計に入れていません（セット割などの割引だけ入れています）。` : ''}<a href="#" data-goto="scope">比較対象の一覧</a></p></div>`;
 
     const cards = res.top.map((r, i) => {
@@ -386,7 +391,7 @@
         <ul class="services">${serviceRows(r, input)}</ul>
         <p class="meta">乗り換えの手続き：${r.switches}件${r.hasLowConfidence ? '　<span class="tag low">要確認の金額を含む</span>' : ''}</p>
         <button type="button" class="btn-sub btn-card" data-card="${i}">お店で見せる比較図を作る</button>
-        <details class="breakdown"><summary>内訳を見る（スマホ・光回線・電気・ガス別）</summary>${breakdown(r, m)}</details>
+        <details class="breakdown"><summary>内訳を見る（スマホ・光回線・電気・ガス別）</summary>${breakdown(r, m, res)}</details>
         ${todoBlock(r, input, i)}
       </article>`;
     }).join('');
@@ -402,7 +407,7 @@
       <h2 class="h2">おすすめの組み合わせ</h2>
       ${summary}
       ${cards}
-      ${brandRows ? `<h2 class="h2">家族全員を同じスマホ会社にする場合</h2>
+      ${brandRows && input.lines.length > 1 ? `<h2 class="h2">家族全員を同じスマホ会社にする場合</h2>
       <p class="hint">「この会社にまとめたい」場合に、光回線・電気・ガスをどうすると安いか（家族割を含む）。</p>
       <div class="table-scroll"><table class="brand-table">
         <thead><tr><th>スマホ</th><th>光回線／電気／ガス</th><th>${m}か月の実質</th></tr></thead>
@@ -461,7 +466,7 @@
       <div class="camp-card">
         <div class="row">
           <div><span class="meta">${esc(catLabel[c.target])}｜${esc(providerName(c))}</span><br><strong>${linkText(c.name, c.source)}</strong>${c.agent ? `<br><span class="meta">代理店「${esc(c.agent)}」のページ（PRリンク）から申し込んだ場合の特典</span>` : c.viaLink ? '<br><span class="meta">PRリンクから申し込んだ場合の特典</span>' : ''}</div>
-          <div class="amt">${c.amountMonths ? (c.monthlyCap ? `月${yen(c.monthlyCap)}まで×${c.amountMonths}か月` : `月額${c.amountMonths}か月分`) : yen(c.amount)}${c.kind === 'points' ? '<span class="meta"> 相当</span>' : ''}</div>
+          <div class="amt">${/最大/.test(c.conditions || '') && !c.amountMonths ? '最大' : ''}${c.amountMonths ? (c.monthlyCap ? `月${yen(c.monthlyCap)}まで×${c.amountMonths}か月` : `月額${c.amountMonths}か月分`) : yen(c.amount)}${c.kind === 'points' ? '<span class="meta"> 相当</span>' : ''}</div>
         </div>
         <p class="cond">${c.endsAt ? `<strong>${Number(c.endsAt.slice(5, 7))}月${Number(c.endsAt.slice(8, 10))}日まで。</strong>` : ''}${c.mnpOnly ? '番号そのまま乗り換え（MNP）限定。' : ''}${esc(c.conditions || '')}</p>
         <p class="meta">${c.kind === 'points' ? 'ポイント' : '現金・残高・割引'}｜受け取り方：${esc(E.RECEIVE_LABEL[c.receive] || '不明')}${c.receiveNote ? `（${esc(c.receiveNote)}）` : ''}${confTag(c)}${srcLink(c)}</p>
