@@ -609,6 +609,47 @@
       }
     }
 
+    // 6) 仕上げ：安い光回線・電気・ガスの組み合わせごとに、一番安い案から1人ずつ会社を替えて、もっと安くならないか試す
+    //    （家族割・家族で1回だけの特典などで、上の決まった形では見つからない組み合わせを拾う）
+    if (cmp.mobile && n >= 2) {
+      const bestByRest = new Map();
+      for (const [k, r] of resultsMap) {
+        const rk = k.slice(k.indexOf('|'));
+        if (!bestByRest.has(rk) || r.total < bestByRest.get(rk).total) bestByRest.set(rk, r);
+      }
+      const starts = [...bestByRest.values()].sort((a, b) => a.total - b.total).slice(0, 8);
+      for (const r0 of starts) {
+        const rest = { hikari: r0.combo.hikari, electric: r0.combo.electric, gas: r0.combo.gas };
+        const restKey = '|' + rest.hikari + '|' + rest.electric + '|' + rest.gas;
+        let cur = r0;
+        for (let iter = 0; iter < 5; iter++) {
+          let improved = false;
+          for (let i = 0; i < n; i++) {
+            for (const b of brands) {
+              if (cur.combo.mobile[i] === b.id) continue;
+              const a = cur.combo.mobile.slice();
+              a[i] = b.id;
+              add(a, rest);
+              const r = resultsMap.get(a.join(',') + restKey);
+              if (r && r.total < cur.total) { cur = r; improved = true; }
+            }
+          }
+          // 2人の会社を入れ替える形も試す（家族で1回だけの特典を誰が受けるか、で金額が変わるため）
+          for (let i = 0; i < n; i++) {
+            for (let j = i + 1; j < n; j++) {
+              if (cur.combo.mobile[i] === cur.combo.mobile[j]) continue;
+              const a = cur.combo.mobile.slice();
+              [a[i], a[j]] = [a[j], a[i]];
+              add(a, rest);
+              const r = resultsMap.get(a.join(',') + restKey);
+              if (r && r.total < cur.total) { cur = r; improved = true; }
+            }
+          }
+          if (!improved) break;
+        }
+      }
+    }
+
     const results = [...resultsMap.values()];
     results.sort((a, b) => a.total - b.total || a.switches - b.switches);
 

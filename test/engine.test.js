@@ -532,3 +532,11 @@ test('2回目チェックの再発防止：最初にやることは申込期限�
   const k = E.compare(baseInput({ area: 'kansai', compare: { mobile: false, hikari: false, electric: true, gas: false }, gas: { type: 'city', current: 'other', bill: 5000 } }), data);
   for (const x of k.results) assert.ok(!x.items.some((i) => /^大阪ガス (ガス・電気セット|まとめトク)/.test(i.label)), 'set discount with other gas');
 });
+
+test('3回目チェックの再発防止：家族で1回だけの特典があっても、より安い組み合わせを見落とさない', () => {
+  const inp = { area: 'hokkaido', housing: 'mansion', months: 24, lines: [{ current: 'nihontsushin', gb: 100 }, { current: 'au', gb: 20 }, { current: 'rakuten', gb: 10 }], mobileCurrentMonthly: '', hikari: { use: true, current: 'none', currentMonthly: '', cancelFee: '' }, electric: { current: 'std', bill: '9000', amp: 30, kWh: '' }, gas: { type: 'city', current: 'std', bill: '5000' }, cards: { d: 'haveGold', au: 'no', paypay: 'have' }, options: { includePoints: true, applyPolicy: 'none', excludeUnverified: true, today: '2026-11-15', links: {} } };
+  const r = E.compare(inp, data);
+  const hit = r.results.find((x) => x.combo.mobile.join() === 'rakuten,nihontsushin,iijmio' && x.combo.hikari === 'iij-hikari' && x.combo.electric === 'rakuten-denki');
+  assert.ok(hit, 'cheaper assignment found');
+  assert.ok(r.results[0].total <= hit.total);
+});
