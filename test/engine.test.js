@@ -4,7 +4,14 @@ const assert = require('node:assert');
 const data = require('../data.js');
 const E = require('../engine.js');
 
+// テストは日付で結果が変わらないよう「今日」を固定する（キャンペーンの終了日で計算が変わるため）
+const TEST_TODAY = '2026-11-15';
 function baseInput(over = {}) {
+  const input = baseInputRaw(over);
+  input.options = { today: TEST_TODAY, ...(input.options || {}) };
+  return input;
+}
+function baseInputRaw(over = {}) {
   return {
     area: 'tokyo', housing: 'mansion', months: 24,
     lines: [{ current: 'docomo', gb: 20 }, { current: 'docomo', gb: 3 }],
