@@ -15,9 +15,9 @@
   const ALL_BUT_OKINAWA = ['hokkaido', 'tohoku', 'tokyo', 'chubu', 'hokuriku', 'kansai', 'chugoku', 'shikoku', 'kyushu'];
 
   const DATA = {
-    asOf: '2026-11-10',
+    asOf: '2026-11-17',
     // endsAt: キャンペーン・割引の終了日（この日を過ぎると自動で計算から外れる）。checkedAt: 個別に確認し直した日（なければ asOf）
-    notice: '料金・キャンペーンは毎週月曜0時に更新しています（データ時点：2026年11月10日）。各社の公式サイトなどで調べた値です。「要確認」が付いた金額は確認できなかったものです。申し込み前に必ず公式サイトで最新の条件を確認してください。店頭限定のキャンペーンや、代理店・家電量販店などの申込窓口が独自に出すキャッシュバックは、ネットで公開されていないものも多いため計算に入れていません。ただし、このサイトからリンクしている代理店・広告ページのキャンペーンは、そのページから申し込んだ場合の金額として計算に入れ、その旨を表示しています。',
+    notice: '料金・キャンペーンは毎週月曜0時に更新しています（データ時点：2026年11月17日）。各社の公式サイトなどで調べた値です。「要確認」が付いた金額は確認できなかったものです。申し込み前に必ず公式サイトで最新の条件を確認してください。店頭限定のキャンペーンや、代理店・家電量販店などの申込窓口が独自に出すキャッシュバックは、ネットで公開されていないものも多いため計算に入れていません。ただし、このサイトからリンクしている代理店・広告ページのキャンペーンは、そのページから申し込んだ場合の金額として計算に入れ、その旨を表示しています。',
 
     areas: [
       { id: 'hokkaido', name: '北海道' },
@@ -202,8 +202,8 @@
       {
         id: 'uq-family', name: 'UQ 家族セット割', brand: 'uq', byCount: { 2: 550 }, group: 'home',
         todo: [{ phase: 'after', text: 'UQ 家族セット割を申し込む' }],
-        plans: ['uq-tokutoku-5', 'uq-tokutoku-30'], confidence: 'mid', checkedAt: '2026-11-15', source: 'https://selectra.jp/telecom/mobile/uqmobile-family-discount',
-        note: 'トクトクプラン2のみ。自宅セット割とは重ならない（公式で確認）。金額は記事',
+        plans: ['uq-tokutoku-5', 'uq-tokutoku-30'], confidence: 'high', checkedAt: '2026-11-17', source: 'https://www.uqwimax.jp/mobile/plan/tokutoku2/',
+        note: 'トクトクプラン2のみ。自宅セット割とは重ならない。金額・条件とも公式で確認（2026-11-17）',
       },
       {
         id: 'sb-family', name: '新みんな家族割', brand: 'softbank', byCount: { 2: 660, 3: 1210 },
@@ -607,13 +607,13 @@
         requires: { hikari: ['bbiq'] },
       },
       {
-        id: 'sb-denki-ouen', name: 'ソフトバンクでんき でんき応援割（3か月）', target: 'electric', amount: 1100, months: 3, endsAt: '2027-03-31', checkedAt: '2026-11-15', confidence: 'mid', newOnly: true,
+        id: 'sb-denki-ouen', name: 'ソフトバンクでんき でんき応援割（3か月）', target: 'electric', amount: 1100, months: 3, endsAt: '2027-03-31', checkedAt: '2026-11-17', confidence: 'high', newOnly: true,
         notWithLink: 'electric:softbank-denki', /* 比較サイト限定ページ（sb-denki-site）と同じ割引。リンクを貼ったらそちらで計算し、2回数えない */
-        source: 'https://www.softbank.jp/energy/', note: '毎月「最大」1,100円の割引を3か月。北海道・東京・中部・中国・四国のみ。1年未満の解約は違約金5,000円',
+        source: 'https://www.softbank.jp/energy/special/first-monthfree2025-2026/', note: '毎月「最大」1,100円の割引を3か月。北海道・東京・中部・中国・四国のみ。1年未満の解約は違約金5,000円',
         requires: { electric: ['softbank-denki'], area: ['hokkaido', 'tokyo', 'chubu', 'chugoku', 'shikoku'] },
       },
       {
-        id: 'osakagas-set-e', name: '大阪ガス ガス・電気セット（電気：ベースプランA-G）', target: 'electric', rate: 0.009, confidence: 'mid', checkedAt: '2026-11-15',
+        id: 'osakagas-set-e', name: '大阪ガス ガス・電気セット（電気：ベースプランA-G）', target: 'electric', rate: 0.009, confidence: 'high', checkedAt: '2026-11-17',
         source: 'https://home.osakagas.co.jp/energy/electricity/price/plan_ag/', note: 'ベースプランA-GはAより120〜350kWhが0.40円、350kWh超が0.29円安い。月260kWhで約0.9%として計算',
         requires: { area: ['kansai'], electric: ['osakagas-denki'], gas: ['std'] },
       },
@@ -645,21 +645,21 @@
         id: 'dcard-gold', family: 'd', tier: 'gold', name: 'dカード GOLD', annualFee: 11000, confidence: 'high',
         source: 'https://www.docomo.ne.jp/charge/dcard_oshiharai/',
         perLine: { docomo: 550 },
-        joinBonus: { amount: 7400, kind: 'points', receive: 'apply', confidence: 'mid', checkedAt: '2026-11-15', source: 'https://appllio.com/dcard-gold-campaign', note: '入会＆利用特典（最大）。条件の達成が必要' },
+        joinBonus: { amount: 7400, kind: 'points', receive: 'apply', confidence: 'high', checkedAt: '2026-11-17', source: 'https://dcard.docomo.ne.jp/std/campaigns/202607_1cm/cpn-shinkinyuukai-tokuten-standard/index.html', note: '入会＆利用特典（最大）：新規入会2,000＋固定費の支払い最大2,400＋利用3,000ポイント。公式で確認。2026年12月以降に還元率・年会費の見直し予定と公式に記載' },
       },
       {
         id: 'aupay', family: 'au', tier: 'normal', name: 'au PAY カード', annualFee: 0, confidence: 'high',
         source: 'https://www.au.com/mobile/charge/discount-option/aupay-card-wari/',
         perLine: { au: 220, uq: 220 }, plans: ['au-mini-1', 'au-mini-3', 'au-mini-5', 'au-max', 'uq-tokutoku-5', 'uq-tokutoku-30'],
         note: 'au PAY カードお支払い割。UQ はトクトクプラン2（公式の割引後料金から計算）',
-        joinBonus: { amount: 3000, kind: 'points', receive: 'apply', confidence: 'mid', checkedAt: '2026-11-15', source: 'https://money.it-trend.jp/articles/brand/au-pay-card/19-0010', note: '新規入会＆利用特典（最大）' },
+        joinBonus: { amount: 3000, kind: 'points', receive: 'apply', confidence: 'high', checkedAt: '2026-11-17', source: 'https://www.kddi-fs.com/function/promotion/', note: '新規入会＆利用特典（最大）。公式で確認（2026年6月1日〜・終了日の記載なし）' },
       },
       {
         id: 'aupay-gold', family: 'au', tier: 'gold', name: 'au PAY ゴールドカード', annualFee: 11000, confidence: 'high',
         source: 'https://www.au.com/mobile/charge/discount-option/aupay-card-wari/',
         perLine: { au: 220, uq: 220 }, plans: ['au-mini-1', 'au-mini-3', 'au-mini-5', 'au-max', 'uq-tokutoku-5', 'uq-tokutoku-30'],
         note: 'スマホ代の割引は一般カードと同じ。コミコミプランバリューの14か月目以降の割引継続は計算に入れていない',
-        joinBonus: { amount: 10000, kind: 'points', receive: 'apply', confidence: 'mid', checkedAt: '2026-11-15', source: 'https://money.it-trend.jp/articles/brand/au-pay-card/19-0010', note: '新規入会＆利用特典（最大）' },
+        joinBonus: { amount: 10000, kind: 'points', receive: 'apply', confidence: 'high', checkedAt: '2026-11-17', source: 'https://www.kddi-fs.com/function/promotion/', note: '新規入会＆利用特典（最大）。公式で確認（2026年6月1日〜・終了日の記載なし）' },
       },
       {
         id: 'paypay', family: 'paypay', tier: 'normal', name: 'PayPayカード', annualFee: 0, confidence: 'high',
@@ -671,7 +671,7 @@
         id: 'paypay-gold', family: 'paypay', tier: 'gold', name: 'PayPayカード ゴールド', annualFee: 11000, confidence: 'high',
         source: 'https://www.ymobile.jp/yservice/howto/discount/',
         perLine: { softbank: 550, ymobile: 770 }, note: 'ソフトバンク550円（提供条件書）、ワイモバイル770円（公式）',
-        joinBonus: { amount: 5000, kind: 'points', receive: 'apply', confidence: 'mid', checkedAt: '2026-11-15', source: 'https://dime.jp/genre/2124706/', note: '入会特典。年100万円以上使うと別に6,000ポイント（計算に入れていない）' },
+        joinBonus: { amount: 5000, kind: 'points', receive: 'apply', confidence: 'high', checkedAt: '2026-11-17', source: 'https://www.paypay-card.co.jp/campaign/sign-up/web/gold', note: '入会特典。公式で確認。年100万円以上使うと別に6,000ポイント（計算に入れていない）' },
       },
     ],
 
@@ -682,16 +682,16 @@
       {
         // ドコモ オンラインショップの SIMのみ契約。ドコモ MAX・ポイ活 MAX への乗り換えは20,000ポイント（ドコモ mini の金額は公式で確認できず入れていない）
         id: 'docomo-mnp-max', name: 'ドコモ SIMのみ乗り換え dポイント（ドコモ MAX）', target: 'line', provider: 'docomo', plans: ['docomo-max-1', 'docomo-max-3', 'docomo-max'], amount: 15000, kind: 'points', mnpOnly: true,
-        checkedAt: '2026-11-15', confidence: 'mid', receive: 'apply', receiveNote: '開通手続きの翌々月から（分割の場合あり）dポイント（期間・用途限定）',
+        checkedAt: '2026-11-17', confidence: 'low', receive: 'apply', receiveNote: '開通手続きの翌々月から（分割の場合あり）dポイント（期間・用途限定）',
         todo: [{ phase: 'before', text: 'ドコモのSIMのみ契約キャンペーンにWebエントリーする（申込前）' }],
         source: 'https://www.docomo.ne.jp/campaign_event/plan_norikae/index.html',
         applyNote: 'ドコモオンラインショップで「SIMのみ」で申し込む',
-        conditions: 'ドコモオンラインショップでのSIMのみ契約（要Webエントリー）。公式は「最大20,000pt」だが、個人のドコモ MAX・ポイ活 MAX へののりかえは15,000ポイント（2026年11月1日以降の申込、マイナビ・なるはやネットの記事で確認。オンラインショップのページは読み取れず）。新規は10,000ポイント',
+        conditions: '【2026-11-17 要確認：公式（オンラインショップのページ）が自動で読めず、記事でもドコモ MAX の金額を確かめられなかったため計算から外している】ドコモオンラインショップでのSIMのみ契約（要Webエントリー）。公式は「最大20,000pt」だが、個人のドコモ MAX・ポイ活 MAX へののりかえは15,000ポイント（2026年11月1日以降の申込、マイナビ・なるはやネットの記事で確認。オンラインショップのページは読み取れず）。新規は10,000ポイント',
       },
       {
         // 本気割：乗り換えで 360GB（365日間）トッピングを買うと半額をau PAY 残高に還元
         id: 'povo-mnp-360', name: 'povo 本気割（360GB・365日間トッピング）', target: 'line', provider: 'povo', plans: ['povo-360y'], amount: 13200, kind: 'cash', mnpOnly: true,
-        checkedAt: '2026-11-15', confidence: 'high', receive: 'auto', receiveNote: 'SIM有効化の翌月末までにau PAY 残高へ',
+        checkedAt: '2026-11-17', confidence: 'high', receive: 'auto', receiveNote: 'SIM有効化の翌月末までにau PAY 残高へ',
         source: 'https://povo.jp/campaign/detail/mnp_aupay_cpn_2025_05/',
         applyNote: 'SIMを有効化してから7日以内に「データ追加360GB（365日間）」を買う（au IDを連携しておく）',
         conditions: '他社からの乗り換えで「通話＋データ」プラン（au・UQ・povo1.0からは対象外）。SIM有効化の7日後までに初めて対象トッピングを購入。au IDの連携とau PAYの利用開始が必要',
@@ -728,101 +728,118 @@
       },
       {
         id: 'au-ols-new', name: 'au Online Shop SIM新規契約特典', target: 'line', provider: 'au', plans: ['au-max'], amount: 10000, kind: 'cash', newLineOnly: true,
-        checkedAt: '2026-11-15', confidence: 'high', receive: 'auto', source: 'https://www.au.com/mobile/campaign/ols-sim-2010/',
+        checkedAt: '2026-11-17', confidence: 'high', receive: 'auto', source: 'https://www.au.com/mobile/campaign/ols-sim-2010/',
         conditions: 'au Online Shop で SIM・eSIM のみの新規契約（5〜12歳は20,000円）。スマホミニプラン＋は対象外',
       },
       {
         id: 'docomo-new-max', name: 'ドコモ SIMのみ新規契約 dポイント（ドコモ MAX）', target: 'line', provider: 'docomo', plans: ['docomo-max-1', 'docomo-max-3', 'docomo-max'], amount: 10000, kind: 'points', newLineOnly: true,
-        checkedAt: '2026-11-15', confidence: 'mid', receive: 'apply', source: 'https://www.docomo.ne.jp/campaign_event/plan_norikae/index.html',
+        checkedAt: '2026-11-17', confidence: 'low', receive: 'apply', source: 'https://www.docomo.ne.jp/campaign_event/plan_norikae/index.html',
         todo: [{ phase: 'before', text: 'ドコモのSIMのみ契約キャンペーンにWebエントリーする（申込前）' }],
-        conditions: 'ドコモオンラインショップでのSIMのみ新規契約（要Webエントリー）。金額は記事（マイナビ 2026-11-12）で確認',
+        conditions: '【2026-11-17 要確認：公式（オンラインショップのページ）が自動で読めず、記事でもドコモ MAX の金額を確かめられなかったため計算から外している】ドコモオンラインショップでのSIMのみ新規契約（要Webエントリー）。金額は記事（マイナビ 2026-11-12）で確認',
       },
       {
         id: 'ym-mnp-s', name: 'ワイモバイル 乗り換え特典（S）', target: 'line', provider: 'ymobile', plans: ['ym-s'], amount: 5000, kind: 'points', mnpOnly: true,
-        confidence: 'mid', checkedAt: '2026-11-15', source: 'https://selectra.jp/telecom/mobile/ymobile-campaigns',
+        confidence: 'mid', checkedAt: '2026-11-17', source: 'https://selectra.jp/telecom/mobile/ymobile-campaigns',
         conditions: 'SプランにSIMのみの乗り換え。データ増量オプション（6か月無料）の加入が条件。ソフトバンク・LINEMOからは対象外（公式ページは自動で読めず記事で確認）',
       },
       {
         id: 'ym-new', name: 'ワイモバイル 新規契約特典（M・L）', target: 'line', provider: 'ymobile', plans: ['ym-m', 'ym-l'], amount: 5000, kind: 'points', newLineOnly: true,
-        confidence: 'mid', checkedAt: '2026-11-15', source: 'https://selectra.jp/telecom/mobile/ymobile-campaigns',
+        confidence: 'mid', checkedAt: '2026-11-17', source: 'https://selectra.jp/telecom/mobile/ymobile-campaigns',
         conditions: 'M/LプランにSIMのみの新規契約（5〜18歳は10,000円相当）。データ増量オプション（6か月無料）の加入が条件',
       },
       {
         id: 'rakuten-new', name: '楽天モバイル 新規申し込みポイント', target: 'line', provider: 'rakuten', amount: 9000, kind: 'points', newLineOnly: true, group: 'rakuten-first',
-        checkedAt: '2026-11-15', confidence: 'high', receive: 'apply', source: 'https://network.mobile.rakuten.co.jp/campaign/mnp/',
+        checkedAt: '2026-11-17', confidence: 'high', receive: 'apply', source: 'https://network.mobile.rakuten.co.jp/campaign/mnp/',
         conditions: '電話番号を新しく取る申し込み（9,000ポイント）。事前エントリー・Rakuten Linkで10秒以上の通話が必要',
       },
       {
         id: 'linemo-new', name: 'LINEMO 新規契約特典（ベストプランV）', target: 'line', provider: 'linemo', plans: ['linemo-30'], amount: 6000, kind: 'points', newLineOnly: true,
-        confidence: 'mid', checkedAt: '2026-11-15', source: 'https://selectra.jp/telecom/mobile/linemo-campaign',
-        conditions: '新しい番号での契約（ベストプランは3,000ポイント）。公式ページは自動で読めず記事で確認',
+        confidence: 'mid', checkedAt: '2026-11-17', source: 'https://selectra.jp/telecom/news/linemo-paypay-boost-fee-free-november-2026',
+        conditions: '2026年11月23日〜12月6日の申込はPayPayポイント増額と事務手数料0円の予定（増額の金額は未発表のため計算に入れていない）。新しい番号での契約（ベストプランは3,000ポイント）。公式ページは自動で読めず記事で確認',
       },
       {
         id: 'linemo-new-best', name: 'LINEMO 新規契約特典（ベストプラン）', target: 'line', provider: 'linemo', plans: ['linemo-3', 'linemo-10'], amount: 3000, kind: 'points', newLineOnly: true,
-        confidence: 'mid', checkedAt: '2026-11-15', source: 'https://selectra.jp/telecom/mobile/linemo-campaign',
-        conditions: '新しい番号での契約。公式ページは自動で読めず記事で確認',
+        confidence: 'mid', checkedAt: '2026-11-17', source: 'https://selectra.jp/telecom/news/linemo-paypay-boost-fee-free-november-2026',
+        conditions: '2026年11月23日〜12月6日の申込はPayPayポイント増額と事務手数料0円の予定（増額の金額は未発表のため計算に入れていない）。新しい番号での契約。公式ページは自動で読めず記事で確認',
       },
       {
         id: 'mineo-pittari-3', name: 'mineo 秋のピッタリ割（3GB）', target: 'line', provider: 'mineo', plans: ['mineo-3'], amount: 2508, kind: 'cash', endsAt: '2026-11-30',
-        checkedAt: '2026-11-15', confidence: 'high', receive: 'auto', source: 'https://mineo.jp/campaign/cp-20260917-1/',
+        checkedAt: '2026-11-17', confidence: 'high', receive: 'auto', source: 'https://mineo.jp/campaign/cp-20260917-1/',
         conditions: 'マイピタ デュアルタイプ（音声）の新規申込。利用開始月から最大6か月、月418円引き（11月30日までの申込・12月31日までに開通）。法人は対象外',
       },
       {
         id: 'mineo-pittari-7', name: 'mineo 秋のピッタリ割（7GB）', target: 'line', provider: 'mineo', plans: ['mineo-7'], amount: 3168, kind: 'cash', endsAt: '2026-11-30',
-        checkedAt: '2026-11-15', confidence: 'high', receive: 'auto', source: 'https://mineo.jp/campaign/cp-20260917-1/',
+        checkedAt: '2026-11-17', confidence: 'high', receive: 'auto', source: 'https://mineo.jp/campaign/cp-20260917-1/',
         conditions: 'マイピタ デュアルタイプ（音声）の新規申込。利用開始月から最大6か月、月528円引き（11月30日までの申込・12月31日までに開通）。法人は対象外',
       },
       {
         id: 'mineo-pittari-15', name: 'mineo 秋のピッタリ割（15GB）', target: 'line', provider: 'mineo', plans: ['mineo-15'], amount: 5808, kind: 'cash', endsAt: '2026-11-30',
-        checkedAt: '2026-11-15', confidence: 'high', receive: 'auto', source: 'https://mineo.jp/campaign/cp-20260917-1/',
+        checkedAt: '2026-11-17', confidence: 'high', receive: 'auto', source: 'https://mineo.jp/campaign/cp-20260917-1/',
         conditions: 'マイピタ デュアルタイプ（音声）の新規申込。利用開始月から最大6か月、月968円引き（11月30日までの申込・12月31日までに開通）。法人は対象外',
       },
       {
         id: 'mineo-pittari-30', name: 'mineo 秋のピッタリ割（30GB）', target: 'line', provider: 'mineo', plans: ['mineo-30'], amount: 5148, kind: 'cash', endsAt: '2026-11-30',
-        checkedAt: '2026-11-15', confidence: 'high', receive: 'auto', source: 'https://mineo.jp/campaign/cp-20260917-1/',
+        checkedAt: '2026-11-17', confidence: 'high', receive: 'auto', source: 'https://mineo.jp/campaign/cp-20260917-1/',
         conditions: 'マイピタ デュアルタイプ（音声）の新規申込。利用開始月から最大6か月、月858円引き（11月30日までの申込・12月31日までに開通）。法人は対象外',
       },
       {
         id: 'mineo-pittari-50', name: 'mineo 秋のピッタリ割（50GB）', target: 'line', provider: 'mineo', plans: ['mineo-50'], amount: 5148, kind: 'cash', endsAt: '2026-11-30',
-        checkedAt: '2026-11-15', confidence: 'high', receive: 'auto', source: 'https://mineo.jp/campaign/cp-20260917-1/',
+        checkedAt: '2026-11-17', confidence: 'high', receive: 'auto', source: 'https://mineo.jp/campaign/cp-20260917-1/',
         conditions: 'マイピタ デュアルタイプ（音声）の新規申込。利用開始月から最大6か月、月858円引き（11月30日までの申込・12月31日までに開通）。法人は対象外',
       },
       {
         id: 'ahamo-mnp', name: 'ahamo 乗り換え特典', target: 'line', provider: 'ahamo', amount: 20000, kind: 'points', mnpOnly: true,
         todo: [{ phase: 'apply', text: 'ahamo のキャンペーンページで対象条件を確認してから申し込む' }],
-        confidence: 'high', checkedAt: '2026-11-15', receive: 'auto', receiveNote: '条件を満たした月の翌々月末から5か月、毎月4,000ポイント', source: 'https://ahamo.com/special/lp/dpointcp/001.html',
+        confidence: 'high', checkedAt: '2026-11-17', receive: 'auto', receiveNote: '条件を満たした月の翌々月末から5か月、毎月4,000ポイント', source: 'https://ahamo.com/special/lp/dpointcp/001.html',
         conditions: 'SIMのみの乗り換え（要エントリー）。dポイント（期間・用途限定）合計20,000ポイント。ドコモからは対象外。JALモバイルオプション同時申込は対象外',
       },
       {
         id: 'uq-mnp', name: 'UQモバイル 乗り換え特典', target: 'line', provider: 'uq', amount: 20000, kind: 'cash', mnpOnly: true,
         todo: [{ phase: 'apply', text: 'UQモバイルは「SIMのみ」でオンライン申込（特典の対象）' }],
-        confidence: 'high', checkedAt: '2026-11-15', receive: 'auto', receiveNote: '開通翌月下旬以降にau PAY 残高へ', source: 'https://shop.uqmobile.jp/shop/cashback/',
+        confidence: 'high', checkedAt: '2026-11-17', receive: 'auto', receiveNote: '開通翌月下旬以降にau PAY 残高へ', source: 'https://shop.uqmobile.jp/shop/cashback/',
         conditions: '2026年9月17日から20,000円。SIM・eSIMのみの乗り換えで、トクトクプラン2かコミコミプランバリュー。増量オプションⅡ（月550円・7か月無料、その間に外せば0円）の加入が条件。au・povoからは対象外',
       },
       {
         id: 'au-ols-mnp', name: 'au Online Shop SIM乗り換え特典', target: 'line', provider: 'au', plans: ['au-max'], amount: 20000, kind: 'cash', mnpOnly: true,
         todo: [{ phase: 'apply', text: 'au は Online Shop から SIM のみで申し込む（特典の対象）' }],
-        confidence: 'high', checkedAt: '2026-11-15', source: 'https://www.au.com/mobile/campaign/ols-sim-2010/',
+        confidence: 'high', checkedAt: '2026-11-17', source: 'https://www.au.com/mobile/campaign/ols-sim-2010/',
         conditions: '2026年9月17日〜終了日未定。スマホミニプラン＋は対象外。au Online Shop で SIM・eSIM のみの乗り換え。au PAY 残高で最大20,000円相当。UQ・povoからは対象外',
       },
       {
         id: 'ym-mnp', name: 'ワイモバイル 乗り換え特典（M・L）', target: 'line', provider: 'ymobile', plans: ['ym-m', 'ym-l'], amount: 15000, kind: 'points', mnpOnly: true,
         todo: [{ phase: 'apply', text: 'ワイモバイルは特典が載っているページから SIM のみで申し込む' }],
-        confidence: 'mid', checkedAt: '2026-11-15', source: 'https://selectra.jp/telecom/mobile/ymobile-campaigns',
+        confidence: 'mid', checkedAt: '2026-11-17', source: 'https://selectra.jp/telecom/mobile/ymobile-campaigns',
         conditions: 'M/LプランにSIMのみの乗り換え。データ増量オプション（月550円・6か月無料、その間に外せば0円）の加入が条件。PayPayポイント15,000円相当（ヤフー店は最大21,000円相当）。ソフトバンク・LINEMOからは対象外（記事は2026-11-13更新・終了日未定）',
       },
       {
         id: 'rakuten-mnp', name: '楽天モバイル 乗り換えポイント', target: 'line', provider: 'rakuten', amount: 10000, kind: 'points', mnpOnly: true, group: 'rakuten-first',
         todo: [{ phase: 'before', text: '楽天モバイルの乗り換えキャンペーンにエントリーする（申込前）' }],
-        checkedAt: '2026-11-10', confidence: 'high', receive: 'apply', receiveNote: '事前エントリーが必要。条件達成の翌々月末ごろから3回に分けて受け取り手続き（4,000・3,000・3,000ポイント、有効3か月）', source: 'https://network.mobile.rakuten.co.jp/campaign/mnp/',
+        checkedAt: '2026-11-17', confidence: 'high', receive: 'apply', receiveNote: '事前エントリーが必要。条件達成の翌々月末ごろから3回に分けて受け取り手続き（4,000・3,000・3,000ポイント、有効3か月）', source: 'https://network.mobile.rakuten.co.jp/campaign/mnp/',
         conditions: '他社から電話番号そのまま乗り換え（新規は9,000ポイント）。申込翌月末までに利用開始とRakuten Linkで10秒以上の通話が必要',
+      },
+      {
+        // 楽天銀行会員向け（常時開催）。楽天銀行利用者3,000ポイント＋乗り換え10,000／新規9,000ポイント。ほかの「初めて申し込み」の特典とは一番多いものだけ（group）
+        id: 'rakuten-bank-member-mnp', name: '楽天モバイル 楽天銀行会員向け 乗り換え 13,000ポイント', target: 'line', provider: 'rakuten', amount: 13000, kind: 'points', mnpOnly: true, group: 'rakuten-first',
+        onePerHousehold: true, onceKey: 'rakuten-bank' /* 楽天銀行の特典は家族で1回 */, checkedAt: '2026-11-17', confidence: 'high', receive: 'apply',
+        receiveNote: '楽天銀行利用者特典3,000ポイントは利用開始月の3か月後の月末ごろ。10,000ポイントは届いた通知から受け取り手続き',
+        source: 'https://network.mobile.rakuten.co.jp/campaign/bank-member-campaign/', applyUrl: 'https://network.mobile.rakuten.co.jp/campaign/bank-member-campaign/',
+        conditions: '常時開催。楽天銀行口座が必要。申込月に楽天銀行ハッピープログラムにエントリー、クーポン「RBNREG00000002」、翌月末までに利用開始とRakuten Linkで10秒以上の発信。おひとり様1回',
+        todo: [{ phase: 'before', text: '楽天銀行のハッピープログラムにエントリーし、楽天モバイルの楽天銀行会員向けキャンペーンにエントリーする（申込前）' }],
+      },
+      {
+        id: 'rakuten-bank-member-new', name: '楽天モバイル 楽天銀行会員向け 新規 12,000ポイント', target: 'line', provider: 'rakuten', amount: 12000, kind: 'points', newLineOnly: true, group: 'rakuten-first',
+        onePerHousehold: true, onceKey: 'rakuten-bank' /* 楽天銀行の特典は家族で1回 */, checkedAt: '2026-11-17', confidence: 'high', receive: 'apply',
+        receiveNote: '楽天銀行利用者特典3,000ポイントは利用開始月の3か月後の月末ごろ。9,000ポイントは届いた通知から受け取り手続き',
+        source: 'https://network.mobile.rakuten.co.jp/campaign/bank-member-campaign/', applyUrl: 'https://network.mobile.rakuten.co.jp/campaign/bank-member-campaign/',
+        conditions: '常時開催。新しい電話番号での申込。楽天銀行口座が必要。申込月に楽天銀行ハッピープログラムにエントリー、クーポン「RBNREG00000002」、翌月末までに利用開始とRakuten Linkで10秒以上の発信。おひとり様1回',
+        todo: [{ phase: 'before', text: '楽天銀行のハッピープログラムにエントリーし、楽天モバイルの楽天銀行会員向けキャンペーンにエントリーする（申込前）' }],
       },
       {
         // 楽天銀行と合同のキャンペーン（Web申込・11/18 10時まで）。楽天モバイル初めての申し込みは、ほかのポイント特典と併用できず一番多いものだけ（group）
         id: 'rakuten-bank-first', name: '楽天モバイル初めて申し込み 20,000ポイント（楽天銀行口座あり・開設の人）', target: 'line', provider: 'rakuten', amount: 20000, kind: 'points', group: 'rakuten-first',
-        onePerHousehold: true, /* おひとり様1回・楽天銀行口座とハッピープログラムが必要なので、家族のうち1人分だけ計算する */
+        onePerHousehold: true, onceKey: 'rakuten-bank' /* 楽天銀行の特典は家族で1回 */, /* おひとり様1回・楽天銀行口座とハッピープログラムが必要なので、家族のうち1人分だけ計算する */
         applyUrl: 'https://network.mobile.rakuten.co.jp/campaign/bank-mobile-joint/',
-        endsAt: '2026-11-18', /* 11月18日10:00まで */ checkedAt: '2026-11-15', confidence: 'high', receive: 'auto', receiveNote: '2027年2月から5か月、毎月末ごろに4,000ポイント（期間限定・有効3か月）',
+        endsAt: '2026-11-18', /* 11月18日10:00まで */ checkedAt: '2026-11-17', confidence: 'high', receive: 'auto', receiveNote: '2027年2月から5か月、毎月末ごろに4,000ポイント（期間限定・有効3か月）',
         source: 'https://network.mobile.rakuten.co.jp/campaign/bank-mobile-joint/',
         conditions: 'Web申込限定（2026年11月9日〜11月18日10:00）。キャンペーンページの申し込みボタンから、クーポン「RBKBST00000001」を適用して申し込む。新規・乗り換えとも対象。楽天銀行口座が必要（なければ同じページの口座開設ボタンから11/18 10時までに申込）。12/31までに利用開始・Rakuten Linkで10秒以上発信・楽天銀行ハッピープログラムにエントリー（同じ楽天ID）。おひとり様1回。楽天モバイルショップで申し込む場合は、別のショップ限定20,000ポイント（11/19閉店まで）',
         applyNote: 'キャンペーンページの申し込みボタンから申し込み、クーポン「RBKBST00000001」が表示されているか確認（11月18日10時まで）',
@@ -842,23 +859,23 @@
       },
       {
         id: 'au-hikari-norikae', name: 'auひかり 乗りかえスタートサポート', target: 'hikari', provider: 'au-hikari', amount: 0, kind: 'cash',
-        coversCancelFee: true, cancelFeeCap: 30000, checkedAt: '2026-11-10', 
+        coversCancelFee: true, cancelFeeCap: 30000, checkedAt: '2026-11-17', 
         confidence: 'high', receive: 'apply', receiveNote: '申込月を含む12か月以内に申請書と解約明細を送付。約1か月後にau PAY 残高（最大10,000円）＋月額割引（最大20,000円）',
         source: 'https://www.au.com/internet/campaign/norikae-startsupport-home/',
         conditions: 'ずっとギガ得プラン＋電話。他社からの乗り換えで、今の光回線の解約違約金相当を合計最大30,000円まで還元（対象プロバイダの場合。Asahi Net・DTI は最大15,000円）',
         todo: [{ phase: 'after', text: 'auひかり「乗りかえスタートサポート」の申請書と、今の光回線の解約金がわかる明細を送る（申込から12か月以内）' }],
       },
       {
-        id: 'nuro-cb', name: 'NURO光 キャッシュバック', target: 'hikari', provider: 'nuro', amount: 15000, kind: 'cash',
-        endsAt: '2026-11-15', notWithLink: 'hikari:nuro', /* 広告リンク先の特典とは併用できない */
+        id: 'nuro-cb', name: 'NURO光 キャッシュバック', target: 'hikari', provider: 'nuro', amount: 10000, kind: 'cash',
+        endsAt: '2026-11-22', notWithLink: 'hikari:nuro', /* 広告リンク先の特典とは併用できない */
         todo: [{ phase: 'later', months: 17, text: 'NURO光のキャッシュバック受け取り手続き（開通17か月後に届くメールから。期限あり）' }],
-        checkedAt: '2026-11-15', confidence: 'high', receive: 'apply', receiveNote: '開通17か月後に届くメールからマイページで口座を指定（手続き期間45日）', source: 'https://www.nuro.jp/',
-        conditions: '11月15日まで（公式ページのバナーに「期間限定 11/15まで」）。2年割の申込・12か月以内の開通・支払方法の登録が条件',
+        checkedAt: '2026-11-17', confidence: 'high', receive: 'apply', receiveNote: '開通17か月後に届くメールからマイページで口座を指定（手続き期間45日）', source: 'https://www.nuro.jp/',
+        conditions: '期間限定（2026年11月22日まで）。2.5ギガは10,000円（10ギガは20,000円）。2年割かU29応援割の申込・申込から12か月以内の開通・支払方法の登録・受け取りまで継続が条件',
       },
       {
         // 広告（PR）リンク先の特別ページ（nuro.jp/hikari/pr/sp/）からの申込だけの特典。affiliate.js に NURO光のリンクがあるときだけ計算に入る
         id: 'nuro-pr-cb', name: 'NURO光 現金キャッシュバック（広告ページ限定）', target: 'hikari', provider: 'nuro', amount: 55000, kind: 'cash',
-        viaLink: 'hikari:nuro', checkedAt: '2026-11-13', confidence: 'high', receive: 'apply',
+        viaLink: 'hikari:nuro', checkedAt: '2026-11-17', confidence: 'high', receive: 'apply',
         receiveNote: '開通11か月後に15,000円・17か月後に25,000円・23か月後に15,000円（クーポン分）の案内メール。それぞれ45日以内にマイページで口座を指定',
         source: 'https://www.nuro.jp/hikari/pr/sp/',
         conditions: '2.5ギガプランの場合（10ギガは80,000円）。このページからの申込のみ。申込画面でクーポン「myb」を入力（入れないと40,000円）。申込から12か月後の月末までに開通、開通10か月後の末日までに支払方法とメールアドレスを登録。受け取りまで解約しないこと。ほかの特典・キャンペーンとは併用不可',
@@ -872,23 +889,23 @@
       },
       {
         id: 'nuro-norikae', name: 'NURO光 乗り換え特典', target: 'hikari', provider: 'nuro', amount: 0, kind: 'cash',
-        coversCancelFee: true, cancelFeeCap: 60000, checkedAt: '2026-11-13', confidence: 'high', receive: 'apply',
+        coversCancelFee: true, cancelFeeCap: 60000, checkedAt: '2026-11-17', confidence: 'high', receive: 'apply',
         receiveNote: '開通5〜7か月目の末日までに届くシートに解約金の証明書を貼って返送 → 45日以内に案内 → 45日以内に口座指定',
         source: 'https://www.nuro.jp/',
         conditions: '今の光回線などの解約金・工事費の残り・撤去費用を最大60,000円までキャッシュバック。申請は1回だけ',
         todo: [{ phase: 'later', months: 5, text: 'NURO光の乗り換え特典：届いたシートに今の光回線の解約金の証明書を貼って返送する' }],
       },
       {
-        id: 'sonet-cb', name: 'So-net光 新設キャッシュバック', target: 'hikari', provider: 'sonet-hikari', amount: 10000, kind: 'cash',
-        endsAt: '2026-11-15', newOnly: true, checkedAt: '2026-11-11',
+        id: 'sonet-cb', name: 'So-net光 新設キャッシュバック', target: 'hikari', provider: 'sonet-hikari', amount: 5000, kind: 'cash',
+        endsAt: '2026-11-22', newOnly: true, checkedAt: '2026-11-17',
         todo: [{ phase: 'later', months: 17, text: 'So-net光のキャッシュバックの口座手続き（開通17か月後の15日から45日間。過ぎると受け取れない）' }],
         confidence: 'high', receive: 'apply', receiveNote: '開通17か月後の15日から45日間に、マイページかSo-net会員アプリで受取口座を指定', source: 'https://www.so-net.ne.jp/access/hikari/1g/',
-        conditions: '2026年11月9日〜15日の申込。新設のみ（転用・事業者変更は対象外）。So-net 光 Mと10ギガが対象（S・Lは対象外）。申込から6か月後の末日までに支払方法の登録と開通。受け取りまで解約・退会しないこと',
+        conditions: '2026年11月16日〜22日の申込。So-net 光 M の新設のみ（10ギガ・S・L・転用・事業者変更は対象外）。申込から6か月後の末日までに支払方法とメールアドレスを登録して開通。受け取りまで解約・退会しないこと',
       },
       {
         // 広告（PR）リンク先の特別ページ（join.biglobe.ne.jp/ftth/hikari/lp/af/）の特典。affiliate.js に ビッグローブ光のリンクがあるときだけ計算に入る
         id: 'biglobe-pr-cb', name: 'ビッグローブ光 キャッシュバック（広告ページ・クーポン）', target: 'hikari', provider: 'biglobe-hikari', amount: 65000, kind: 'cash',
-        viaLink: 'hikari:biglobe-hikari', checkedAt: '2026-11-13', confidence: 'high', receive: 'apply',
+        viaLink: 'hikari:biglobe-hikari', checkedAt: '2026-11-17', confidence: 'high', receive: 'apply',
         receiveNote: '12か月目に35,000円、24か月目に30,000円（クーポン分）。それぞれ対象月の2日から45日以内にマイページで手続き（CASH POSTで口座へ）',
         source: 'https://join.biglobe.ne.jp/ftth/hikari/lp/af/limited.html',
         conditions: '1ギガ3年プランの場合。リンク先のページから、クーポン「BWS」を入力して申し込む。申込から6か月以内に開通。受け取りまで解約・コース変更しないこと（24か月目の分は24か月目まで継続）',
@@ -900,7 +917,7 @@
       },
       {
         id: 'biglobe-pr-cancel', name: 'ビッグローブ光 解約金サポート（広告ページ）', target: 'hikari', provider: 'biglobe-hikari', amount: 0, kind: 'cash',
-        viaLink: 'hikari:biglobe-hikari', coversCancelFee: true, cancelFeeCap: 40000, checkedAt: '2026-11-13', confidence: 'high', receive: 'apply',
+        viaLink: 'hikari:biglobe-hikari', coversCancelFee: true, cancelFeeCap: 40000, checkedAt: '2026-11-17', confidence: 'high', receive: 'apply',
         receiveNote: '申込後に届く入会資料の「解約金サポート申込書」で申請',
         source: 'https://join.biglobe.ne.jp/ftth/hikari/lp/af/limited.html',
         conditions: '他社の光回線の解約金（契約解除料・工事費の残り・撤去費用）と同じ額を最大40,000円まで還元',
@@ -908,27 +925,27 @@
       },
       {
         id: 'eo-cash', name: 'eo光 他社の違約金・撤去費の補填', target: 'hikari', provider: 'eo-hikari', amount: 0, kind: 'cash',
-        coversCancelFee: true, cancelFeeCap: 60000, checkedAt: '2026-11-15', receive: 'apply',
+        coversCancelFee: true, cancelFeeCap: 60000, checkedAt: '2026-11-17', receive: 'apply',
         confidence: 'high', source: 'https://eonet.jp/sp/home-pickup/', conditions: '戸建て向け。他社の違約金・撤去費を最大60,000円まで補填（機器の残債は10,000円まで、利用開始6か月目末までに申請）。現金3,000円プレゼントは10ギガの「eo光シンプルプラン」だけなので計算に入れていない',
         todo: [{ phase: 'after', text: 'eo光の現金プレゼント・他社違約金補填の手続きを確認する' }],
       },
       {
         id: 'commufa-cb', name: 'コミュファ光 WEB限定キャッシュバック', target: 'hikari', provider: 'commufa', amount: 3000, kind: 'cash', notWithLink: 'hikari:commufa', /* コミュファ光指定のWEBページからの申込が条件 */
         todo: [{ phase: 'apply', text: 'コミュファ光は Web で「1年間980円キャンペーン」と同時に申し込む' }],
-        checkedAt: '2026-11-10', confidence: 'high', receive: 'apply', receiveNote: '開通翌月末までに届くメールからCASH POSTで受け取り（Myコミュファ ID 登録が必要）', source: 'https://www.commufa.jp/services/information/', conditions: '1年間980円キャンペーンと同時申し込み',
+        checkedAt: '2026-11-17', confidence: 'high', receive: 'apply', receiveNote: '開通翌月末までに届くメールからCASH POSTで受け取り（Myコミュファ ID 登録が必要）', source: 'https://www.commufa.jp/services/information/', conditions: '1年間980円キャンペーンと同時申し込み',
       },
       {
         id: 'megaegg-cb', name: 'メガ・エッグ 開通後キャッシュバック', target: 'hikari', provider: 'megaegg', amount: 10000, kind: 'cash', notWithLink: 'hikari:megaegg', /* 公式ホームページからの申込が条件。代理店リンクから申し込むと対象外 */
         todo: [{ phase: 'after', text: 'メガ・エッグの特典を申請（他社の解約金の明細を用意）' }],
         coversCancelFee: true, cancelFeeCap: 50000,
-        checkedAt: '2026-11-10', confidence: 'high', receive: 'apply', receiveNote: '開通翌月16日ごろの案内メールから30日以内に口座登録', source: 'https://www.megaegg.jp/', conditions: 'auひかりからの乗り換えは解約金負担の対象外。公式Web特典（光ベーシック）。標準工事費の分割払いを選ぶ。他社の解約金も最大50,000円まで負担（開通後2か月以内に申請）',
+        checkedAt: '2026-11-17', confidence: 'high', receive: 'apply', receiveNote: '開通翌月16日ごろの案内メールから30日以内に口座登録', source: 'https://www.megaegg.jp/', conditions: 'auひかりからの乗り換えは解約金負担の対象外。公式Web特典（光ベーシック）。標準工事費の分割払いを選ぶ。他社の解約金も最大50,000円まで負担（開通後2か月以内に申請）',
       },
       // ---------- 代理店のキャンペーン（A8.netで提携した代理店のページ。affiliate.js にその会社のリンクがあるときだけ計算に入る） ----------
       // 条件なし（有料オプション不要）でもらえる金額だけを入れる。2026-11-13 に各代理店のキャンペーンページで確認
       {
         id: 'sb-hikari-next', name: 'ソフトバンク光 代理店キャッシュバック（新規）', agent: '株式会社NEXT', target: 'hikari', provider: 'softbank-hikari', amount: 35000, kind: 'cash',
         viaLink: 'hikari:softbank-hikari', newOnly: true, reduceIfGroup: { group: 'sb-ouen', amount: 15000, label: '超おうち応援割' },
-        checkedAt: '2026-11-13', confidence: 'high', receive: 'apply', receiveNote: '申込後に届くSMSのフォームで振込口座を登録（電話でも可）。開通の翌月末に振込',
+        checkedAt: '2026-11-17', confidence: 'high', receive: 'apply', receiveNote: '申込後に届くSMSのフォームで振込口座を登録（電話でも可）。開通の翌月末に振込',
         source: 'https://softbank-hikaricollabo.com/campaign/cashback.php',
         conditions: '1ギガの新規申込。オプション不要。超おうち応援割を使うと15,000円減額。申込から1か月以内に支払方法を確定、申込月を含む6か月後の月末までに開通。8か月以上継続しないと全額返金',
         todo: [
@@ -939,7 +956,7 @@
       {
         id: 'sb-hikari-next-henkou', name: 'ソフトバンク光 代理店キャッシュバック（転用・事業者変更）', agent: '株式会社NEXT', target: 'hikari', provider: 'softbank-hikari', amount: 20000, kind: 'cash',
         viaLink: 'hikari:softbank-hikari', henkouOnly: true, reduceIfGroup: { group: 'sb-ouen', amount: 15000, label: '超おうち応援割' },
-        checkedAt: '2026-11-13', confidence: 'high', receive: 'apply', receiveNote: '申込後に届くSMSのフォームで振込口座を登録（電話でも可）。開通の翌月末に振込',
+        checkedAt: '2026-11-17', confidence: 'high', receive: 'apply', receiveNote: '申込後に届くSMSのフォームで振込口座を登録（電話でも可）。開通の翌月末に振込',
         source: 'https://softbank-hikaricollabo.com/campaign/cashback.php',
         conditions: 'フレッツ光からの転用・他社光コラボからの事業者変更。オプション不要。超おうち応援割を使うと15,000円減額。8か月以上継続しないと全額返金',
         todo: [
@@ -950,32 +967,32 @@
       {
         // ドコモ光の公式Web申込特典（代理店のリンクから申し込むと対象外なので、リンクを貼ったら使わない）
         id: 'docomo-hikari-web', name: 'ドコモ光 公式Web申込 dポイント', target: 'hikari', provider: 'docomo-hikari', amount: 20000, kind: 'points', notWithLink: 'hikari:docomo-hikari',
-        checkedAt: '2026-11-15', confidence: 'high', receive: 'auto',
+        checkedAt: '2026-11-17', confidence: 'high', receive: 'auto',
         source: 'https://nttdocomo-ssw.com/nssw/dhkr/19dec_b/',
         conditions: 'ドコモ光 1ギガを公式Webで新規・事業者変更で申し込み（転用は15,000ポイント）。dポイント（期間・用途限定）',
       },
       {
         id: 'docomo-hikari-cover', name: 'ドコモ光 他社解約金 dポイント', target: 'hikari', provider: 'docomo-hikari', amount: 0, kind: 'points',
-        coversCancelFee: true, cancelFeeCap: 100000, newOnly: true, checkedAt: '2026-11-15', confidence: 'high', receive: 'apply',
+        coversCancelFee: true, cancelFeeCap: 100000, newOnly: true, checkedAt: '2026-11-17', confidence: 'high', receive: 'apply',
         source: 'https://nttdocomo-ssw.com/nssw/dhkr/19dec_b/', conditions: '他社からの乗り換えで、他社の解約金のうち最大100,000ポイント（転用は対象外）。代理店経由でも対象。利用開始4か月目末までに証明書を提出、6か月目にポイント',
       },
       {
         // 新規工事料（28,600円）相当を、利用開始の7か月後から24か月に分けてdポイントで進呈（spread）
         id: 'docomo-hikari-kouji', name: 'ドコモ光 新規工事料実質0円（dポイント）', target: 'hikari', provider: 'docomo-hikari', amount: 28600, kind: 'points', newOnly: true,
-        spread: { startMonth: 8, months: 24 }, checkedAt: '2026-11-15', confidence: 'high', receive: 'auto',
+        spread: { startMonth: 8, months: 24 }, checkedAt: '2026-11-17', confidence: 'high', receive: 'auto',
         source: 'https://www.docomo.ne.jp/campaign_event/hikari_shinkikojiryo_free/',
         conditions: '新規申込。工事料相当のdポイントを利用開始月の7か月後の月から24か月に分けて進呈（比べる期間内にもらえる分だけ計算）。途中で解約するとそこで終わり',
       },
       {
         id: 'osakagas-new', name: '大阪ガスの電気 新規申込で基本料金2か月0円', target: 'electric', provider: 'osakagas-denki', amount: 1416, kind: 'cash',
-        endsAt: '2026-11-30', checkedAt: '2026-11-15', confidence: 'high', receive: 'auto',
+        endsAt: '2026-11-30', checkedAt: '2026-11-17', confidence: 'high', receive: 'auto',
         source: 'https://home.osakagas.co.jp/lp/electricity/cp_re/index.html',
         conditions: '2026年10月1日〜11月30日に新規申込、2027年1月31日までに供給開始。関西エリア。取次事業者経由は対象外。金額はベースプランAの最低料金（707.80円）2か月分で計算',
       },
       {
         id: 'docomo-hikari-itx', name: 'ドコモ光 代理店キャッシュバック（新規）', agent: 'アイ・ティー・エックス株式会社', target: 'hikari', provider: 'docomo-hikari', amount: 40000, kind: 'cash',
         viaLink: 'hikari:docomo-hikari', newOnly: true,
-        checkedAt: '2026-11-13', confidence: 'high', receive: 'apply', receiveNote: '申込時の電話かSMSのフォーム（14日間有効）で振込口座を伝える。課金開始月の翌月末に振込',
+        checkedAt: '2026-11-17', confidence: 'high', receive: 'apply', receiveNote: '申込時の電話かSMSのフォーム（14日間有効）で振込口座を伝える。課金開始月の翌月末に振込',
         source: 'https://docomohikari-collabo.com/campaign/original-cashback/',
         conditions: '1ギガの新規申込。オプション加入不要。8か月以上継続。同じ住所・名義で過去に申込があると対象外',
         todo: [
@@ -985,7 +1002,7 @@
       {
         id: 'docomo-hikari-itx-henkou', name: 'ドコモ光 代理店キャッシュバック（転用・事業者変更）', agent: 'アイ・ティー・エックス株式会社', target: 'hikari', provider: 'docomo-hikari', amount: 25000, kind: 'cash',
         viaLink: 'hikari:docomo-hikari', henkouOnly: true,
-        checkedAt: '2026-11-13', confidence: 'high', receive: 'apply', receiveNote: '申込時の電話かSMSのフォーム（14日間有効）で振込口座を伝える。課金開始月の翌月末に振込',
+        checkedAt: '2026-11-17', confidence: 'high', receive: 'apply', receiveNote: '申込時の電話かSMSのフォーム（14日間有効）で振込口座を伝える。課金開始月の翌月末に振込',
         source: 'https://docomohikari-collabo.com/campaign/original-cashback/',
         conditions: '1ギガの転用・事業者変更。オプション加入不要。8か月以上継続',
         todo: [
@@ -995,7 +1012,7 @@
       {
         id: 'commufa-elidea', name: 'コミュファ光 代理店キャッシュバック', agent: 'エルアイデア株式会社', target: 'hikari', provider: 'commufa', amount: 25000, kind: 'cash',
         viaLink: 'hikari:commufa',
-        checkedAt: '2026-11-13', confidence: 'high', receive: 'apply', receiveNote: '申込後の確認の電話で振込口座（契約者本人名義）を伝える。光ネットの開通確認の翌営業日に振込',
+        checkedAt: '2026-11-17', confidence: 'high', receive: 'apply', receiveNote: '申込後の確認の電話で振込口座（契約者本人名義）を伝える。光ネットの開通確認の翌営業日に振込',
         source: 'https://commufa-elidea.com/',
         conditions: '1ギガ以下のメニューは25,000円（それより上は最大30,000円）。全員対象・オプション条件なし。コミュファ光公式サイトの申込フォームからだと対象外',
         todo: [
@@ -1005,7 +1022,7 @@
       {
         id: 'megaegg-next', name: 'メガ・エッグ 代理店キャッシュバック', agent: '株式会社NEXT', target: 'hikari', provider: 'megaegg', amount: 20000, kind: 'cash',
         viaLink: 'hikari:megaegg', newOnly: true,
-        checkedAt: '2026-11-13', confidence: 'high', receive: 'apply', receiveNote: '申込後に届くフォームで振込口座を登録（電話でも可）。最短で開通月の翌月末に振込',
+        checkedAt: '2026-11-17', confidence: 'high', receive: 'apply', receiveNote: '申込後に届くフォームで振込口座を登録（電話でも可）。最短で開通月の翌月末に振込',
         source: 'https://me-hikari.net/campaign/original.php',
         conditions: '光ベーシック・光10ギガの新規申込。オプション不要。申込から6か月以内に開通。8か月以上継続しないと全額返金。代理店から申し込むと、メガ・エッグ公式Web特典は対象外',
         todo: [
@@ -1016,7 +1033,7 @@
       {
         id: 'pikara-next', name: 'ピカラ光 代理店キャッシュバック', agent: '株式会社NEXT', target: 'hikari', provider: 'pikara', amount: 30000, kind: 'cash',
         viaLink: 'hikari:pikara', newOnly: true,
-        checkedAt: '2026-11-13', confidence: 'high', receive: 'apply', receiveNote: '申込後に届くフォームで振込口座を登録（電話でも可）。最短で開通月の翌月末に振込',
+        checkedAt: '2026-11-17', confidence: 'high', receive: 'apply', receiveNote: '申込後に届くフォームで振込口座を登録（電話でも可）。最短で開通月の翌月末に振込',
         source: 'https://pikarahikari.net/campaign/original_cb.php',
         conditions: 'ピカラ光ねっとの新規申込。オプション不要。申込から6か月以内に開通。8か月以上継続しないと全額返金。2022年2月18日〜終了日未定',
         todo: [
@@ -1024,7 +1041,7 @@
           { phase: 'after', text: 'ピカラ光の代理店キャッシュバック：届いたフォームで振込口座を登録する' },
         ],
       },
-      {
+      { checkedAt: '2026-11-17',
         id: 'au-denki-web', name: 'auでんき Web新規申込特典', target: 'electric', provider: 'au-denki', amount: 5000, kind: 'cash',
         todo: [{ phase: 'apply', text: 'auでんきは Web から申し込む（au PAY 残高5,000円の対象）' }],
         confidence: 'high', receive: 'auto', receiveNote: '利用開始の約3か月後にau PAY 残高へ', source: 'https://www.au.com/energy/denki/pr/prime/base/',
@@ -1038,7 +1055,7 @@
       {
         // 「ポイントサイト・比較サイト限定」ページ（softbank.jp/energy/special/site-limited/）の特典。affiliate.js にソフトバンクでんきのリンクがあるときだけ計算に入る
         id: 'sb-denki-site', name: 'ソフトバンクでんき 比較サイト限定 3か月割引', target: 'electric', provider: 'softbank-denki', amountMonths: 3, monthlyCap: 1100, amount: 0, kind: 'cash',
-        viaLink: 'electric:softbank-denki', endsAt: '2027-03-31', checkedAt: '2026-11-13', confidence: 'high', receive: 'auto', receiveNote: 'ほかの特典が終わった翌月から3か月、電気代から割引（電気代が1,100円より少ない月はその額まで）',
+        viaLink: 'electric:softbank-denki', endsAt: '2027-03-31', checkedAt: '2026-11-17', confidence: 'high', receive: 'auto', receiveNote: 'ほかの特典が終わった翌月から3か月、電気代から割引（電気代が1,100円より少ない月はその額まで）',
         requires: { area: ['hokkaido', 'tokyo', 'chubu', 'chugoku', 'shikoku'] }, source: 'https://www.softbank.jp/energy/special/site-limited/',
         conditions: '2026年10月1日〜2027年3月31日。個人・新規。北海道・東京・中部・中国・四国・沖縄電力エリア（関西電力エリアの「Powered by 関西電力」は対象外）。申込で「現在ご利用の電力会社のご契約情報」を「あり」にする。90日以内の開通。1年未満の解約は違約金5,000円',
         todo: [{ phase: 'apply', text: 'ソフトバンクでんきを申し込む（リンク先のページで提供条件書を確認。「今の電力会社の契約情報」は「あり」を選ぶ）' }],
@@ -1047,15 +1064,15 @@
         id: 'rakuten-denki-pt', name: '楽天でんき 秋の家計応援キャンペーン', target: 'electric', provider: 'rakuten-denki', amount: 5000, kind: 'points',
         endsAt: '2026-12-02',
         todo: [{ phase: 'apply', deadline: '2026-12-02', text: '楽天でんきを12月2日9:59までに申し込む（全員5,000ポイントの対象）' }],
-        checkedAt: '2026-11-10', confidence: 'high', receive: 'auto', receiveNote: '利用開始から6か月目の月末ごろに付与（期間限定ポイント）', source: 'https://energy.rakuten.co.jp/electricity/fee/',
+        checkedAt: '2026-11-17', confidence: 'high', receive: 'auto', receiveNote: '利用開始から6か月目の月末ごろに付与（期間限定ポイント）', source: 'https://energy.rakuten.co.jp/electricity/fee/',
         conditions: '2026年12月2日9:59までの新規申込。利用開始月と翌月の電気代が合計6,000円以上、5か月目末まで継続',
       },
       {
         id: 'tokyogas-first', name: '東京ガスの電気 基本料金1か月分割引', target: 'electric', provider: 'tokyogas-denki', amount: 1176, kind: 'cash',
-        confidence: 'high', checkedAt: '2026-11-15', receive: 'auto', source: 'https://home.tokyo-gas.co.jp/gas_power/plan/power/discount_power.html',
+        confidence: 'high', checkedAt: '2026-11-17', receive: 'auto', source: 'https://home.tokyo-gas.co.jp/gas_power/plan/power/discount_power.html',
         conditions: '30Aの場合の金額（2026年12月改定後の基本料金1,176円。改定前は935円）。新規申込',
       },
-      {
+      { checkedAt: '2026-11-17',
         id: 'cd-shukuwari', name: 'CDエナジー 登録特典', target: 'electric', provider: 'cd-denki', amount: 1000, kind: 'points',
         todo: [{ phase: 'after', text: 'カテエネ・LINEに登録してポイントを受け取る' }],
         confidence: 'high', receive: 'apply', receiveNote: 'LINE・カテエネの登録が必要', source: 'https://www.cdedirect.co.jp/',

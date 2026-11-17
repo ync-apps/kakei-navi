@@ -101,7 +101,7 @@
         if (c.newLineOnly && isMnp) return false; // 新しい番号での契約だけの特典
         if (c.mnpOnly && fromGroup && fromGroup === brand.group) return false; // 同じグループ内の乗り換えは対象外
         if (c.plans && !c.plans.includes(plan.id)) return false; // プランで金額が違う特典
-        if (c.onePerHousehold && used.has(c.id)) return false; // 家族で1回だけの特典（2人目以降は使えない）
+        if (c.onePerHousehold && used.has(c.onceKey || c.id)) return false; // 家族で1回だけの特典（2人目以降は使えない）
         return meets(c.requires, lineCombo, area);
       });
       // 同じ group の特典は併用できないので、一番多いものだけ使う
@@ -405,7 +405,7 @@
       const brand = data.mobileBrands.find((x) => x.id === l.brandId);
       const r = lineCost(l.line, brand, combo, { ...ctx, usedOnce }, { assignment, index: lineResults.length });
       if (!r) return null; // 使う容量に合うプランがない
-      for (const it of r.items) if (it.campaign && it.campaign.onePerHousehold) usedOnce.add(it.campaign.id);
+      for (const it of r.items) if (it.campaign && it.campaign.onePerHousehold) usedOnce.add(it.campaign.onceKey || it.campaign.id);
       lineResults.push(r);
     }
     // 広告リンク（代理店・広告ページ）経由と、公式経由の両方を計算して安い方を使う（useLink：リンク経由の方が安いか同じ）

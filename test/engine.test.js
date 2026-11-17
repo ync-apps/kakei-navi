@@ -142,8 +142,8 @@ test('申請が必要な特典の扱いを選べる（NURO光）', () => {
     const it = x.items.find((i) => i.label.startsWith('NURO光 キャッシュバック'));
     return it ? it.amount : 0;
   };
-  assert.strictEqual(pick('full'), -15000);
-  assert.strictEqual(pick('half'), -7500);
+  assert.strictEqual(pick('full'), -10000); // 2.5ギガは10,000円（11/22まで）
+  assert.strictEqual(pick('half'), -5000);
   assert.strictEqual(pick('none'), 0);
 });
 
@@ -436,15 +436,19 @@ test('楽天モバイルの初めて申し込み特典は併用できず、一�
   };
   // 楽天銀行の20,000ポイントは家族で1人分（おひとり様1回・口座が要る）。2人目は乗り換えの10,000
   assert.deepStrictEqual(pts('2026-11-15'), [20000, 10000]);
-  assert.deepStrictEqual(pts('2026-11-19'), [10000, 10000]);
+  // 11/18以降は常時開催の楽天銀行会員向け13,000（これも家族で1人分）。2人目は乗り換えの10,000
+  assert.deepStrictEqual(pts('2026-11-19'), [13000, 10000]);
 });
 
 test('11/15の総点検で足した特典が計算に入る', () => {
   const r = E.compare(baseInput({ options: { includePoints: true, excludeUnverified: true, applyPolicy: 'full', today: '2026-11-15' } }), data);
   const labels = (f) => find(r, f).items.map((i) => i.label);
   // ドコモ MAX への乗り換え 20,000ポイント（今が au の人。1人目20GB → ドコモ MAX）
-  const r2 = E.compare(baseInput({ lines: [{ current: 'au', gb: 20 }, { current: 'au', gb: 3 }], options: { includePoints: true, excludeUnverified: true, applyPolicy: 'full', today: '2026-11-15' } }), data);
+  // （2026-11-17 に金額を確かめられず「要確認」にしたため、要確認も入れる設定で確かめる。標準設定では入らない）
+  const r2 = E.compare(baseInput({ lines: [{ current: 'au', gb: 20 }, { current: 'au', gb: 3 }], options: { includePoints: true, excludeUnverified: false, applyPolicy: 'full', today: '2026-11-15' } }), data);
   assert.ok(find(r2, (y) => y.combo.mobile.every((b) => b === 'docomo')).items.some((i) => i.label.startsWith('ドコモ SIMのみ乗り換え')));
+  const r3 = E.compare(baseInput({ lines: [{ current: 'au', gb: 20 }, { current: 'au', gb: 3 }], options: { includePoints: true, excludeUnverified: true, applyPolicy: 'full', today: '2026-11-15' } }), data);
+  assert.ok(!find(r3, (y) => y.combo.mobile.every((b) => b === 'docomo')).items.some((i) => i.label.startsWith('ドコモ SIMのみ乗り換え')));
   // IIJmio 半額と家族割引
   const iij = labels((y) => y.combo.mobile.every((b) => b === 'iijmio'));
   assert.ok(iij.some((l) => l.startsWith('IIJmio ギガプラン半額キャンペーン')));
