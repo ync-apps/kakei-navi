@@ -35,6 +35,8 @@
     // 電気の計算に使う共通の値
     energy: {
       renewableLevy: 4.18, // 再エネ賦課金 円/kWh（2026年5月〜2027年4月）。使用量の推定にだけ使う
+      // 燃料費調整額（円/kWh）。電気代から使用量を出すときだけ使う。公式で確かめられた地域だけ（ほかは0）。毎月変わるので月1回見直す
+      fuelAdj: { tokyo: { value: -5.33, month: '2026-11', source: 'https://home.tokyo-gas.co.jp/information/power-202610-01.html' } },
       renewableLevySource: 'https://www.yonden.co.jp/customer/price/renewable.html',
     },
 
@@ -554,6 +556,11 @@
         notWithLink: 'hikari:nuro', source: 'https://www.nuro.jp/', requires: { hikari: ['nuro'] },
       },
       {
+        // 広告ページから申し込むと契約事務手数料（3,300円）が無料（開通月に同じ額を割引）
+        id: 'nuro-pr-fee', name: 'NURO光 広告ページ 契約事務手数料の割引', target: 'hikari', amount: 3300, months: 1, viaLink: 'hikari:nuro', confidence: 'high', checkedAt: '2026-11-18',
+        source: 'https://www.nuro.jp/hikari/pr/sp/', note: '広告ページからの申込で、契約事務手数料が開通月に割引される', requires: { hikari: ['nuro'] },
+      },
+      {
         // 広告ページ（PR）の料金：開通月〜3か月目は0円、4か月目から 戸建5,720円・マンション4,730円（ホームゲートウェイ込み）。契約事務手数料も無料
         id: 'nuro-pr-free-h', name: 'NURO光 広告ページ 3か月無料（戸建）', target: 'hikari', amount: 5720, months: 3, housing: ['house'], viaLink: 'hikari:nuro', confidence: 'high', checkedAt: '2026-11-17',
         source: 'https://www.nuro.jp/hikari/pr/sp/', requires: { hikari: ['nuro'] },
@@ -782,12 +789,12 @@
       {
         id: 'linemo-new', name: 'LINEMO 新規契約特典（ベストプランV）', target: 'line', provider: 'linemo', plans: ['linemo-30'], amount: 6000, kind: 'points', newLineOnly: true,
         confidence: 'mid', checkedAt: '2026-11-17', source: 'https://selectra.jp/telecom/news/linemo-paypay-boost-fee-free-november-2026',
-        conditions: '2026年11月23日〜12月6日の申込はPayPayポイント増額と事務手数料0円の予定（増額の金額は未発表のため計算に入れていない）。新しい番号での契約（ベストプランは3,000ポイント）。公式ページは自動で読めず記事で確認',
+        conditions: '2026年11月23日〜12月6日の申込はPayPayポイント増額（ベストプランVは乗り換え20,000・新規14,000。ベストプランは未発表）と事務手数料0円の予定（まだ始まっていないので計算に入れていない）。新しい番号での契約（ベストプランは3,000ポイント）。公式ページは自動で読めず記事で確認',
       },
       {
         id: 'linemo-new-best', name: 'LINEMO 新規契約特典（ベストプラン）', target: 'line', provider: 'linemo', plans: ['linemo-3', 'linemo-10'], amount: 3000, kind: 'points', newLineOnly: true,
         confidence: 'mid', checkedAt: '2026-11-17', source: 'https://selectra.jp/telecom/news/linemo-paypay-boost-fee-free-november-2026',
-        conditions: '2026年11月23日〜12月6日の申込はPayPayポイント増額と事務手数料0円の予定（増額の金額は未発表のため計算に入れていない）。新しい番号での契約。公式ページは自動で読めず記事で確認',
+        conditions: '2026年11月23日〜12月6日の申込はPayPayポイント増額（ベストプランVは乗り換え20,000・新規14,000。ベストプランは未発表）と事務手数料0円の予定（まだ始まっていないので計算に入れていない）。新しい番号での契約。公式ページは自動で読めず記事で確認',
       },
       {
         id: 'mineo-pittari-3', name: 'mineo 秋のピッタリ割（3GB）', target: 'line', provider: 'mineo', plans: ['mineo-3'], amount: 2090, kind: 'cash', endsAt: '2026-11-30',
@@ -827,7 +834,7 @@
         conditions: '2026年9月17日から20,000円。SIM・eSIMのみの乗り換えで、トクトクプラン2かコミコミプランバリュー。増量オプションⅡ（月550円・7か月無料、その間に外せば0円）の加入が条件。au・povoからは対象外',
       },
       {
-        id: 'au-ols-mnp', name: 'au Online Shop SIM乗り換え特典', target: 'line', provider: 'au', plans: ['au-max'], amount: 20000, kind: 'cash', mnpOnly: true,
+        id: 'au-ols-mnp', name: 'au Online Shop SIM乗り換え特典', target: 'line', provider: 'au', plans: ['au-max'], amount: 20000, upTo: true, kind: 'cash', mnpOnly: true,
         todo: [{ phase: 'apply', text: 'au は Online Shop から SIM のみで申し込む（特典の対象）' }],
         confidence: 'high', checkedAt: '2026-11-17', source: 'https://www.au.com/mobile/campaign/ols-sim-2010/',
         conditions: '2026年9月17日〜終了日未定。スマホミニプラン＋は対象外。au Online Shop で SIM・eSIM のみの乗り換え。au PAY 残高で最大20,000円相当。UQ・povoからは対象外',
@@ -866,7 +873,7 @@
         id: 'rakuten-bank-first', name: '楽天モバイル初めて申し込み 20,000ポイント（楽天銀行口座あり・開設の人）', target: 'line', provider: 'rakuten', amount: 20000, kind: 'points', group: 'rakuten-first',
         onePerHousehold: true, onceKey: 'rakuten-bank' /* 楽天銀行の特典は家族で1回 */, /* おひとり様1回・楽天銀行口座とハッピープログラムが必要なので、家族のうち1人分だけ計算する */
         applyUrl: 'https://network.mobile.rakuten.co.jp/campaign/bank-mobile-joint/',
-        endsAt: '2026-11-18', /* 11月18日10:00まで */ checkedAt: '2026-11-17', confidence: 'high', receive: 'auto', receiveNote: '2027年2月から5か月、毎月末ごろに4,000ポイント（期間限定・有効3か月）',
+        endsAt: '2026-11-17', /* 申込は11月18日10:00まで。18日は朝で締め切りなので、計算は17日まで */ checkedAt: '2026-11-17', confidence: 'high', receive: 'auto', receiveNote: '2027年2月から5か月、毎月末ごろに4,000ポイント（期間限定・有効3か月）',
         source: 'https://network.mobile.rakuten.co.jp/campaign/bank-mobile-joint/',
         conditions: 'Web申込限定（2026年11月9日〜11月18日10:00）。キャンペーンページの申し込みボタンから、クーポン「RBKBST00000001」を適用して申し込む。新規・乗り換えとも対象。楽天銀行口座が必要（なければ同じページの口座開設ボタンから11/18 10時までに申込）。12/31までに利用開始・Rakuten Linkで10秒以上発信・楽天銀行ハッピープログラムにエントリー（同じ楽天ID）。おひとり様1回。楽天モバイルショップで申し込む場合は、別のショップ限定20,000ポイント（11/19閉店まで）',
         applyNote: 'キャンペーンページの申し込みボタンから申し込み、クーポン「RBKBST00000001」が表示されているか確認（11月18日10時まで）',
@@ -880,13 +887,13 @@
       {
         id: 'linemo-mnp', name: 'LINEMO 乗り換え特典（ベストプランV）', target: 'line', provider: 'linemo', plans: ['linemo-30'], amount: 12000, kind: 'points', mnpOnly: true,
         todo: [{ phase: 'apply', text: 'LINEMO のキャンペーンページで対象条件・エントリーを確認してから申し込む' }],
-        checkedAt: '2026-11-15', confidence: 'high', source: 'https://www.linemo.jp/campaign/syukakusai/',
+        checkedAt: '2026-11-18', confidence: 'mid', /* 公式は自動で読めず、Selectra（2026-11-17）で同じ金額を確認 */ source: 'https://www.linemo.jp/campaign/syukakusai/',
         conditions: 'PayPayポイント12,000円相当（LINEMOベストプランVに他社から乗り換え。終了日未定）。週替わりの増額期間あり（計算には入れていない）。ソフトバンク・ワイモバイル・LINEモバイルからは対象外',
       },
       {
         id: 'linemo-mnp-best', name: 'LINEMO 乗り換え特典（ベストプラン）', target: 'line', provider: 'linemo', plans: ['linemo-3', 'linemo-10'], amount: 10000, kind: 'points', mnpOnly: true,
         todo: [{ phase: 'apply', text: 'LINEMO のキャンペーンページで対象条件・エントリーを確認してから申し込む' }],
-        checkedAt: '2026-11-15', confidence: 'high', source: 'https://www.linemo.jp/campaign/syukakusai/',
+        checkedAt: '2026-11-18', confidence: 'mid', /* 公式は自動で読めず、Selectra（2026-11-17）で同じ金額を確認 */ source: 'https://www.linemo.jp/campaign/syukakusai/',
         conditions: 'PayPayポイント10,000円相当（LINEMOベストプランに他社から乗り換え。終了日未定）。週替わりの増額期間あり（計算には入れていない）。ソフトバンク・ワイモバイル・LINEモバイルからは対象外',
       },
       {

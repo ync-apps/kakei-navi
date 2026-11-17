@@ -165,10 +165,13 @@
     const svc = data.hikari.find((x) => x.id === combo.hikari);
     // この住まいの料金がない（例：マンションの auひかり）ときは、戸建ての料金で見積もる
     const listMonthly = svc.price[input.housing] || svc.price.house;
+    const noHousingPrice = !svc.price[input.housing];
     const staying = h.current === svc.id;
     const monthly = staying && Number(h.currentMonthly) > 0 ? Number(h.currentMonthly) : listMonthly;
 
-    const items = [{ cat: 'hikari', label: `${svc.name} 月額（${months}か月）`, amount: monthly * months, low: lowConf(svc), src: svc.source }];
+    // この住まいの料金がわからない（戸建ての料金で見積もった）ときは「要確認」にして、今の月額の入力をうながす
+    const guessed = noHousingPrice && !(staying && Number(h.currentMonthly) > 0);
+    const items = [{ cat: 'hikari', label: `${svc.name} 月額（${months}か月）${guessed ? '（この住まいの料金がわからず戸建ての料金で見積もり。今の月額を入れると正確）' : ''}`, amount: monthly * months, low: lowConf(svc) || guessed, src: svc.source }];
 
     const currentSvc = data.hikari.find((x) => x.id === h.current);
     const jigyoushaHenkou = !staying && !!currentSvc && currentSvc.type === 'collab' && svc.type === 'collab';
@@ -235,7 +238,8 @@
         const spreadAmt = c.spread ? Math.round(c.amount * Math.max(0, Math.min(c.spread.months, months - c.spread.startMonth + 1)) / c.spread.months) : c.amount;
         const base = c.spread ? { ...c, amount: spreadAmt } : c;
         const v = campaignValue(cut ? { ...base, amount: Math.max(0, base.amount - cut) } : base, opts);
-        if (v > 0) items.push({ cat: 'hikari', label: campaignLabel(c, opts) + (cut ? `（${c.reduceIfGroup.label}を使うので${yen(cut)}減額）` : ''), amount: -v, low: lowConf(c), campaign: c, src: c.source });
+        // gross：実際にもらえる額（計算の設定で半分にする前・比べる期間で切る前）。やることリストの金額に使う
+        if (v > 0) items.push({ cat: 'hikari', label: campaignLabel(c, opts) + (cut ? `（${c.reduceIfGroup.label}を使うので${yen(cut)}減額）` : ''), amount: -v, gross: Math.max(0, c.amount - cut), low: lowConf(c), campaign: c, src: c.source });
       }
     }
     return { svc, items, switching: !staying, jigyoushaHenkou };
@@ -503,7 +507,9 @@
     const amp = Number(input.electric.amp) || 30;
     const stdT = tariffOf(data.electric.find((x) => x.id === 'std'), input.area, data);
     const kWhInput = Number(input.electric.kWh);
-    const kWh = kWhInput > 0 ? kWhInput : (estimateKWh(Number(input.electric.bill) || 0, stdT, amp, (data.energy || {}).renewableLevy || 0) || 0);
+    // 燃料費調整額は公式で確かめられた地域だけ（data.energy.fuelAdj）。ほかの地域は0として推定
+    const fuel = (((data.energy || {}).fuelAdj || {})[input.area] || {}).value || 0;
+    const kWh = kWhInput > 0 ? kWhInput : (estimateKWh(Number(input.electric.bill) || 0, stdT, amp, ((data.energy || {}).renewableLevy || 0) + fuel) || 0);
     // 比べるもの（スマホ・光回線・電気・ガス）。比べないものは今の会社のまま
     const cmp = { ...CMP_ALL, ...(input.compare || {}) };
     const fixed = { line: !cmp.mobile, hikari: !cmp.hikari, electric: !cmp.electric, gas: !cmp.gas, card: false };
@@ -711,7 +717,7 @@
         add('after', `${r.hikari.svc.name}の開通を確認してから、今の${cur ? cur.name : '光回線'}を解約する`, { note: 'ルーターなどのレンタル機器は返却が必要なことが多い' });
       }
       // 金額は実際に計算に入れた額（例：応援割を使うので減額したキャッシュバック）を出す
-      for (const it of r.hikari.items) if (it.campaign) fromList(it.campaign.todo, it.campaign.source, { ...(moneyOf(it.campaign) || {}), ...(it.amount < 0 && !(it.label || '').includes('解約金を負担') ? { amount: -it.amount, kind: it.campaign.kind } : {}) }, it.campaign.viaLink, `hikari:${r.hikari.svc.id}`);
+      for (const it of r.hikari.items) if (it.campaign) fromList(it.campaign.todo, it.campaign.source, { ...(moneyOf(it.campaign) || {}), ...(it.gross ? { amount: it.gross, kind: it.campaign.kind } : {}) }, it.campaign.viaLink, `hikari:${r.hikari.svc.id}`);
     }
 
     // 電気・ガス
@@ -754,10 +760,12 @@
         todos.splice(todos.indexOf(o), 1);
       }
     }
+    // 「最初にやること」は、同じ会社の申し込みの期限より前にやる必要があるので、その期限までにする（ほかの会社の手続きは急がせない）
+    for (const t of todos.filter((x) => x.phase === 'before' && !x.deadline && x.owner)) {
+      const end = todos.filter((a) => a.phase === 'apply' && a.applyBy && a.owner === t.owner).map((a) => a.applyBy).sort()[0];
+      if (end && (!t.applyBy || t.applyBy > end)) t.applyBy = end;
+    }
     todos.forEach((t) => { delete t.main; delete t.owner; });
-    // 「最初にやること」は、申し込みの期限より前にやる必要があるので、その期限までにする
-    const firstEnd = todos.filter((t) => t.phase === 'apply' && t.applyBy).map((t) => t.applyBy).sort()[0];
-    if (firstEnd) for (const t of todos) if (t.phase === 'before' && !t.deadline && (!t.applyBy || t.applyBy > firstEnd)) t.applyBy = firstEnd;
 
     const order = PHASES.map((p) => p.id);
     todos.sort((a, b) => order.indexOf(a.phase) - order.indexOf(b.phase));

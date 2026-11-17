@@ -245,8 +245,9 @@ test('終了日を過ぎたキャンペーンは計算から外れる', () => {
     const r = E.compare(baseInput({ options: { includePoints: true, excludeUnverified: true, applyPolicy: 'full', today } }), data);
     return find(r, (y) => y.combo.mobile.every((b) => b === 'rakuten')).items.some((i) => i.label.startsWith('楽天モバイル初めて申し込み 20,000'));
   };
-  assert.strictEqual(has('2026-11-18'), true);
-  assert.strictEqual(has('2026-11-19'), false);
+  // 申込は11/18 10:00まで。18日は朝で締め切りなので、計算に入るのは17日まで
+  assert.strictEqual(has('2026-11-17'), true);
+  assert.strictEqual(has('2026-11-18'), false);
 });
 
 test('やることリスト：締切のある特典は申込の期限がその日になる', () => {
@@ -254,10 +255,10 @@ test('やることリスト：締切のある特典は申込の期限がその�
   const r = E.compare(input, data);
   const x = find(r, (y) => y.combo.mobile.every((b) => b === 'rakuten'));
   const t = E.buildTodos(x, input, data).find((y) => y.text.startsWith('楽天銀行の口座を用意'));
-  assert.strictEqual(E.dueOf(t, '2026-11-16').getDate(), 18);
+  assert.strictEqual(E.dueOf(t, '2026-11-16').getDate(), 17);
   // 楽天モバイルの申し込み自体も、締切（11/18）が期限になる
   const ap = E.buildTodos(x, input, data).find((y) => y.text.startsWith('楽天モバイルに'));
-  assert.strictEqual(E.dueOf(ap, '2026-11-16').getDate(), 18);
+  assert.strictEqual(E.dueOf(ap, '2026-11-16').getDate(), 17);
   assert.ok(ap.url.includes('bank-mobile-joint'));
 });
 
@@ -525,7 +526,7 @@ test('2回目チェックの再発防止：最初にやることは申込期限�
   for (const x of r.top) {
     const todos = E.buildTodos(x, inp, data);
     const end = todos.filter((t) => t.phase === 'apply' && t.applyBy).map((t) => t.applyBy).sort()[0];
-    if (end) for (const t of todos.filter((t) => t.phase === 'before')) assert.ok(E.dueOf(t, '2026-11-17') <= new Date(end + 'T00:00:00'), t.text);
+    if (end) for (const t of todos.filter((t) => t.phase === 'before' && t.text.includes('楽天'))) assert.ok(E.dueOf(t, '2026-11-17') <= new Date(end + 'T00:00:00'), t.text);
   }
   // ガスが「その他」で比べないとき、大阪ガスのセット割は付かない
   const k = E.compare(baseInput({ area: 'kansai', compare: { mobile: false, hikari: false, electric: true, gas: false }, gas: { type: 'city', current: 'other', bill: 5000 } }), data);

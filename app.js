@@ -466,7 +466,7 @@
       <div class="camp-card">
         <div class="row">
           <div><span class="meta">${esc(catLabel[c.target])}｜${esc(providerName(c))}</span><br><strong>${linkText(c.name, c.source)}</strong>${c.agent ? `<br><span class="meta">代理店「${esc(c.agent)}」のページ（PRリンク）から申し込んだ場合の特典</span>` : c.viaLink ? '<br><span class="meta">PRリンクから申し込んだ場合の特典</span>' : ''}</div>
-          <div class="amt">${/最大/.test(c.conditions || '') && !c.amountMonths ? '最大' : ''}${c.amountMonths ? (c.monthlyCap ? `月${yen(c.monthlyCap)}まで×${c.amountMonths}か月` : `月額${c.amountMonths}か月分`) : yen(c.amount)}${c.kind === 'points' ? '<span class="meta"> 相当</span>' : ''}</div>
+          <div class="amt">${c.upTo ? '最大' : ''}${c.amountMonths ? (c.monthlyCap ? `月${yen(c.monthlyCap)}まで×${c.amountMonths}か月` : `月額${c.amountMonths}か月分`) : yen(c.amount)}${c.kind === 'points' ? '<span class="meta"> 相当</span>' : ''}</div>
         </div>
         <p class="cond">${c.endsAt ? `<strong>${Number(c.endsAt.slice(5, 7))}月${Number(c.endsAt.slice(8, 10))}日まで。</strong>` : ''}${c.mnpOnly ? '番号そのまま乗り換え（MNP）限定。' : ''}${esc(c.conditions || '')}</p>
         <p class="meta">${c.kind === 'points' ? 'ポイント' : '現金・残高・割引'}｜受け取り方：${esc(E.RECEIVE_LABEL[c.receive] || '不明')}${c.receiveNote ? `（${esc(c.receiveNote)}）` : ''}${confTag(c)}${srcLink(c)}</p>
