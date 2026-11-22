@@ -140,13 +140,13 @@ test('電気：使用量が空欄なら電気代から推定する', () => {
 
 test('申請が必要な特典の扱いを選べる（NURO光）', () => {
   const pick = (applyPolicy) => {
-    const r = E.compare(baseInput({ options: { includePoints: true, excludeUnverified: true, applyPolicy, today: '2026-11-17' } }), data);
+    const r = E.compare(baseInput({ options: { includePoints: true, excludeUnverified: true, applyPolicy, today: '2026-11-23' } }), data);
     const x = find(r, (y) => y.combo.hikari === 'nuro');
     const it = x.items.find((i) => i.label.startsWith('NURO光 キャッシュバック'));
     return it ? it.amount : 0;
   };
-  assert.strictEqual(pick('full'), -10000); // 2.5ギガは10,000円（11/22まで）
-  assert.strictEqual(pick('half'), -5000);
+  assert.strictEqual(pick('full'), -15000); // 15,000円（11/30まで）
+  assert.strictEqual(pick('half'), -7500);
   assert.strictEqual(pick('none'), 0);
 });
 
@@ -245,21 +245,21 @@ test('終了日を過ぎたキャンペーンは計算から外れる', () => {
     const r = E.compare(baseInput({ options: { includePoints: true, excludeUnverified: true, applyPolicy: 'full', today } }), data);
     return find(r, (y) => y.combo.mobile.every((b) => b === 'rakuten')).items.some((i) => i.label.startsWith('楽天モバイル初めて申し込み 20,000'));
   };
-  // 申込は11/18 10:00まで。18日は朝で締め切りなので、計算に入るのは17日まで
-  assert.strictEqual(has('2026-11-17'), true);
-  assert.strictEqual(has('2026-11-18'), false);
+  // 楽天マジ得（楽天カードの人の20,000）：申込は12/21 10:00まで。21日は朝で締め切りなので、計算に入るのは20日まで
+  assert.strictEqual(has('2026-12-20'), true);
+  assert.strictEqual(has('2026-12-21'), false);
 });
 
 test('やることリスト：締切のある特典は申込の期限がその日になる', () => {
-  const input = baseInput({ options: { includePoints: true, excludeUnverified: true, applyPolicy: 'full', today: '2026-11-16' } });
+  const input = baseInput({ options: { includePoints: true, excludeUnverified: true, applyPolicy: 'full', today: '2026-12-18' } });
   const r = E.compare(input, data);
   const x = find(r, (y) => y.combo.mobile.every((b) => b === 'rakuten'));
-  const t = E.buildTodos(x, input, data).find((y) => y.text.startsWith('楽天銀行の口座を用意'));
-  assert.strictEqual(E.dueOf(t, '2026-11-16').getDate(), 17);
-  // 楽天モバイルの申し込み自体も、締切（11/18）が期限になる
+  const t = E.buildTodos(x, input, data).find((y) => y.text.startsWith('楽天カードを持っているか確認'));
+  assert.strictEqual(E.dueOf(t, '2026-12-18').getDate(), 20);
+  // 楽天モバイルの申し込み自体も、締切（12/21 10時 → 計算は20日まで）が期限になる
   const ap = E.buildTodos(x, input, data).find((y) => y.text.startsWith('楽天モバイルに'));
-  assert.strictEqual(E.dueOf(ap, '2026-11-16').getDate(), 17);
-  assert.ok(ap.url.includes('bank-mobile-joint'));
+  assert.strictEqual(E.dueOf(ap, '2026-12-18').getDate(), 20);
+  assert.ok(ap.url.includes('card-mobile-majitoku'));
 });
 
 test('期間限定の料金は期間が過ぎると通常料金になる（NURO光 2年割は24か月まで）', () => {
@@ -432,16 +432,16 @@ test('比べるものを選べる：電気だけ比べると、スマホ・光�
   assert.deepStrictEqual(Object.keys(r.counts).filter((k) => r.counts[k] > 0), ['electric']);
 });
 
-test('楽天モバイルの初めて申し込み特典は併用できず、一番多いものだけ（11/17までは楽天銀行の20,000、それ以降は乗り換え10,000）', () => {
+test('楽天モバイルの初めて申し込み特典は併用できず、一番多いものだけ（楽天カード・楽天銀行の特典はそれぞれ家族で1回）', () => {
   const pts = (today) => {
     const r = E.compare(baseInput({ options: { includePoints: true, excludeUnverified: true, applyPolicy: 'full', today } }), data);
     const x = find(r, (y) => y.combo.mobile.every((b) => b === 'rakuten'));
     return x.items.filter((i) => i.campaign && i.campaign.provider === 'rakuten').map((i) => -i.amount);
   };
-  // 楽天銀行の20,000ポイントは家族で1人分（おひとり様1回・口座が要る）。2人目は乗り換えの10,000
-  assert.deepStrictEqual(pts('2026-11-15'), [20000, 10000]);
-  // 11/18以降は常時開催の楽天銀行会員向け13,000（これも家族で1人分）。2人目は乗り換えの10,000
-  assert.deepStrictEqual(pts('2026-11-19'), [13000, 10000]);
+  // 12/20までは、1人目が楽天カードの20,000（家族で1回）、2人目が楽天銀行会員向け13,000（家族で1回）。1人で両方はもらえない
+  assert.deepStrictEqual(pts('2026-11-23'), [20000, 13000]);
+  // 12/21以降は楽天銀行会員向け13,000（家族で1人分）。2人目は乗り換えの10,000
+  assert.deepStrictEqual(pts('2026-12-21'), [13000, 10000]);
 });
 
 test('11/15の総点検で足した特典が計算に入る', () => {
