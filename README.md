@@ -4,7 +4,7 @@
 
 公開ページ：https://ync-apps.github.io/kakei-navi/
 
-`index.html`（トップページ）と `keisan.html`（計算ツール）をブラウザで開くだけで動きます（サーバー・インストール不要）。データは毎週月曜0時（日本時間）に更新します。
+`index.html`（トップページ）と `keisan.html`（計算ツール）をブラウザで開くだけで動きます（サーバー・インストール不要）。データは毎週土曜20時（日本時間）に更新します。
 このリポジトリ（ync-apps/kakei-navi）が本体です。以前の置き場所（yoshiki5242/side-business の kakei-navi/）は移設済みです。
 
 ## できること

@@ -7,7 +7,7 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="description" content="スマホ・光回線・電気・ガス・カードをまとめて見直し、1年〜4年以上の実質負担が一番安い組み合わせと乗り換えのやることリストを無料で計算します。">
 <meta property="og:title" content="まとめ割ナビ｜固定費をまとめて見直すと、いくら浮く？">
-<meta property="og:description" content="家族のスマホ・光回線・電気・ガス・カードを全部まとめて、実質負担が一番安い組み合わせを無料で計算。データは毎週月曜0時に更新。">
+<meta property="og:description" content="家族のスマホ・光回線・電気・ガス・カードを全部まとめて、実質負担が一番安い組み合わせを無料で計算。データは毎週土曜20時に更新。">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -325,7 +325,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
         <button type="button" class="reach-item" data-list="hikari" aria-expanded="false" aria-controls="reach-panel"><b class="num" id="cnt-hikari">14<small>社</small></b><span>光回線（地域の回線含む）</span><em>一覧を見る</em></button>
         <button type="button" class="reach-item" data-list="electric" aria-expanded="false" aria-controls="reach-panel"><b class="num" id="cnt-electric">9<small>社</small></b><span>電気（エリア別の料金表）</span><em>一覧を見る</em></button>
         <button type="button" class="reach-item" data-list="card" aria-expanded="false" aria-controls="reach-panel"><b class="num" id="cnt-card">6<small>種</small></b><span>カード払いの割引</span><em>一覧を見る</em></button>
-        <div class="reach-item static"><b>毎週月曜</b><span>0時に料金・キャンペーンを更新</span><em id="asof">データ時点 2026年11月10日</em></div>
+        <div class="reach-item static"><b>毎週土曜</b><span>20時に料金・キャンペーンを更新</span><em id="asof">データ時点 2026年11月10日</em></div>
         <div class="reach-panel" id="reach-panel" role="region" aria-label="比較している会社の一覧" hidden></div>
       </div>
     </div>
@@ -409,7 +409,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
         </div>
         <div class="trust-list">
           <div class="trust-item"><span class="trust-icon">✓</span><div><h3>出典つきで確認</h3><p>料金・割引・キャンペーンは各社の公式ページ（読めない場合は日付の新しい記事）で確認し、出典のリンクと確からしさ（公式で確認・記事で確認・要確認）を付けています。</p></div></div>
-          <div class="trust-item"><span class="trust-icon">月</span><div><h3>毎週月曜0時に更新</h3><p>毎週月曜の0時に、料金改定と新しいキャンペーンを調べ直してデータを更新しています。</p></div></div>
+          <div class="trust-item"><span class="trust-icon">土</span><div><h3>毎週土曜20時に更新</h3><p>毎週土曜の20時に、料金改定と新しいキャンペーンを調べ直してデータを更新しています。</p></div></div>
           <div class="trust-item"><span class="trust-icon">=</span><div><h3>順位は実質負担の安い順</h3><p>並び順は実質負担の安い順です。広告報酬の額は使っていません。ただし、このサイトがリンクしている代理店・広告ページの特典は、リンクがある会社だけ計算に入れています（内訳に表示）。</p></div></div>
         </div>
       </div>
@@ -456,7 +456,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 
 <footer class="foot band">
   <div class="wrap">
-    <p>© まとめ割ナビ　<span id="foot-asof">データは毎週月曜0時に更新</span></p>
+    <p>© まとめ割ナビ　<span id="foot-asof">データは毎週土曜20時に更新</span></p>
     <nav aria-label="サイト情報"><a href="about.html">運営者・広告について</a><a href="privacy.html">プライバシーポリシー</a></nav>
   </div>
 </footer>
@@ -475,7 +475,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 
   // データ時点
   $('asof').textContent = `データ時点 ${jpDate(D.asOf)}`;
-  $('foot-asof').textContent = `データ時点 ${jpDate(D.asOf)}・毎週月曜0時に更新`;
+  $('foot-asof').textContent = `データ時点 ${jpDate(D.asOf)}・毎週土曜20時に更新`;
 
   // ---- 例の家庭を、本物の計算エンジンで計算 ----
   const example = {
