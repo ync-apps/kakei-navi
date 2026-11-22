@@ -28,7 +28,7 @@ print('終了日を過ぎたもの（削除するか、続いているか確認�
 print('14日以内に終わるもの', all.filter((r) => r.endsAt && r.endsAt >= today && r.endsAt <= soon));
 print('要確認（confidence: low）', all.filter((r) => r.confidence === 'low'));
 print('記事が出典のもの（confidence: mid）。毎週すべて、記事が今も有効か確かめる（UPDATE.md）', all.filter((r) => r.confidence === 'mid'));
-print('30日以上確認していないもの', all.filter((r) => daysSince(r.checkedAt) >= 30));
+print('30日以上確認していないもの（月1回の総点検で確かめる）', all.filter((r) => daysSince(r.checkedAt) >= 30));
 
 const urls = [...new Set(all.map((r) => r.source).filter(Boolean))].sort();
 console.log(`\n## 確認するページ（${urls.length}件）`);
