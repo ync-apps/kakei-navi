@@ -2,7 +2,7 @@
 // 実行: node tools/check-freshness.js [今日の日付 YYYY-MM-DD]
 const D = require('../data.js');
 
-const today = process.argv[2] || new Date().toISOString().slice(0, 10);
+const today = process.argv[2] || new Date(Date.now() + 9 * 3600 * 1000).toISOString().slice(0, 10); // 日本時間の日付
 const addDays = (ymd, n) => { const d = new Date(ymd + 'T00:00:00Z'); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
 const soon = addDays(today, 14);
 const daysSince = (ymd) => Math.round((new Date(today) - new Date(ymd)) / 86400000);
