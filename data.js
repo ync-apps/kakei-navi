@@ -353,8 +353,8 @@
         note: '北海道・東京・関西・中国・四国は大手電力と同じ料金表。中部は1kWhあたり少し安い。東北は新規受付停止、北陸・九州は提供なし',
       },
       {
-        id: 'docomo-denki', name: 'ドコモでんき Basic', areas: ALL_BUT_OKINAWA, sameAsStd: true, pointRate: 0.01, confidence: 'mid', source: 'https://denki.docomo.ne.jp/',
-        note: 'dポイント1%（dカード払いで最大2%）は公式で確認。料金表は数字が読み取れず、大手電力と同じとして計算',
+        id: 'docomo-denki', name: 'ドコモでんき Basic', areas: ALL_BUT_OKINAWA, sameAsStd: true, pointRate: 0.01, confidence: 'mid', checkedAt: '2026-11-28', source: 'https://denki.docomo.ne.jp/',
+        note: 'dポイント1%（dカード払いで最大2%）は公式で確認。料金表は数字が読み取れず、大手電力と同じとして計算。公式「料金の仕組み」ページの計算例（2026年10月時点）の電力量料金は、東京 29.85/36.45/40.54円・関西 20.89/26.29/29.27円で、データの大手電力の単価と同じ',
       },
       {
         id: 'rakuten-denki', name: '楽天でんき（プランS）', areas: ALL_BUT_OKINAWA, pointRate: 0.005, pointCapMonthly: 1000, confidence: 'high',
@@ -473,7 +473,7 @@
       },
       {
         // auスマートバリュー・UQ 自宅セット割は「ネット＋電話」が条件。光電話の月額（約770円）を足す（auひかりは月額に電話代を入れてあるので除く）
-        id: 'au-set-phone', name: 'auスマートバリュー・自宅セット割に必要な光電話代', target: 'hikari', amount: -770, confidence: 'mid', checkedAt: '2026-11-15',
+        id: 'au-set-phone', name: 'auスマートバリュー・自宅セット割に必要な光電話代', target: 'hikari', amount: -770, confidence: 'mid', checkedAt: '2026-11-28',
         source: 'https://www.au.com/mobile/charge/charge-discount/smartvalue/', note: '公式の例で光電話 月770円。光回線の会社により金額が少し違う',
         requires: { mobile: ['au', 'uq'], hikari: ['biglobe-hikari', 'sonet-hikari', 'eo-hikari', 'commufa', 'pikara', 'megaegg', 'bbiq'] },
       },
@@ -714,7 +714,7 @@
       {
         // ドコモ オンラインショップの SIMのみ契約。ドコモ MAX・ポイ活 MAX への乗り換えは20,000ポイント（ドコモ mini の金額は公式で確認できず入れていない）
         id: 'docomo-mnp-max', name: 'ドコモ SIMのみ乗り換え dポイント（ドコモ MAX）', target: 'line', provider: 'docomo', plans: ['docomo-max-1', 'docomo-max-3', 'docomo-max'], amount: 15000, kind: 'points', mnpOnly: true,
-        checkedAt: '2026-11-23', confidence: 'mid', receive: 'apply', receiveNote: '開通手続きの翌々月から5か月に分けて（月3,000ポイント）dポイント（期間・用途限定）',
+        checkedAt: '2026-11-28', confidence: 'mid', receive: 'apply', receiveNote: '開通手続きの翌々月から5か月に分けて（月3,000ポイント）dポイント（期間・用途限定）',
         todo: [{ phase: 'before', text: 'ドコモのSIMのみ契約キャンペーンにWebエントリーする（申込前）' }],
         source: 'https://www.docomo.ne.jp/campaign_event/plan_norikae/index.html',
         applyNote: 'ドコモオンラインショップで「SIMのみ」で申し込む',
@@ -765,7 +765,7 @@
       },
       {
         id: 'docomo-new-max', name: 'ドコモ SIMのみ新規契約 dポイント（ドコモ MAX）', target: 'line', provider: 'docomo', plans: ['docomo-max-1', 'docomo-max-3', 'docomo-max'], amount: 10000, kind: 'points', newLineOnly: true,
-        checkedAt: '2026-11-23', confidence: 'mid', receive: 'apply', source: 'https://www.docomo.ne.jp/campaign_event/plan_norikae/index.html',
+        checkedAt: '2026-11-28', confidence: 'mid', receive: 'apply', source: 'https://www.docomo.ne.jp/campaign_event/plan_norikae/index.html',
         todo: [{ phase: 'before', text: 'ドコモのSIMのみ契約キャンペーンにWebエントリーする（申込前）' }],
         conditions: 'ドコモオンラインショップでのSIMのみ新規契約（要Webエントリー）。ドコモ MAX・ポイ活 MAX は10,000ポイント（マイナビ 2026-11-21・なるはやネット 2026-11-10 の記事で確認。オンラインショップのページは自動で読めない）。金額は記事（マイナビ 2026-11-12）で確認',
       },
